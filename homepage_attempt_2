@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InkCritique - The Yelp for Tattoos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%);
+        }
+        .tattoo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .rating-stars {
+            color: #f59e0b;
+        }
+        .tattoo-detail-image {
+            transition: all 0.3s ease;
+        }
+        .tattoo-detail-image:hover {
+            transform: scale(1.03);
+        }
+        .review-card {
+            transition: all 0.2s ease;
+        }
+        .review-card:hover {
+            background-color: #f8fafc;
+        }
+        .search-dropdown {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .artist-badge {
+            background: linear-gradient(90deg, #7e22ce 0%, #3b82f6 100%);
+        }
+        .nav-link:hover {
+            color: #a78bfa;
+        }
+        .tattoo-type-tag {
+            transition: all 0.2s ease;
+        }
+        .tattoo-type-tag:hover {
+            background-color: #7e22ce;
+            color: white;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="flex items-center space-x-2">
+                        <i class="fas fa-paint-brush text-2xl"></i>
+                        <span class="text-xl font-bold">InkCritique</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="nav-link font-medium hover:text-purple-300">Home</a>
+                    <a href="#artists" class="nav-link font-medium hover:text-purple-300">Artists</a>
+                    <a href="#studios" class="nav-link font-medium hover:text-purple-300">Studios</a>
+                    <a href="#reviews" class="nav-link font-medium hover:text-purple-300">Reviews</a>
+                    <a href="#submit" class="nav-link font-medium hover:text-purple-300">Submit</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full font-medium transition">
+                        Sign In
+                    </button>
+                    <button class="md:hidden text-white focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Find Your Perfect Tattoo Artist</h1>
+                    <p class="text-xl mb-8 text-purple-100">Read authentic reviews, browse portfolios, and connect with the best tattoo artists in your area.</p>
+                    <div class="relative max-w-lg">
+                        <input type="text" placeholder="Search by artist, studio, or style..." 
+                               class="w-full px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <button class="absolute right-2 top-2 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative">
+                        <div class="w-64 h-64 md:w-80 md:h-80 bg-purple-300 rounded-full opacity-20 absolute -top-6 -left-6"></div>
+                        <div class="w-64 h-64 md:w-80 md:h-80 bg-purple-200 rounded-full opacity-20 absolute -bottom-6 -right-6"></div>
+                        <img src="https://images.unsplash.com/photo-1613082296403-906e0e6d5833?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                             alt="Tattoo artist at work" 
+                             class="relative z-10 rounded-lg shadow-xl w-64 h-64 md:w-80 md:h-80 object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Styles -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Popular Tattoo Styles</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Traditional
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Realism
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Watercolor
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Japanese
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Black & Grey
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Geometric
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Tribal
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Minimalist
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Neo-Traditional
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Script
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Portrait
+                </div>
+                <div class="tattoo-type-tag bg-gray-100 rounded-full px-4 py-2 text-center cursor-pointer hover:bg-purple-600 hover:text-white">
+                    Dotwork
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Artists -->
+    <section id="artists" class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">Featured Artists</h2>
+                <a href="#" class="text-purple-600 hover:text-purple-800 font-medium">View All →</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Artist Card 1 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden tattoo-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1573634803717-afb398f92e4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                             alt="Artist Sarah" class="w-full h-64 object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                            <div class="flex items-center">
+                                <span class="artist-badge text-white text-xs font-bold px-2 py-1 rounded-full mr-2">PRO</span>
+                                <span class="text-white font-medium">Sarah Inkwell</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-600 ml-2">4.7 (128 reviews)</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">Specializes in watercolor and neo-traditional styles with a delicate touch.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Watercolor</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Floral</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Fine Line</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-1"></i>
+                                <span class="text-gray-600">Los Angeles, CA</span>
+                            </div>
+                            <button class="text-purple-600 hover:text-purple-800 font-medium">View Portfolio</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artist Card 2 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden tattoo-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1573147331738-4c8f5d3a1c0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                             alt="Artist Mike" class="w-full h-64 object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                            <div class="flex items-center">
+                                <span class="artist-badge text-white text-xs font-bold px-2 py-1 rounded-full mr-2">PRO</span>
+                                <span class="text-white font-medium">Mike Steel</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-600 ml-2">5.0 (89 reviews)</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">Master of black and grey realism, specializing in portraits and intricate details.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Realism</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Portrait</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Black & Grey</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-1"></i>
+                                <span class="text-gray-600">New York, NY</span>
+                            </div>
+                            <button class="text-purple-600 hover:text-purple-800 font-medium">View Portfolio</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artist Card 3 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden tattoo-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1621605816867-83371a2f9e5e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                             alt="Artist Jenna" class="w-full h-64 object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                            <div class="flex items-center">
+                                <span class="artist-badge text-white text-xs font-bold px-2 py-1 rounded-full mr-2">PRO</span>
+                                <span class="text-white font-medium">Jenna Koi</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="text-gray-600 ml-2">4.2 (64 reviews)</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">Japanese traditional specialist with a modern twist, bold lines and vibrant colors.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Japanese</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Traditional</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Color</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-1"></i>
+                                <span class="text-gray-600">Austin, TX</span>
+                            </div>
+                            <button class="text-purple-600 hover:text-purple-800 font-medium">View Portfolio</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Studios -->
+    <section id="studios" class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">Top Rated Studios</h2>
+                <a href="#" class="text-purple-600 hover:text-purple-800 font-medium">View All →</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Studio 1 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden tattoo-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1605647540924-852290f6a0dd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                             alt="Ink Haven Studio" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-white rounded-full p-2 shadow">
+                            <i class="fas fa-heart text-red-500"></i>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Ink Haven</h3>
+                        <div class="flex items-center mb-3">
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-600 ml-2">4.6 (342 reviews)</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">Premium tattoo studio with 8 resident artists specializing in various styles.</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-1"></i>
+                                <span class="text-gray-600">Chicago, IL</span>
+                            </div>
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full text-sm font-medium transition">
+                                Book Consultation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Studio 2 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden tattoo-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1605647540924-852290f6a0dd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                             alt="Electric Needle" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-white rounded-full p-2 shadow">
+                            <i class="far fa-heart text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Electric Needle</h3>
+                        <div class="flex items-center mb-3">
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-600 ml-2">5.0 (278 reviews)</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">Award-winning studio known for innovative designs and strict hygiene standards.</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-1"></i>
+                                <span class="text-gray-600">Portland, OR</span>
+                            </div>
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full text-sm font-medium transition">
+                                Book Consultation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Studio 3 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden tattoo-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1605647540924-852290f6a0dd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                             alt="Ancient Art" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-white rounded-full p-2 shadow">
+                            <i class="far fa-heart text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Ancient Art</h3>
+                        <div class="flex items-center mb-3">
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="text-gray-600 ml-2">4.0 (193 reviews)</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">Specializing in traditional and cultural tattoo styles from around the world.</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-1"></i>
+                                <span class="text-gray-600">Miami, FL</span>
+                            </div>
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full text-sm font-medium transition">
+                                Book Consultation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Reviews -->
+    <section id="reviews" class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">Recent Reviews</h2>
+                <a href="#" class="text-purple-600 hover:text-purple-800 font-medium">View All →</a>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Review 1 -->
+                <div class="bg-white rounded-xl shadow-md p-6 review-card">
+                    <div class="flex items-start mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">Jessica M.</h4>
+                            <div class="flex items-center">
+                                <div class="rating-stars mr-2">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span class="text-gray-500 text-sm">2 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h5 class="font-medium mb-2">Review for: Sarah Inkwell</h5>
+                        <p class="text-gray-600">Sarah was absolutely amazing! She took my vague idea and turned it into a beautiful watercolor piece that exceeded all my expectations. The studio was immaculate and she made me feel comfortable throughout the entire process.</p>
+                    </div>
+                    <div class="flex space-x-2 mb-4">
+                        <img src="https://images.unsplash.com/photo-1613082296403-906e0e6d5833?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" 
+                             alt="Tattoo" class="w-16 h-16 rounded object-cover cursor-pointer">
+                        <img src="https://images.unsplash.com/photo-1605647540924-852290f6a0dd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" 
+                             alt="Tattoo" class="w-16 h-16 rounded object-cover cursor-pointer">
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <div>
+                            <button class="text-gray-500 hover:text-purple-600 mr-4">
+                                <i class="far fa-thumbs-up mr-1"></i> 12
+                            </button>
+                            <button class="text-gray-500 hover:text-purple-600">
+                                <i class="far fa-comment mr-1"></i> 3
+                            </button>
+                        </div>
+                        <button class="text-purple-600 hover:text-purple-800 font-medium">
+                            View Artist
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Review 2 -->
+                <div class="bg-white rounded-xl shadow-md p-6 review-card">
+                    <div class="flex items-start mb-4">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">Marcus T.</h4>
+                            <div class="flex items-center">
+                                <div class="rating-stars mr-2">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="text-gray-500 text-sm">1 week ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h5 class="font-medium mb-2">Review for: Electric Needle Studio</h5>
+                        <p class="text-gray-600">Great experience overall. The artists are professional and the space is clean. My only complaint is that they're very popular so booking can be challenging. Worth the wait though - my sleeve is coming along beautifully!</p>
+                    </div>
+                    <div class="flex space-x-2 mb-4">
+                        <img src="https://images.unsplash.com/photo-1621605816867-83371a2f9e5e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" 
+                             alt="Tattoo" class="w-16 h-16 rounded object-cover cursor-pointer">
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <div>
+                            <button class="text-gray-500 hover:text-purple-600 mr-4">
+                                <i class="far fa-thumbs-up mr-1"></i> 8
+                            </button>
+                            <button class="text-gray-500 hover:text-purple-600">
+                                <i class="far fa-comment mr-1"></i> 1
+                            </button>
+                        </div>
+                        <button class="text-purple-600 hover:text-purple-800 font-medium">
+                            View Studio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Submit Review CTA -->
+    <section id="submit" class="py-16 gradient-bg text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Share Your Tattoo Experience</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto text-purple-100">Help others find their perfect artist by sharing your tattoo journey. Your review could be the deciding factor for someone's lifelong ink!</p>
+            <button class="bg-white text-purple-600 hover:bg-purple-100 px-8 py-4 rounded-full text-lg font-bold transition duration-300">
+                Submit a Review
+            </button>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+            <div class="max-w-3xl mx-auto">
+                <!-- FAQ Item 1 -->
+                <div class="mb-6 border-b border-gray-200 pb-6">
+                    <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">How do I know if an artist is right for me?</h3>
+                        <i class="fas fa-chevron-down text-purple-600 transition-transform duration-300"></i>
+                    </button>
+                    <div class="mt-2 text-gray-600 hidden">
+                        <p>Look at their portfolio to see if their style matches what you're looking for. Read reviews to understand their working style and how they interact with clients. Many artists also offer consultations where you can discuss your ideas and see if you're a good fit.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="mb-6 border-b border-gray-200 pb-6">
+                    <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">What should I look for in a tattoo studio?</h3>
+                        <i class="fas fa-chevron-down text-purple-600 transition-transform duration-300"></i>
+                    </button>
+                    <div class="mt-2 text-gray-600 hidden">
+                        <p>Key things to check: cleanliness (look for autoclave sterilization equipment), proper licensing displayed, artist portfolios, and reviews about the studio environment. A good studio will be happy to answer your questions about their safety procedures.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="mb-6 border-b border-gray-200 pb-6">
+                    <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">How much should I tip my tattoo artist?</h3>
+                        <i class="fas fa-chevron-down text-purple-600 transition-transform duration-300"></i>
+                    </button>
+                    <div class="mt-2 text-gray-600 hidden">
+                        <p>The standard tip is 15-20% of the total cost, similar to restaurant tipping. For larger pieces, you might tip per session. If you're on a tight budget, even a smaller tip with a heartfelt thank you is appreciated.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="mb-6 border-b border-gray-200 pb-6">
+                    <button class="flex justify-between items-center w-full text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">Can I negotiate the price with a tattoo artist?</h3>
+                        <i class="fas fa-chevron-down text-purple-600 transition-transform duration-300"></i>
+                    </button>
+                    <div class="mt-2 text-gray-600 hidden">
+                        <p>Generally no - tattoo pricing reflects the artist's skill, experience, and time. However, you can discuss options like simplifying the design or breaking a large piece into multiple sessions to fit your budget. Never try to underpay for quality work.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8 text-center">
+                <h2 class="text-2xl font-bold mb-4">Stay Inked-In</h2>
+                <p class="text-gray-600 mb-6">Subscribe to get artist spotlights, style trends, and exclusive offers from top studios.</p>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="email" placeholder="Your email address" 
+                           class="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition">
+                        Subscribe
+                    </button>
+                </div>
+                <p class="text-gray-400 text-sm mt-3">We respect your privacy. Unsubscribe at any time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white pt-12 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">InkCritique</h3>
+                    <p class="text-purple-100">The most trusted platform for tattoo artist reviews and studio recommendations.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Explore</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-purple-100 hover:text-white">Artists</a></li>
+                        <li><a href="#" class="text-purple-100 hover:text-white">Studios</a></li>
+                        <li><a href="#" class="text-purple-100 hover:text-white">Styles</a></li>
+                        <li><a href="#" class="text-purple-100 hover:text-white">Cities</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-purple-100 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-purple-100 hover:text-white">Careers</a></li>
+                        <li><a href="#" class="text-purple-100 hover:text-white">Press</a></li>
+                        <li><a href="#" class="text-purple-100 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Legal</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-purple-100 hover:text-white">Terms</a></li>
+                        <li><a href="#" class="text-purple-100 hover:text-white">Privacy</a></li>
+                        <li><a href="#" class="text-purple-100 hover:text-white">Cookie Policy</a></li>
+                        <li><a href="#" class="text-purple-100 hover:text-white">Guidelines</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-purple-500 pt-6 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-purple-100 mb-4 md:mb-0">© 2023 InkCritique. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-purple-100 hover:text-white text-xl"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-purple-100 hover:text-white text-xl"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-purple-100 hover:text-white text-xl"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-purple-100 hover:text-white text-xl"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal (hidden by default) -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden" id="reviewModal">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Submit Your Review</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Who are you reviewing?</label>
+                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="">Select an artist or studio</option>
+                        <option value="artist1">Sarah Inkwell</option>
+                        <option value="artist2">Mike Steel</option>
+                        <option value="artist3">Jenna Koi</option>
+                        <option value="studio1">Ink Haven</option>
+                        <option value="studio2">Electric Needle</option>
+                        <option value="studio3">Ancient Art</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Rating</label>
+                    <div class="flex space-x-2">
+                        <button type="button" class="rating-star text-2xl text-gray-300 hover:text-yellow-400" data-rating="1">★</button>
+                        <button type="button" class="rating-star text-2xl text-gray-300 hover:text-yellow-400" data-rating="2">★</button>
+                        <button type="button" class="rating-star text-2xl text-gray-300 hover:text-yellow-400" data-rating="3">★</button>
+                        <button type="button" class="rating-star text-2xl text-gray-300 hover:text-yellow-400" data-rating="4">★</button>
+                        <button type="button" class="rating-star text-2xl text-gray-300 hover:text-yellow-400" data-rating="5">★</button>
+                    </div>
+                    <input type="hidden" id="selectedRating" value="0">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Review Title</label>
+                    <input type="text" placeholder="Summarize your experience" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Your Review</label>
+                    <textarea rows="5" placeholder="Tell us about your experience..." 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Upload Photos (Optional)</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500">Drag & drop photos here or click to browse</p>
+                        <input type="file" class="hidden" id="photoUpload" multiple>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" id="cancelReview" class="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-100">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition">
+                        Submit Review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle FAQ answers
+        document.querySelectorAll('section.faq button').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const icon = button.querySelector('i');
+                
+                answer.classList.toggle('hidden');
+                icon.classList.toggle('transform');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+
+        // Rating stars in modal
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.addEventListener('click', () => {
+                const rating = parseInt(star.dataset.rating);
+                document.getElementById('selectedRating').value = rating;
+                
+                // Update star colors
+                document.querySelectorAll('.rating-star').forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.add('text-yellow-400');
+                        s.classList.remove('text-gray-300', 'hover:text-yellow-400');
+                    } else {
+                        s.classList.remove('text-yellow-400');
+                        s.classList.add('text-gray-300', 'hover:text-yellow-400');
+                    }
+                });
+            });
+        });
+
+        // Modal functionality
+        const reviewModal = document.getElementById('reviewModal');
+        const submitReviewBtn = document.querySelector('section#submit button');
+        const closeModalBtn = document.getElementById('closeModal');
+        const cancelReviewBtn = document.getElementById('cancelReview');
+
+        if (submitReviewBtn) {
+            submitReviewBtn.addEventListener('click', () => {
+                reviewModal.classList.remove('hidden');
+            });
+        }
+
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', () => {
+                reviewModal.classList.add('hidden');
+            });
+        }
+
+        if (cancelReviewBtn) {
+            cancelReviewBtn.addEventListener('click', () => {
+                reviewModal.classList.add('hidden');
+            });
+        }
+
+        // Close modal when clicking outside
+        reviewModal.addEventListener('click', (e) => {
+            if (e.target === reviewModal) {
+                reviewModal.classList.add('hidden');
+            }
+        });
+
+        // Search functionality
+        const searchInput = document.querySelector('nav input[type="text"]');
+        const searchResults = document.createElement('div');
+        searchResults.className = 'absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg search-dropdown hidden';
+        
+        if (searchInput) {
+            searchInput.parentNode.appendChild(searchResults);
+            
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+                
+                if (query.length > 2) {
+                    // Simulate search results
+                    const mockResults = [
+                        { type: 'artist', name: 'Sarah Inkwell', location: 'Los Angeles, CA' },
+                        { type: 'artist', name: 'Mike Steel', location: 'New York, NY' },
+                        { type: 'studio', name: 'Ink Haven', location: 'Chicago, IL' },
+                        { type: 'style', name: 'Watercolor Tattoos', count: '24 artists' }
+                    ];
+                    
+                    let resultsHTML = '';
+                    mockResults.forEach(result => {
+                        resultsHTML += `
+                            <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0">
+                                <div class="flex items-center">
+                                    <i class="fas ${result.type === 'artist' ? 'fa-user' : result.type === 'studio' ? 'fa-store' : 'fa-tag'} text-purple-500 mr-3"></i>
+                                    <div>
+                                        <div class="font-medium">${result.name}</div>
+                                        <div class="text-sm text-gray-500">${result.location || result.count}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    searchResults.innerHTML = resultsHTML;
+                    searchResults.classList.remove('hidden');
+                } else {
+                    searchResults.classList.add('hidden');
+                }
+            });
+            
+            // Hide results when clicking outside
+            document.addEventListener('click', (e) => {
+                if (e.target !== searchInput) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        }
+
+        // Tattoo type tags
+        document.querySelectorAll('.tattoo-type-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                // In a real app, this would filter results
+                alert(`Showing results for: ${tag.textContent.trim()}`);
+            });
+        });
+
+        // Like and comment buttons
+        document.querySelectorAll('.fa-thumbs-up, .fa-comment').forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const button = icon.parentNode;
+                
+                if (icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    
+                    if (icon.classList.contains('fa-thumbs-up')) {
+                        const count = parseInt(button.textContent.trim());
+                        button.innerHTML = `<i class="fas fa-thumbs-up mr-1"></i> ${count + 1}`;
+                    }
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    
+                    if (icon.classList.contains('fa-thumbs-up')) {
+                        const count = parseInt(button.textContent.trim());
+                        button.innerHTML = `<i class="far fa-thumbs-up mr-1"></i> ${count - 1}`;
+                    }
+                }
+            });
+        });
+
+        // Favorite studio button
+        document.querySelectorAll('.fa-heart').forEach(heart => {
+            heart.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (heart.classList.contains('far')) {
+                    heart.classList.remove('far');
+                    heart.classList.add('fas', 'text-red-500');
+                } else {
+                    heart.classList.remove('fas', 'text-red-500');
+                    heart.classList.add('far');
+                }
+            });
+        });
+
+        // Photo upload interaction
+        const photoUpload = document.getElementById('photoUpload');
+        const uploadArea = photoUpload?.parentNode;
+        
+        if (uploadArea) {
+            uploadArea.addEventListener('click', () => {
+                photoUpload.click();
+            });
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('border-purple-500', 'bg-purple-50');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('border-purple-500', 'bg-purple-50');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('border-purple-500', 'bg-purple-50');
+                // Handle file drop
+            });
+        }
+    </script>
+</body>
+</html>
