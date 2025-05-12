@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InkSpy - Find & Review Tattoo Artists & Studios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Roboto:wght@300;400;700&display=swap');
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f5f2;
+        }
+        
+        .logo {
+            font-family: 'Permanent Marker', cursive;
+            color: #1a1a1a;
+        }
+        
+        .hero-bg {
+            background-image: url('https://images.unsplash.com/photo-1605649487212-47bddf064f1f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: multiply;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        
+        .tattoo-card {
+            transition: all 0.3s ease;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .tattoo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #1a1a1a;
+        }
+        
+        .artist-card {
+            transition: all 0.3s ease;
+        }
+        
+        .artist-card:hover {
+            transform: scale(1.03);
+        }
+        
+        .ink-color {
+            color: #1a1a1a;
+        }
+        
+        .ink-bg {
+            background-color: #1a1a1a;
+        }
+        
+        .rating-star {
+            color: #f59e0b;
+        }
+        
+        .style-tag {
+            background-color: #f3f4f6;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #1a1a1a;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover:after {
+            width: 100%;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-8">
+                <a href="#" class="logo text-3xl ink-color">InkSpy</a>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#" class="nav-link ink-color font-medium">Discover</a>
+                    <a href="#" class="nav-link ink-color font-medium">Artists</a>
+                    <a href="#" class="nav-link ink-color font-medium">Studios</a>
+                    <a href="#" class="nav-link ink-color font-medium">Styles</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="#" class="ink-color"><i class="far fa-heart text-xl"></i></a>
+                <a href="#" class="ink-color"><i class="far fa-user text-xl"></i></a>
+                <button class="ink-bg text-white px-4 py-2 rounded-md font-medium hover:bg-gray-800 transition">Add Your Studio</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Find Your Perfect Tattoo Artist</h1>
+            <p class="text-xl md:text-2xl mb-10 max-w-3xl mx-auto">Discover, review, and book the best tattoo artists and studios near you</p>
+            
+            <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-2">
+                <div class="flex flex-col md:flex-row">
+                    <div class="flex-1 relative">
+                        <input type="text" placeholder="Search by artist, studio or style..." class="search-input w-full p-4 text-gray-800 rounded-l-lg">
+                        <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="flex-1 relative">
+                        <input type="text" placeholder="Location" class="search-input w-full p-4 text-gray-800">
+                        <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </button>
+                    </div>
+                    <button class="ink-bg text-white px-6 py-4 rounded-r-lg font-medium hover:bg-gray-800 transition">Search</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Categories -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-10 ink-color text-center">Browse by Style</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <a href="#" class="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition">
+                    <div class="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center">
+                        <i class="fas fa-skull text-2xl ink-color"></i>
+                    </div>
+                    <span class="font-medium ink-color">Traditional</span>
+                </a>
+                <a href="#" class="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition">
+                    <div class="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center">
+                        <i class="fas fa-feather-alt text-2xl ink-color"></i>
+                    </div>
+                    <span class="font-medium ink-color">Black & Grey</span>
+                </a>
+                <a href="#" class="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition">
+                    <div class="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center">
+                        <i class="fas fa-paint-brush text-2xl ink-color"></i>
+                    </div>
+                    <span class="font-medium ink-color">Watercolor</span>
+                </a>
+                <a href="#" class="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition">
+                    <div class="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center">
+                        <i class="fas fa-dragon text-2xl ink-color"></i>
+                    </div>
+                    <span class="font-medium ink-color">Japanese</span>
+                </a>
+                <a href="#" class="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition">
+                    <div class="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center">
+                        <i class="fas fa-code text-2xl ink-color"></i>
+                    </div>
+                    <span class="font-medium ink-color">Geometric</span>
+                </a>
+                <a href="#" class="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition">
+                    <div class="w-16 h-16 bg-gray-200 rounded-full mb-2 flex items-center justify-center">
+                        <i class="fas fa-hand-sparkles text-2xl ink-color"></i>
+                    </div>
+                    <span class="font-medium ink-color">Tribal</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Tattoos -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-bold ink-color">Featured Tattoos</h2>
+                <a href="#" class="text-gray-600 hover:underline">View All</a>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Tattoo Card 1 -->
+                <div class="tattoo-card bg-white rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1611689037241-d8dfe5080e71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Japanese style tattoo" class="w-full h-64 object-cover">
+                        <div class="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md">
+                            <i class="far fa-heart text-xl ink-color"></i>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg ink-color">Japanese Dragon Sleeve</h3>
+                            <div class="flex items-center">
+                                <i class="fas fa-star rating-star"></i>
+                                <span class="ml-1 font-medium">4.9</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-3">By <a href="#" class="font-medium ink-color hover:underline">Carlos InkMaster</a> at <a href="#" class="font-medium ink-color hover:underline">Eternal Ink</a></p>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span class="style-tag">Japanese</span>
+                            <span class="style-tag">Color</span>
+                            <span class="style-tag">Sleeve</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium ink-color">$300/hour</span>
+                            <button class="ink-bg text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition">Book Now</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tattoo Card 2 -->
+                <div class="tattoo-card bg-white rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1605647540924-852290f6b0d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80" alt="Black and grey portrait" class="w-full h-64 object-cover">
+                        <div class="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md">
+                            <i class="far fa-heart text-xl ink-color"></i>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg ink-color">Portrait Realism</h3>
+                            <div class="flex items-center">
+                                <i class="fas fa-star rating-star"></i>
+                                <span class="ml-1 font-medium">5.0</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-3">By <a href="#" class="font-medium ink-color hover:underline">Sarah FineLines</a> at <a href="#" class="font-medium ink-color hover:underline">Precision Ink</a></p>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span class="style-tag">Realism</span>
+                            <span class="style-tag">Black & Grey</span>
+                            <span class="style-tag">Portrait</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium ink-color">$400/hour</span>
+                            <button class="ink-bg text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition">Book Now</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tattoo Card 3 -->
+                <div class="tattoo-card bg-white rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1622397333309-3056849bc70b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80" alt="Geometric tattoo" class="w-full h-64 object-cover">
+                        <div class="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md">
+                            <i class="far fa-heart text-xl ink-color"></i>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg ink-color">Sacred Geometry</h3>
+                            <div class="flex items-center">
+                                <i class="fas fa-star rating-star"></i>
+                                <span class="ml-1 font-medium">4.7</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-3">By <a href="#" class="font-medium ink-color hover:underline">Miguel Patterns</a> at <a href="#" class="font-medium ink-color hover:underline">Symmetry Studio</a></p>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span class="style-tag">Geometric</span>
+                            <span class="style-tag">Dotwork</span>
+                            <span class="style-tag">Minimal</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium ink-color">$250/hour</span>
+                            <button class="ink-bg text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition">Book Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Artists -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-bold ink-color">Top Rated Artists</h2>
+                <a href="#" class="text-gray-600 hover:underline">View All</a>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Artist 1 -->
+                <div class="artist-card bg-white rounded-lg overflow-hidden shadow-md text-center p-6">
+                    <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-gray-200 mb-4">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=761&q=80" alt="Artist" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold text-xl ink-color mb-1">Emma Needlework</h3>
+                    <p class="text-gray-600 mb-3">Fine Line Specialist</p>
+                    <div class="flex justify-center items-center mb-4">
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <span class="ml-2 font-medium">5.0 (127)</span>
+                    </div>
+                    <div class="flex justify-center space-x-2 mb-4">
+                        <span class="style-tag">Fine Line</span>
+                        <span class="style-tag">Minimal</span>
+                    </div>
+                    <button class="ink-bg text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition w-full">View Portfolio</button>
+                </div>
+                
+                <!-- Artist 2 -->
+                <div class="artist-card bg-white rounded-lg overflow-hidden shadow-md text-center p-6">
+                    <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-gray-200 mb-4">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" alt="Artist" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold text-xl ink-color mb-1">Jake BoldLines</h3>
+                    <p class="text-gray-600 mb-3">Traditional Expert</p>
+                    <div class="flex justify-center items-center mb-4">
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star-half-alt rating-star"></i>
+                        <span class="ml-2 font-medium">4.8 (203)</span>
+                    </div>
+                    <div class="flex justify-center space-x-2 mb-4">
+                        <span class="style-tag">Traditional</span>
+                        <span class="style-tag">Bold</span>
+                    </div>
+                    <button class="ink-bg text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition w-full">View Portfolio</button>
+                </div>
+                
+                <!-- Artist 3 -->
+                <div class="artist-card bg-white rounded-lg overflow-hidden shadow-md text-center p-6">
+                    <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-gray-200 mb-4">
+                        <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Artist" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold text-xl ink-color mb-1">Marcus Shade</h3>
+                    <p class="text-gray-600 mb-3">Black & Grey Master</p>
+                    <div class="flex justify-center items-center mb-4">
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <span class="ml-2 font-medium">5.0 (156)</span>
+                    </div>
+                    <div class="flex justify-center space-x-2 mb-4">
+                        <span class="style-tag">Realism</span>
+                        <span class="style-tag">Black & Grey</span>
+                    </div>
+                    <button class="ink-bg text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition w-full">View Portfolio</button>
+                </div>
+                
+                <!-- Artist 4 -->
+                <div class="artist-card bg-white rounded-lg overflow-hidden shadow-md text-center p-6">
+                    <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-gray-200 mb-4">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=688&q=80" alt="Artist" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold text-xl ink-color mb-1">Lena ColorBlast</h3>
+                    <p class="text-gray-600 mb-3">Neo-Traditional Artist</p>
+                    <div class="flex justify-center items-center mb-4">
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <i class="fas fa-star rating-star"></i>
+                        <span class="ml-2 font-medium">5.0 (189)</span>
+                    </div>
+                    <div class="flex justify-center space-x-2 mb-4">
+                        <span class="style-tag">Neo-Traditional</span>
+                        <span class="style-tag">Color</span>
+                    </div>
+                    <button class="ink-bg text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition w-full">View Portfolio</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-10 ink-color text-center">What Our Community Says</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="User" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold ink-color">Sarah J.</h4>
+                            <div class="flex">
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">"Found my perfect artist through InkSpy! The reviews were spot on and the booking process was seamless. My sleeve came out even better than I imagined."</p>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span>Verified Booking</span>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" alt="User" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold ink-color">Mike T.</h4>
+                            <div class="flex">
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">"As someone new to tattoos, InkSpy helped me understand different styles and find an artist who specialized in exactly what I wanted. The portfolio examples were super helpful!"</p>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span>Verified Booking</span>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" alt="User" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold ink-color">Alexis R.</h4>
+                            <div class="flex">
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                                <i class="fas fa-star rating-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">"I've used InkSpy for all three of my tattoos. Being able to see real client photos (not just the artist's best work) gives me confidence in my choices. Love this platform!"</p>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span>Verified Booking</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 ink-bg text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Are You a Tattoo Artist or Studio Owner?</h2>
+            <p class="text-xl mb-10 max-w-2xl mx-auto">Join thousands of artists growing their business with InkSpy</p>
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
+                <button class="bg-white ink-color px-8 py-4 rounded-md font-bold hover:bg-gray-100 transition">List Your Studio</button>
+                <button class="border-2 border-white px-8 py-4 rounded-md font-bold hover:bg-white hover:ink-color transition">Artist Sign Up</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="logo text-2xl mb-4">InkSpy</h3>
+                    <p class="text-gray-400">The trusted platform for discovering and booking tattoo artists worldwide.</p>
+                    <div class="flex space-x-4 mt-6">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-pinterest text-xl"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">For Clients</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">How It Works</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Find Artists</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Find Studios</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Tattoo Styles</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Pricing Guide</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">For Artists</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Artist Sign Up</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Studio Sign Up</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Artist Resources</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Marketing Tips</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Pricing Strategies</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Press</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 InkSpy. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple JavaScript for demo purposes
+        document.addEventListener('DOMContentLoaded', function() {
+            // Favorite button toggle
+            const favoriteButtons = document.querySelectorAll('.fa-heart');
+            favoriteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (this.classList.contains('far')) {
+                        this.classList.remove('far');
+                        this.classList.add('fas');
+                        this.style.color = '#ef4444'; // Red color for active favorite
+                    } else {
+                        this.classList.remove('fas');
+                        this.classList.add('far');
+                        this.style.color = ''; // Reset to default
+                    }
+                });
+            });
+            
+            // Mobile menu toggle would go here
+            // This is just a placeholder for a real implementation
+        });
+    </script>
+</body>
+</html>
