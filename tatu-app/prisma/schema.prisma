@@ -1,0 +1,453 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ARTIST
+  SHOP_OWNER
+  ADMIN
+}
+
+enum ShopStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum MessagePlatform {
+  EMAIL
+  INSTAGRAM
+  FACEBOOK
+  X_TWITTER
+  INTERNAL
+}
+
+enum MessageStatus {
+  UNREAD
+  READ
+  ARCHIVED
+  DELETED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+  role          UserRole  @default(CUSTOMER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  profile       Profile?
+  artistAtShops ShopsOnArtists[]
+  reviews       Review[]
+  ownedShops    Shop[]    @relation("ShopOwner")
+  portfolioItems PortfolioItem[]
+  portfolioCollections PortfolioCollection[]
+  comments      Comment[]
+  likes         Like[]
+  shares        Share[]
+  favorites     Favorite[]
+  favoriteArtists Favorite[] @relation("FavoriteArtists")
+
+  // Auth
+  accounts      Account[]
+  sessions      Session[]
+
+  artistAppointments Appointment[] @relation("ArtistAppointments")
+  clientAppointments Appointment[] @relation("ClientAppointments")
+  services          Service[]
+
+  connectedAccounts ConnectedAccount[]
+  unifiedMessages   UnifiedMessage[]
+  messageThreads    MessageThread[]
+}
+
+model Profile {
+  id          String    @id @default(cuid())
+  bio         String?   @db.Text
+  avatar      String?   // URL to avatar image
+  phone       String?
+  instagram   String?
+  website     String?
+  location    String?
+  specialties String[]  // Array of tattoo styles/specialties
+  completedRegistration Boolean @default(false)
+  
+  // Relations
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Shop {
+  id          String      @id @default(cuid())
+  name        String
+  description String?     @db.Text
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  phone       String?
+  email       String?
+  website     String?
+  instagram   String?
+  status      ShopStatus  @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  ownerId     String
+  owner       User        @relation("ShopOwner", fields: [ownerId], references: [id])
+  artists     ShopsOnArtists[]
+  reviews     Review[]
+  appointments Appointment[]
+  services    Service[]
+}
+
+// Join table for many-to-many relation between Shop and Artist Users
+model ShopsOnArtists {
+  shop       Shop     @relation(fields: [shopId], references: [id])
+  shopId     String
+  artist     User     @relation(fields: [artistId], references: [id])
+  artistId   String
+  joinedAt   DateTime @default(now())
+
+  @@id([shopId, artistId])
+}
+
+model Review {
+  id          String    @id @default(cuid())
+  rating      Int       @db.SmallInt
+  content     String    @db.Text
+  images      String[]  // Array of image URLs
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopId      String
+  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  duration    Int      // in minutes
+  price       Float
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  artistId    String?
+  artist      User?    @relation(fields: [artistId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  appointments Appointment[]
+
+  @@index([shopId])
+  @@index([artistId])
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  startTime   DateTime
+  endTime     DateTime
+  status      AppointmentStatus @default(PENDING)
+  notes       String?
+  shopId      String
+  shop        Shop             @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  artistId    String
+  artist      User             @relation("ArtistAppointments", fields: [artistId], references: [id])
+  clientId    String
+  client      User             @relation("ClientAppointments", fields: [clientId], references: [id])
+  serviceId   String
+  service     Service          @relation(fields: [serviceId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([shopId])
+  @@index([artistId])
+  @@index([clientId])
+  @@index([serviceId])
+}
+
+// NextAuth Models
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PortfolioCollection {
+  id          String    @id @default(cuid())
+  name        String
+  description String?   @db.Text
+  coverImage  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       PortfolioItem[]
+
+  @@index([userId])
+}
+
+model PortfolioItem {
+  id          String    @id @default(cuid())
+  title       String
+  description String?   @db.Text
+  imageUrl    String
+  tags        String[]
+  style       String
+  featured    Boolean   @default(false)
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collectionId String?
+  collection  PortfolioCollection? @relation(fields: [collectionId], references: [id])
+  comments    Comment[]
+  likes       Like[]
+  shares      Share[]
+  analytics   Analytics?
+
+  @@index([userId])
+  @@index([collectionId])
+  @@index([order])
+}
+
+model Comment {
+  id          String    @id @default(cuid())
+  content     String    @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId      String
+  portfolioItem PortfolioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  parentId    String?
+  parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentReplies")
+
+  @@index([userId])
+  @@index([itemId])
+  @@index([parentId])
+}
+
+model Like {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId      String
+  portfolioItem PortfolioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+  @@index([userId])
+  @@index([itemId])
+}
+
+model Share {
+  id          String    @id @default(cuid())
+  platform    String    // e.g., "facebook", "twitter", "instagram", "direct"
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  userId      String?   // Optional: track who shared if logged in
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  itemId      String
+  portfolioItem PortfolioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([itemId])
+  @@index([platform])
+}
+
+model Analytics {
+  id          String    @id @default(cuid())
+  itemId      String    @unique
+  portfolioItem PortfolioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  views       Int       @default(0)
+  uniqueViews Int       @default(0)
+  lastUpdated DateTime  @updatedAt
+
+  // Daily stats
+  dailyStats  DailyAnalytics[]
+
+  @@index([itemId])
+}
+
+model DailyAnalytics {
+  id          String    @id @default(cuid())
+  date        DateTime  @db.Date
+  views       Int       @default(0)
+  uniqueViews Int       @default(0)
+  likes       Int       @default(0)
+  comments    Int       @default(0)
+  shares      Int       @default(0)
+
+  // Relations
+  analyticsId String
+  analytics   Analytics @relation(fields: [analyticsId], references: [id], onDelete: Cascade)
+
+  @@unique([analyticsId, date])
+  @@index([analyticsId])
+  @@index([date])
+}
+
+model ViewerSession {
+  id          String    @id @default(cuid())
+  sessionId   String    // Browser session ID or user ID
+  itemId      String    // Portfolio item ID
+  firstView   DateTime  @default(now())
+  lastView    DateTime  @updatedAt
+
+  @@unique([sessionId, itemId])
+  @@index([itemId])
+  @@index([sessionId])
+}
+
+model VerificationToken {
+  id         String    @id @default(cuid())
+  token      String    @unique
+  email      String
+  expires    DateTime
+  createdAt  DateTime  @default(now())
+
+  @@unique([email, token])
+  @@index([email])
+}
+
+model ConnectedAccount {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform      MessagePlatform
+  accountId     String    // Platform-specific account ID
+  accessToken   String    // Encrypted access token
+  refreshToken  String?   // Encrypted refresh token
+  tokenExpiry   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastSynced    DateTime?
+
+  @@unique([userId, platform])
+  @@index([userId])
+}
+
+model UnifiedMessage {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform      MessagePlatform
+  externalId    String?   // Original message ID from the platform
+  sender        String    // Sender email or username
+  senderName    String?   // Display name of sender
+  subject       String?
+  content       String    @db.Text
+  status        MessageStatus @default(UNREAD)
+  receivedAt    DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  labels        String[]  // Custom labels/tags for organization
+  attachments   MessageAttachment[]
+  thread        MessageThread?   @relation(fields: [threadId], references: [id])
+  threadId      String?
+
+  @@index([userId])
+  @@index([platform])
+  @@index([status])
+  @@index([receivedAt])
+}
+
+model MessageThread {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject       String?
+  participants  String[]  // List of participant emails/usernames
+  lastMessageAt DateTime
+  messages      UnifiedMessage[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([lastMessageAt])
+}
+
+model MessageAttachment {
+  id            String    @id @default(cuid())
+  messageId     String
+  message       UnifiedMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  fileName      String
+  fileType      String
+  fileSize      Int
+  fileUrl       String
+  createdAt     DateTime  @default(now())
+
+  @@index([messageId])
+}
+
+model Favorite {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artistId      String
+  artist        User      @relation("FavoriteArtists", fields: [artistId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+
+  @@unique([userId, artistId], name: "userId_artistId")
+  @@index([userId])
+  @@index([artistId])
+}

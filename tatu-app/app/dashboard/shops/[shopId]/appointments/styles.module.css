@@ -1,0 +1,52 @@
+/* Calendar Event Status Colors */
+.eventPending {
+  background-color: #fbbf24 !important;
+  border-color: #f59e0b !important;
+  color: white !important;
+}
+
+.eventConfirmed {
+  background-color: #10b981 !important;
+  border-color: #059669 !important;
+  color: white !important;
+}
+
+.eventCancelled {
+  background-color: #ef4444 !important;
+  border-color: #dc2626 !important;
+  color: white !important;
+  text-decoration: line-through !important;
+}
+
+.eventCompleted {
+  background-color: #3b82f6 !important;
+  border-color: #2563eb !important;
+  color: white !important;
+}
+
+/* Calendar Event Hover Effects */
+.eventPending:hover,
+.eventConfirmed:hover,
+.eventCancelled:hover,
+.eventCompleted:hover {
+  filter: brightness(110%);
+  cursor: pointer;
+}
+
+/* Calendar Event Time Display */
+.eventTime {
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+/* Calendar Event Title */
+.eventTitle {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+/* Calendar Event Client Name */
+.eventClient {
+  font-size: 0.75rem;
+  opacity: 0.9;
+} 
