@@ -7,8 +7,13 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
-          <div className="space-y-4">
-            <Logo variant="white" size="md" />
+          <div className="space-y-4 flex flex-col items-start">
+            <img 
+              src="/tatu-logo.png" 
+              alt="TATU Logo" 
+              className="mb-2" 
+              style={{ width: '64px', height: 'auto' }}
+            />
             <p className="text-gray-400 text-sm max-w-xs">
               The premier marketplace connecting tattoo artists with clients worldwide.
             </p>

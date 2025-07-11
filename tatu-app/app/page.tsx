@@ -7,33 +7,47 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen text-white relative">
+      {/* Global Gradient Background */}
+      <div className="absolute inset-0 z-[-10] pointer-events-none bg-gradient-to-br from-black via-black via-blue-950 via-purple-900 to-yellow-900" />
       {/* Hero Section - Minimal */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        {/* Background Image */}
+      <section className="min-h-[80vh] flex items-center justify-center relative overflow-hidden">
+        {/* Animated Flowy Gradient Background */}
+        <div className="absolute inset-0 z-0 pointer-events-none animate-flowy-bg" />
+        {/* Background Image with new overlay */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900/95 to-gray-900/90"></div>
           <img 
             src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1920&h=1080&fit=crop&crop=center" 
             alt="Tattoo Art Background"
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-10"
           />
         </div>
         
         <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Logo */}
-            <h1 className="tatu-minimal text-8xl md:text-9xl lg:text-[10rem] mb-8 animate-fade-in text-amber-500">
-              TATU
-            </h1>
+            <img 
+              src="/tatu-logo.png" 
+              alt="TATU Logo" 
+              className="mx-auto mb-8 animate-fade-in"
+              style={{ 
+                maxWidth: '420px', 
+                width: '80%',
+                filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.35)) drop-shadow(0 0 20px rgba(0,0,0,0.27)) drop-shadow(0 0 40px rgba(0,0,0,0.18))'
+              }}
+            />
             
             {/* Tagline */}
-            <p className="headline text-2xl md:text-3xl text-gray-300 mb-4 animate-fade-in delay-100">
+            <p className="headline text-2xl md:text-3xl text-white mb-4 animate-fade-in delay-100 font-bold" style={{
+              textShadow: '2px 2px 4px rgba(0,0,0,0.35), 0 0 20px rgba(0,0,0,0.27), 0 0 40px rgba(0,0,0,0.18)'
+            }}>
               Professional tattoo artist marketplace
             </p>
             
             {/* Description */}
-            <p className="body text-lg text-gray-400 mb-12 max-w-2xl mx-auto animate-fade-in delay-200">
+            <p className="body text-lg text-gray-100 mb-12 max-w-2xl mx-auto animate-fade-in delay-200 font-medium" style={{
+              textShadow: '1px 1px 3px rgba(0,0,0,0.4), 0 0 15px rgba(0,0,0,0.31)'
+            }}>
               Connect with verified tattoo artists. Browse portfolios. Book appointments.
             </p>
             
@@ -57,19 +71,26 @@ export default function Home() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in delay-300">
-              <Link href="/explore" className="btn btn-primary">
+              <Link href="/explore" className="btn btn-primary" style={{
+                filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.35)) drop-shadow(0 0 20px rgba(0,0,0,0.27)) drop-shadow(0 0 40px rgba(0,0,0,0.18))'
+              }}>
                 Browse Artists
               </Link>
-              <Link href="/register-artist" className="btn btn-secondary">
+              <Link href="/register-artist" className="btn btn-secondary" style={{
+                filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.35)) drop-shadow(0 0 20px rgba(0,0,0,0.27)) drop-shadow(0 0 40px rgba(0,0,0,0.18))'
+              }}>
                 Join as Artist
               </Link>
             </div>
           </div>
         </div>
+        
+        {/* Hero to Stats Transition Gradient */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none z-10 animate-fluid-transition" />
       </section>
-
+      
       {/* Stats Section */}
-      <section className="py-24 border-t border-gray-800">
+      <section className="py-16 border-t border-gray-800 bg-black">
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             {[
@@ -214,6 +235,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+
     </div>
   )
 }

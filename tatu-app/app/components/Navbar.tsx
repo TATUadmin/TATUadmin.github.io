@@ -13,11 +13,13 @@ export default function Navbar() {
       <div className="container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-8 h-8 bg-white rounded-sm flex items-center justify-center group-hover:bg-gray-100 transition-colors">
-              <span className="text-black font-bold text-sm">T</span>
-            </div>
-            <span className="tatu-minimal text-xl">TATU</span>
+          <Link href="/" className="flex items-center group">
+            <img 
+              src="/tatu-logo.png" 
+              alt="TATU Logo" 
+              style={{ height: '32px', width: 'auto', marginRight: '0.5rem' }}
+              className="inline-block align-middle"
+            />
           </Link>
 
           {/* Desktop Navigation */}
