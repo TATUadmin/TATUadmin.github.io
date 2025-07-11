@@ -1,17 +1,32 @@
 'use client';
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [heroHeight, setHeroHeight] = useState('85vh')
+
+  useEffect(() => {
+    const calculateHeroHeight = () => {
+      const vh = window.innerHeight
+      const statsSectionHeight = 120 // Approximate height of stats section in pixels
+      const heroMinHeight = Math.max(vh - statsSectionHeight, vh * 0.85) // At least 85vh
+      setHeroHeight(`${heroMinHeight}px`)
+    }
+
+    calculateHeroHeight()
+    window.addEventListener('resize', calculateHeroHeight)
+    
+    return () => window.removeEventListener('resize', calculateHeroHeight)
+  }, [])
 
   return (
     <div className="min-h-screen text-white relative">
       {/* Global Gradient Background */}
       <div className="absolute inset-0 z-[-10] pointer-events-none bg-gradient-to-br from-black via-black via-blue-950 via-purple-900 to-yellow-900" />
       {/* Hero Section - Minimal */}
-      <section className="min-h-[80vh] flex items-center justify-center relative overflow-hidden">
+      <section className="flex items-center justify-center relative overflow-hidden" style={{ minHeight: heroHeight }}>
         {/* Animated Flowy Gradient Background */}
         <div className="absolute inset-0 z-0 pointer-events-none animate-flowy-bg" />
         {/* Texture Overlay */}
@@ -209,7 +224,7 @@ export default function Home() {
                   }}
                 />
                 <span style={{ position: 'relative', zIndex: 2, color: '#000' }}>
-                  Join as Artist
+                Join as Artist
                 </span>
               </Link>
             </div>
@@ -221,7 +236,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-black">
+      <section className="py-8 bg-black">
         <div className="container" style={{ maxWidth: '900px' }}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             {[
@@ -247,133 +262,133 @@ export default function Home() {
         <div className="tatu-dark-gradient-bg" aria-hidden="true" />
         <div className="grainy-bg absolute inset-0 w-full h-full z-1" aria-hidden="true" />
 
-        {/* Features Section */}
+      {/* Features Section */}
         <section className="py-24 relative">
           <div className="container relative z-10">
-            <div className="text-center mb-16">
-              <h2 className="display text-4xl md:text-5xl text-white mb-4">
-                Why Choose TATU
-              </h2>
-              <p className="body text-gray-300 max-w-2xl mx-auto">
-                The most trusted platform for tattoo artists and clients worldwide.
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {[
-                {
-                  title: 'Verified Artists',
-                  description: 'All artists are professionally verified with portfolio reviews and background checks.',
-                  icon: '✓'
-                },
-                {
-                  title: 'Secure Booking',
-                  description: 'Protected payments and verified appointments with transparent communication.',
-                  icon: '🔒'
-                },
-                {
-                  title: 'Global Network',
-                  description: 'Connect with artists worldwide from local studios to international destinations.',
-                  icon: '🌍'
-                }
-              ].map((feature, index) => (
+          <div className="text-center mb-16">
+            <h2 className="display text-4xl md:text-5xl text-white mb-4">
+              Why Choose TATU
+            </h2>
+            <p className="body text-gray-300 max-w-2xl mx-auto">
+              The most trusted platform for tattoo artists and clients worldwide.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                title: 'Verified Artists',
+                description: 'All artists are professionally verified with portfolio reviews and background checks.',
+                icon: '✓'
+              },
+              {
+                title: 'Secure Booking',
+                description: 'Protected payments and verified appointments with transparent communication.',
+                icon: '🔒'
+              },
+              {
+                title: 'Global Network',
+                description: 'Connect with artists worldwide from local studios to international destinations.',
+                icon: '🌍'
+              }
+            ].map((feature, index) => (
                 <div key={index} className="card card-hover card-z p-8 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
-                  <div className="text-4xl mb-4">{feature.icon}</div>
-                  <h3 className="headline text-xl text-white mb-4">{feature.title}</h3>
-                  <p className="body text-gray-300 mb-6">{feature.description}</p>
-                  <Link href="/how-it-works" className="text-amber-500 hover:text-amber-400 text-sm font-medium transition-colors">
-                    Learn More →
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Artists Section */}
-        <section className="py-24 relative">
-          <div className="container relative z-10">
-            <div className="text-center mb-16">
-              <h2 className="display text-4xl md:text-5xl text-white mb-4">
-                Featured Artists
-              </h2>
-              <p className="body text-gray-300 max-w-2xl mx-auto">
-                Discover work from our most talented verified artists.
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {[
-                {
-                  name: 'Alex Rivera',
-                  location: 'Brooklyn, NY',
-                  specialty: 'Neo-Traditional',
-                  experience: '12 Years',
-                  image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-                  rating: '4.9'
-                },
-                {
-                  name: 'Maya Chen',
-                  location: 'Tokyo, Japan',
-                  specialty: 'Minimalist',
-                  experience: '8 Years',
-                  image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
-                  rating: '4.8'
-                },
-                {
-                  name: 'Marcus Steel',
-                  location: 'London, UK',
-                  specialty: 'Abstract',
-                  experience: '15 Years',
-                  image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
-                  rating: '5.0'
-                }
-              ].map((artist, index) => (
-                <div key={index} className="card card-hover card-z p-6 text-center animate-fade-in group" style={{animationDelay: `${index * 100}ms`}}>
-                  <div className="relative mb-6">
-                    <img 
-                      src={artist.image} 
-                      alt={artist.name}
-                      className="w-24 h-24 rounded-full mx-auto object-cover border-2 border-gray-700 group-hover:border-amber-500 transition-colors"
-                    />
-                    <div className="absolute -bottom-1 -right-1 bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded-full">
-                      {artist.rating}
-                    </div>
-                  </div>
-                  <h3 className="headline text-lg text-white mb-2">{artist.name}</h3>
-                  <p className="label text-gray-300 mb-1">{artist.location}</p>
-                  <p className="body text-gray-300 text-sm mb-1">{artist.specialty}</p>
-                  <p className="caption text-gray-400 text-xs">{artist.experience}</p>
-                  <button className="mt-4 text-amber-500 hover:text-amber-400 text-sm font-medium transition-colors">
-                    View Portfolio →
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-24 relative">
-          <div className="container relative z-10">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="display text-4xl md:text-5xl text-white mb-6">
-                Ready to get started?
-              </h2>
-              <p className="body text-xl text-gray-300 mb-8">
-                Join thousands of artists and clients on the world's leading tattoo platform.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/explore" className="btn btn-primary">
-                  Browse Artists
-                </Link>
-                <Link href="/register-artist" className="btn btn-ghost">
-                  Apply as Artist
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h3 className="headline text-xl text-white mb-4">{feature.title}</h3>
+                <p className="body text-gray-300 mb-6">{feature.description}</p>
+                <Link href="/how-it-works" className="text-amber-500 hover:text-amber-400 text-sm font-medium transition-colors">
+                  Learn More →
                 </Link>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Artists Section */}
+        <section className="py-24 relative">
+          <div className="container relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="display text-4xl md:text-5xl text-white mb-4">
+              Featured Artists
+            </h2>
+            <p className="body text-gray-300 max-w-2xl mx-auto">
+              Discover work from our most talented verified artists.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                name: 'Alex Rivera',
+                location: 'Brooklyn, NY',
+                specialty: 'Neo-Traditional',
+                experience: '12 Years',
+                image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+                rating: '4.9'
+              },
+              {
+                name: 'Maya Chen',
+                location: 'Tokyo, Japan',
+                specialty: 'Minimalist',
+                experience: '8 Years',
+                image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
+                rating: '4.8'
+              },
+              {
+                name: 'Marcus Steel',
+                location: 'London, UK',
+                specialty: 'Abstract',
+                experience: '15 Years',
+                image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
+                rating: '5.0'
+              }
+            ].map((artist, index) => (
+                <div key={index} className="card card-hover card-z p-6 text-center animate-fade-in group" style={{animationDelay: `${index * 100}ms`}}>
+                <div className="relative mb-6">
+                  <img 
+                    src={artist.image} 
+                    alt={artist.name}
+                    className="w-24 h-24 rounded-full mx-auto object-cover border-2 border-gray-700 group-hover:border-amber-500 transition-colors"
+                  />
+                  <div className="absolute -bottom-1 -right-1 bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded-full">
+                    {artist.rating}
+                  </div>
+                </div>
+                <h3 className="headline text-lg text-white mb-2">{artist.name}</h3>
+                <p className="label text-gray-300 mb-1">{artist.location}</p>
+                <p className="body text-gray-300 text-sm mb-1">{artist.specialty}</p>
+                <p className="caption text-gray-400 text-xs">{artist.experience}</p>
+                <button className="mt-4 text-amber-500 hover:text-amber-400 text-sm font-medium transition-colors">
+                  View Portfolio →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+        <section className="py-24 relative">
+          <div className="container relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="display text-4xl md:text-5xl text-white mb-6">
+              Ready to get started?
+            </h2>
+            <p className="body text-xl text-gray-300 mb-8">
+              Join thousands of artists and clients on the world's leading tattoo platform.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/explore" className="btn btn-primary">
+                Browse Artists
+              </Link>
+              <Link href="/register-artist" className="btn btn-ghost">
+                Apply as Artist
+              </Link>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
       </div>
 
 
