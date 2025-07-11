@@ -89,6 +89,14 @@ body {
   color: var(--foreground);
 }
 
+.tatu-dark-gradient-bg {
+  background: rgba(0, 0, 0, 0.3);
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .container {
   width: 100%;
   max-width: 1200px;
@@ -131,12 +139,26 @@ body {
 }
 
 .card {
-  @apply bg-gray-900 border border-gray-800;
+  @apply bg-black border border-gray-800;
   border-radius: var(--radius-xl);
+  z-index: 20;
+  position: relative;
 }
 
 .card-hover {
-  @apply hover:border-gray-700 hover:bg-gray-800/50 transition-all duration-200;
+  @apply hover:border-gray-700 hover:bg-gray-900/50 transition-all duration-200;
+  z-index: 20;
+  position: relative;
+}
+
+.card-z {
+  z-index: 20;
+  position: relative;
+}
+
+.footer-z {
+  z-index: 30;
+  position: relative;
 }
 
 /* Animations */
@@ -171,25 +193,6 @@ body {
   }
 }
 
-@keyframes fluidTransition {
-  0% {
-    background-position: 0% 0%;
-    opacity: 1;
-  }
-  33% {
-    background-position: 100% 0%;
-    opacity: 0.8;
-  }
-  66% {
-    background-position: 100% 100%;
-    opacity: 0.9;
-  }
-  100% {
-    background-position: 0% 0%;
-    opacity: 1;
-  }
-}
-
 .animate-flowy-bg {
   width: 100%;
   height: 100%;
@@ -198,73 +201,6 @@ body {
   animation: flowyBg 16.67s ease-in-out infinite;
   opacity: 0.85;
   z-index: 0;
-}
-
-.animate-fluid-transition {
-  background-size: 200% 200%;
-  animation: fluidTransition 15s ease-in-out infinite;
-  background: linear-gradient(to top, 
-    rgba(0,0,0,1) 0%, 
-    rgba(0,0,0,0.8) 20%, 
-    rgba(0,0,0,0.4) 50%, 
-    rgba(0,0,0,0.1) 80%, 
-    transparent 100%
-  );
-}
-
-/* SVG Flowy Line Draw Animation */
-.svg-flowy-line {
-  stroke-dasharray: 3000;
-  stroke-dashoffset: 3000;
-  animation: svg-line-draw 4s linear forwards, svg-line-loop 24s linear infinite, svg-line-wiggle 6s ease-in-out infinite;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.svg-flowy-line-1 { animation-delay: 0.2s, 0s, 0s; animation-name: svg-line-draw, svg-line-loop, svg-stroke-oscillate-1, svg-line-wiggle; }
-.svg-flowy-line-2 { animation-delay: 0.6s, 2s, 1s; animation-name: svg-line-draw, svg-line-loop, svg-stroke-oscillate-2, svg-line-wiggle; }
-.svg-flowy-line-3 { animation-delay: 1.0s, 4s, 2s; animation-name: svg-line-draw, svg-line-loop, svg-stroke-oscillate-3, svg-line-wiggle; }
-.svg-flowy-line-4 { animation-delay: 1.4s, 6s, 3s; animation-name: svg-line-draw, svg-line-loop, svg-stroke-oscillate-4, svg-line-wiggle; }
-.svg-flowy-line-5 { animation-delay: 1.8s, 8s, 4s; animation-name: svg-line-draw, svg-line-loop, svg-stroke-oscillate-5, svg-line-wiggle; }
-
-@keyframes svg-line-draw {
-  to { stroke-dashoffset: 0; }
-}
-@keyframes svg-line-loop {
-  0% { stroke-dashoffset: 3000; opacity: 0; }
-  10% { opacity: 1; }
-  40% { stroke-dashoffset: 0; opacity: 1; }
-  60% { stroke-dashoffset: 0; opacity: 1; }
-  90% { stroke-dashoffset: 3000; opacity: 1; }
-  100% { stroke-dashoffset: 3000; opacity: 0; }
-}
-
-@keyframes svg-stroke-oscillate-1 {
-  0%, 100% { stroke-width: 10; }
-  50% { stroke-width: 14; }
-}
-@keyframes svg-stroke-oscillate-2 {
-  0%, 100% { stroke-width: 8; }
-  50% { stroke-width: 12; }
-}
-@keyframes svg-stroke-oscillate-3 {
-  0%, 100% { stroke-width: 7; }
-  50% { stroke-width: 10; }
-}
-@keyframes svg-stroke-oscillate-4 {
-  0%, 100% { stroke-width: 6; }
-  50% { stroke-width: 9; }
-}
-@keyframes svg-stroke-oscillate-5 {
-  0%, 100% { stroke-width: 8; }
-  50% { stroke-width: 11; }
-}
-@keyframes svg-line-wiggle {
-  0%, 100% { transform: translateY(0px) scaleX(1); }
-  20% { transform: translateY(-2px) scaleX(1.01); }
-  40% { transform: translateY(2px) scaleX(0.99); }
-  60% { transform: translateY(-1.5px) scaleX(1.02); }
-  80% { transform: translateY(1.5px) scaleX(0.98); }
 }
 
 /* Scrollbar */
@@ -305,4 +241,82 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+.metallic-logo {
+  /* Slight grayscale, high contrast, and screen blend for metallic effect */
+  filter: brightness(1.2) contrast(1.3) grayscale(0.2) drop-shadow(2px 2px 4px rgba(0,0,0,0.35));
+  mix-blend-mode: screen;
+}
+
+@keyframes metallicShine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.metallic-shine-overlay {
+  background: linear-gradient(120deg, rgba(30,58,138,0.22) 0%, rgba(168,85,247,0.22) 40%, rgba(253,230,138,0.18) 80%, rgba(30,58,138,0.10) 100%);
+  background-size: 200% 100%;
+  background-blend-mode: color-dodge, lighten;
+  animation: metallicShine 3.5s linear infinite;
+  opacity: 0.85;
+  border-radius: inherit;
+}
+
+@keyframes bgFlagWave {
+  0% {
+    transform: scale(1) skewY(0deg) skewX(0deg) translateY(0px) translateX(0px);
+    opacity: 0.13;
+  }
+  20% {
+    transform: scale(1.036) skewY(0.5deg) skewX(-0.375deg) translateY(-1.5px) translateX(0.75px);
+    opacity: 0.197;
+  }
+  40% {
+    transform: scale(1.072) skewY(1deg) skewX(-0.75deg) translateY(-3px) translateX(1.5px);
+    opacity: 0.264;
+  }
+  60% {
+    transform: scale(1.072) skewY(-1deg) skewX(0.75deg) translateY(3px) translateX(-1.5px);
+    opacity: 0.264;
+  }
+  80% {
+    transform: scale(1.036) skewY(-0.5deg) skewX(0.375deg) translateY(1.5px) translateX(-0.75px);
+    opacity: 0.197;
+  }
+  100% {
+    transform: scale(1) skewY(0deg) skewX(0deg) translateY(0px) translateX(0px);
+    opacity: 0.13;
+  }
+}
+.bg-flag-wave {
+  animation: bgFlagWave 21.25s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes logoEdgeGlimmer {
+  0% {
+    --glimmer-angle: 0deg;
+  }
+  100% {
+    --glimmer-angle: 360deg;
+  }
+}
+.logo-edge-glimmer {
+  --glimmer-angle: 0deg;
+  background: conic-gradient(from var(--glimmer-angle), transparent 0deg, transparent 40deg, #fff 60deg, #fff 80deg, transparent 100deg, transparent 360deg);
+  opacity: 0.225;
+  mix-blend-mode: lighten;
+  animation: logoEdgeGlimmer 3.5s linear infinite;
+  border-radius: inherit;
+}
+
+.grainy-bg {
+  background-image: url('/grain.png');
+  background-repeat: repeat;
+  background-size: auto;
+  opacity: 0.50;
+  pointer-events: none;
+  z-index: 1;
+}
+
 
