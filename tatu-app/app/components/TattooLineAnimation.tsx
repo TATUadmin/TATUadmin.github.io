@@ -6,12 +6,16 @@ interface TattooLineProps {
   style?: 'minimalist' | 'traditional' | 'geometric' | 'floral' | 'abstract'
   duration?: number
   delay?: number
+  position?: { x: number; y: number }
+  scale?: number
 }
 
 const TattooLineAnimation = ({ 
   style = 'minimalist', 
   duration = 8000, 
-  delay = 0 
+  delay = 0,
+  position = { x: 50, y: 50 },
+  scale = 1
 }: TattooLineProps) => {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -57,14 +61,17 @@ const TattooLineAnimation = ({
 
   return (
     <div 
-      className="absolute inset-0 pointer-events-none opacity-10"
+      className="absolute pointer-events-none"
       style={{
+        left: `${position.x}%`,
+        top: `${position.y}%`,
+        transform: `translate(-50%, -50%) scale(${scale})`,
         animationDelay,
       }}
     >
       <svg
-        width="100%"
-        height="100%"
+        width="200"
+        height="240"
         viewBox="0 0 140 180"
         className="tattoo-line-animation"
         style={{
@@ -73,21 +80,34 @@ const TattooLineAnimation = ({
         }}
       >
         <defs>
+          {/* Brighter gradient for better visibility */}
           <linearGradient id={`fade-${style}-${delay}`} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="white" stopOpacity="0" />
+            <stop offset="30%" stopColor="white" stopOpacity="0.4" />
             <stop offset="50%" stopColor="white" stopOpacity="0.8" />
+            <stop offset="70%" stopColor="white" stopOpacity="0.4" />
             <stop offset="100%" stopColor="white" stopOpacity="0" />
           </linearGradient>
+          
+          {/* Glow effect for enhanced visibility */}
+          <filter id={`glow-${style}-${delay}`}>
+            <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+            <feMerge> 
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
         
         <path
           d={pathData}
           fill="none"
           stroke={`url(#fade-${style}-${delay})`}
-          strokeWidth="1.5"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
           className="tattoo-path"
+          filter={`url(#glow-${style}-${delay})`}
           style={{
             animationDuration,
             animationDelay,
@@ -98,23 +118,46 @@ const TattooLineAnimation = ({
   )
 }
 
-// Main container component
+// Main container component with full viewport coverage
 export default function TattooBackgroundAnimation() {
   const tattooStyles: Array<TattooLineProps['style']> = [
     'minimalist', 'traditional', 'geometric', 'floral', 'abstract'
   ]
 
+  // Generate positions across the full viewport
+  const generatePositions = () => {
+    return Array.from({ length: 12 }, (_, i) => {
+      // Distribute across full width and height with some randomization
+      const baseX = (i % 4) * 25 + 12.5 // 4 columns: 12.5%, 37.5%, 62.5%, 87.5%
+      const baseY = Math.floor(i / 4) * 30 + 20 // 3 rows: 20%, 50%, 80%
+      
+      return {
+        x: baseX + (Math.random() - 0.5) * 15, // Add some variance
+        y: baseY + (Math.random() - 0.5) * 20,
+        scale: 0.7 + Math.random() * 0.6, // Random scale between 0.7-1.3
+        duration: 6000 + (i * 800), // Vary duration: 6-15 seconds
+        delay: i * 1200 // Stagger start times
+      }
+    })
+  }
+
+  const [positions] = useState(generatePositions)
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Generate multiple animated lines with staggered timing */}
-      {Array.from({ length: 8 }, (_, i) => (
-        <TattooLineAnimation
-          key={i}
-          style={tattooStyles[i % tattooStyles.length]}
-          duration={6000 + (i * 1000)} // Vary duration: 6-13 seconds
-          delay={i * 1500} // Stagger start times
-        />
-      ))}
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Ensure full viewport coverage */}
+      <div className="absolute inset-0 w-full h-full">
+        {positions.map((pos, i) => (
+          <TattooLineAnimation
+            key={i}
+            style={tattooStyles[i % tattooStyles.length]}
+            duration={pos.duration}
+            delay={pos.delay}
+            position={{ x: pos.x, y: pos.y }}
+            scale={pos.scale}
+          />
+        ))}
+      </div>
     </div>
   )
 } 
