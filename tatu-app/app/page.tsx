@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import TattooBackgroundAnimation from './components/TattooLineAnimation'
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -10,6 +11,9 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section - Clean and Minimal */}
       <section className="min-h-screen flex items-center justify-center relative">
+        {/* Tattoo Line Animation Background */}
+        <TattooBackgroundAnimation />
+        
         {/* Subtle texture overlay */}
         <div 
           className="absolute inset-0 opacity-5"
