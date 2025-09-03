@@ -39,7 +39,7 @@ export default function ExplorePage() {
 
   useEffect(() => {
     fetchArtists()
-  }, []) // Only fetch on initial load
+  }, [])
 
   const fetchArtists = async () => {
     setIsLoading(true)
@@ -49,7 +49,7 @@ export default function ExplorePage() {
       if (locationFilter) params.append('location', locationFilter)
       if (styleFilter) params.append('style', styleFilter)
       if (sortBy) params.append('sort', sortBy)
-      else params.append('sort', 'rating') // Default to highest rated
+      else params.append('sort', 'rating')
 
       const response = await fetch(`/api/artists?${params.toString()}`)
       if (!response.ok) throw new Error('Failed to fetch artists')
@@ -78,9 +78,9 @@ export default function ExplorePage() {
       const response = await fetch('/api/favorites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ artistId }),
+        body: JSON.stringify({ artistId })
       })
-
+      
       if (response.ok) {
         setFavoriteArtists(prev => 
           prev.includes(artistId) 
@@ -93,235 +93,206 @@ export default function ExplorePage() {
     }
   }
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <StarIcon
-        key={i}
-        className={`h-4 w-4 ${
-          i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-        }`}
-      />
-    ))
-  }
-
   return (
-    <div className="min-h-screen bg-black py-16 pt-24 relative">
-      {/* Original gradient background */}
-      <div className="absolute inset-0 z-0 pointer-events-none bg-gradient-to-br from-black via-black via-blue-950 via-purple-900 to-yellow-900" />
-      {/* 30% dark overlay */}
-      <div className="tatu-dark-gradient-bg" aria-hidden="true" />
-      <div className="grainy-bg absolute inset-0 w-full h-full z-1" aria-hidden="true" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div className="min-h-screen bg-black pt-20">
+      <div className="container">
         {/* Header */}
-        <div className="text-center mb-12 relative z-20">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Discover Talented Tattoo Artists
+        <div className="py-12">
+          <h1 className="display text-4xl md:text-5xl text-white mb-4">
+            Browse Artists
           </h1>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Browse portfolios, read reviews, and find the perfect artist for your next tattoo
+          <p className="body text-lg text-gray-400 max-w-2xl">
+            Discover verified tattoo artists from around the world. Browse portfolios, read reviews, and book your next session.
           </p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-black card-z rounded-lg shadow-sm border p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             {/* Search */}
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <div className="md:col-span-2 relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search artists..."
+                placeholder="Search artists, styles, or keywords..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full pl-10 pr-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-800 text-white placeholder-gray-400"
+                className="input pl-10"
               />
             </div>
 
-            {/* Location */}
+            {/* Location Filter */}
             <div className="relative">
-              <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Location..."
+              <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
                 value={locationFilter}
                 onChange={(e) => setLocationFilter(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="w-full pl-10 pr-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-800 text-white placeholder-gray-400"
-              />
+                className="input pl-10 appearance-none"
+              >
+                <option value="">All Locations</option>
+                <option value="new-york">New York</option>
+                <option value="los-angeles">Los Angeles</option>
+                <option value="london">London</option>
+                <option value="tokyo">Tokyo</option>
+                <option value="berlin">Berlin</option>
+              </select>
             </div>
 
             {/* Style Filter */}
-            <select
-              value={styleFilter}
-              onChange={(e) => setStyleFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-gray-300 bg-gray-800"
-            >
-              <option value="">Styles</option>
-              {styles.map(style => (
-                <option key={style} value={style}>{style}</option>
-              ))}
-            </select>
+            <div>
+              <select
+                value={styleFilter}
+                onChange={(e) => setStyleFilter(e.target.value)}
+                className="input appearance-none"
+              >
+                <option value="">All Styles</option>
+                {styles.map((style) => (
+                  <option key={style} value={style.toLowerCase()}>
+                    {style}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-            {/* Sort */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-gray-300 bg-gray-800"
-            >
-              <option value="">Filter</option>
-              <option value="rating">Highest Rated</option>
-              <option value="reviews">Most Reviews</option>
-              <option value="portfolio">Most Portfolio Items</option>
-              <option value="newest">Newest Artists</option>
-            </select>
-
-            {/* Find Button */}
+          {/* Sort and Search Button */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <label className="text-sm text-gray-400">Sort by:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent border border-gray-600 text-white px-3 py-2 rounded text-sm"
+              >
+                <option value="rating">Highest Rated</option>
+                <option value="reviews">Most Reviews</option>
+                <option value="portfolio">Portfolio Size</option>
+                <option value="recent">Recently Active</option>
+              </select>
+            </div>
+            
             <button
               onClick={handleSearch}
-              className="w-full bg-amber-500 text-black py-2 px-4 rounded-lg font-medium hover:bg-amber-400 transition-colors focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+              className="btn btn-primary"
             >
-              Find
+              Search Artists
             </button>
           </div>
         </div>
 
         {/* Results */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="bg-black card-z rounded-lg shadow-sm border animate-pulse">
-                <div className="h-48 bg-gray-700 rounded-t-lg"></div>
-                <div className="p-6">
-                  <div className="h-4 bg-gray-700 rounded mb-2"></div>
-                  <div className="h-3 bg-gray-700 rounded mb-4 w-3/4"></div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-gray-700 rounded w-1/2"></div>
-                    <div className="h-3 bg-gray-700 rounded w-2/3"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <>
-            <div className="flex justify-between items-center mb-6">
-              <p className="text-gray-300">
-                {artists.length} artists found
-              </p>
-            </div>
-
+        <div className="pb-20">
+          {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {artists.map((artist) => (
-                <div key={artist.id} className="bg-black card-z rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-                  {/* Portfolio Preview */}
-                  <div className="relative h-48 bg-gray-700 rounded-t-lg overflow-hidden">
-                    {artist.avatar ? (
-                      <Image
-                        src={artist.avatar}
-                        alt={`${artist.name}'s work`}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full bg-gray-600">
-                        <span className="text-gray-400">No portfolio image</span>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="card p-6 animate-pulse">
+                  <div className="w-16 h-16 bg-gray-700 rounded-full mb-4"></div>
+                  <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-6">
+                <p className="text-gray-400 text-sm">
+                  {artists.length} artists found
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {artists.map((artist) => (
+                  <div key={artist.id} className="card p-6 card-hover group">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={artist.avatar}
+                          alt={artist.name}
+                          className="w-12 h-12 rounded-full object-cover border border-gray-700"
+                        />
+                        <div>
+                          <h3 className="headline text-lg text-white group-hover:text-gray-100 transition-colors">
+                            {artist.name}
+                          </h3>
+                          <p className="text-gray-400 text-sm flex items-center">
+                            <MapPinIcon className="w-4 h-4 mr-1" />
+                            {artist.location}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                    
-                    {/* Favorite Button */}
-                    <button
-                      onClick={() => toggleFavorite(artist.id)}
-                      className="absolute top-3 right-3 p-2 bg-black bg-opacity-90 rounded-full hover:bg-opacity-100 transition-all"
-                    >
-                      {favoriteArtists.includes(artist.id) ? (
-                        <HeartSolid className="h-5 w-5 text-red-500" />
-                      ) : (
-                        <HeartOutline className="h-5 w-5 text-gray-300" />
-                      )}
-                    </button>
-
-                    {/* Featured Badge */}
-                    {artist.featured && (
-                      <div className="absolute top-3 left-3 bg-amber-500 text-black px-2 py-1 rounded-full text-xs font-medium">
-                        Featured
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Artist Info */}
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-semibold text-white">
-                        {artist.name}
-                      </h3>
-                      <div className="flex items-center space-x-1">
-                        {renderStars(artist.rating)}
-                        <span className="text-sm text-gray-400 ml-1">
-                          ({artist.reviewCount})
-                        </span>
-                      </div>
+                      
+                      <button
+                        onClick={() => toggleFavorite(artist.id)}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        {favoriteArtists.includes(artist.id) ? (
+                          <HeartSolid className="w-5 h-5 text-white" />
+                        ) : (
+                          <HeartOutline className="w-5 h-5" />
+                        )}
+                      </button>
                     </div>
 
-                    <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                    <p className="text-gray-300 text-sm mb-4 line-clamp-2">
                       {artist.bio}
                     </p>
 
-                    <div className="flex items-center text-sm text-gray-400 mb-3">
-                      <MapPinIcon className="h-4 w-4 mr-1" />
-                      {artist.location}
-                    </div>
-
-                    {/* Specialties */}
-                    <div className="flex flex-wrap gap-1 mb-4">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {artist.specialties.slice(0, 3).map((specialty) => (
                         <span
                           key={specialty}
-                          className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded-full"
+                          className="text-xs px-2 py-1 bg-gray-800 text-gray-300 rounded"
                         >
                           {specialty}
                         </span>
                       ))}
-                      {artist.specialties.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                          +{artist.specialties.length - 3} more
-                        </span>
-                      )}
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center text-gray-400">
+                          <StarIcon className="w-4 h-4 mr-1" />
+                          <span>{artist.rating}</span>
+                          <span className="text-gray-500 ml-1">({artist.reviewCount})</span>
+                        </div>
+                        <div className="text-gray-400">
+                          {artist.portfolioCount} works
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-gray-800">
                       <Link
                         href={`/artist/${artist.id}`}
-                        className="flex-1 bg-indigo-600 text-white text-center py-2 px-4 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
+                        className="btn btn-secondary w-full text-sm"
                       >
                         View Portfolio
                       </Link>
-                      <Link
-                        href={`/artist/${artist.id}/book`}
-                        className="flex-1 bg-white border border-gray-300 text-gray-700 text-center py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
-                      >
-                        Book Now
-                      </Link>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            {artists.length === 0 && !isLoading && (
-              <div className="text-center py-12">
-                <p className="text-gray-600 text-lg">
-                  No artists found matching your criteria.
-                </p>
-                <p className="text-gray-500 mt-2">
-                  Try adjusting your filters or search terms.
-                </p>
+                ))}
               </div>
-            )}
-          </>
-        )}
+
+              {artists.length === 0 && !isLoading && (
+                <div className="text-center py-12">
+                  <p className="text-gray-400 text-lg mb-4">No artists found matching your criteria</p>
+                  <button
+                    onClick={() => {
+                      setSearchQuery('')
+                      setLocationFilter('')
+                      setStyleFilter('')
+                      fetchArtists()
+                    }}
+                    className="btn btn-secondary"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

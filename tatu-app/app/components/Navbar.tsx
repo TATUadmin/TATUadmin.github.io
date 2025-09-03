@@ -9,7 +9,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <nav className="fixed top-0 w-full z-50 backdrop-blur border-b border-gray-900">
+    <nav className="fixed top-0 w-full z-50 backdrop-blur-sm border-b border-gray-800 bg-black/80">
       <div className="container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -17,7 +17,12 @@ export default function Navbar() {
             <img 
               src="/tatu-logo.png" 
               alt="TATU Logo" 
-              style={{ height: '32px', width: 'auto', marginRight: '0.5rem' }}
+              style={{ 
+                height: '28px', 
+                width: 'auto', 
+                marginRight: '0.5rem',
+                filter: 'brightness(0) invert(1)'
+              }}
               className="inline-block align-middle"
             />
           </Link>
@@ -26,19 +31,19 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               href="/explore" 
-              className="label text-gray-400 hover:text-white transition-colors"
+              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
               Browse
             </Link>
             <Link 
               href="/how-it-works" 
-              className="label text-gray-400 hover:text-white transition-colors"
+              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
               How it Works
             </Link>
             <Link 
               href="/about" 
-              className="label text-gray-400 hover:text-white transition-colors"
+              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
               About
             </Link>
@@ -50,12 +55,12 @@ export default function Navbar() {
               <div className="flex items-center space-x-4">
                 <Link 
                   href="/dashboard" 
-                  className="body text-gray-400 hover:text-white transition-colors"
+                  className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
                 >
                   Dashboard
                 </Link>
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
                       {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
                     </span>
@@ -81,89 +86,91 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-900 backdrop-blur">
-            <div className="flex flex-col space-y-4">
-              <Link 
-                href="/explore" 
-                className="label text-gray-400 hover:text-white transition-colors px-4 py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Browse
-              </Link>
-              <Link 
-                href="/how-it-works" 
-                className="label text-gray-400 hover:text-white transition-colors px-4 py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                How it Works
-              </Link>
-              <Link 
-                href="/about" 
-                className="label text-gray-400 hover:text-white transition-colors px-4 py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
-              </Link>
-              
-              <div className="border-t border-gray-900 pt-4 px-4">
-                {session ? (
-                  <div className="flex flex-col space-y-3">
-                    <Link 
-                      href="/dashboard" 
-                      className="body text-gray-400 hover:text-white transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <button
-                      onClick={() => {
-                        signOut()
-                        setIsMenuOpen(false)
-                      }}
-                      className="btn btn-ghost text-left"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <div className="flex flex-col space-y-3">
-                    <Link 
-                      href="/auth/signin" 
-                      className="btn btn-ghost"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Sign In
-                    </Link>
-                    <Link 
-                      href="/auth/signup" 
-                      className="btn btn-primary"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Join
-                    </Link>
-                  </div>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 )}
-              </div>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t border-gray-800 bg-black">
+          <div className="container py-4 space-y-4">
+            <Link 
+              href="/explore" 
+              className="block text-gray-400 hover:text-white transition-colors font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Browse
+            </Link>
+            <Link 
+              href="/how-it-works" 
+              className="block text-gray-400 hover:text-white transition-colors font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              How it Works
+            </Link>
+            <Link 
+              href="/about" 
+              className="block text-gray-400 hover:text-white transition-colors font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              About
+            </Link>
+            
+            <div className="border-t border-gray-800 pt-4">
+              {session ? (
+                <div className="space-y-4">
+                  <Link 
+                    href="/dashboard" 
+                    className="block text-gray-400 hover:text-white transition-colors font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      signOut()
+                      setIsMenuOpen(false)
+                    }}
+                    className="block text-gray-400 hover:text-white transition-colors font-medium"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Link 
+                    href="/auth/signin" 
+                    className="block text-gray-400 hover:text-white transition-colors font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                  <Link 
+                    href="/auth/signup" 
+                    className="block text-white font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Join
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   )
 } 
