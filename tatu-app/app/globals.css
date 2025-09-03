@@ -130,6 +130,10 @@ body {
   .bg-surface-3 {
     background-color: var(--surface-3);
   }
+  
+  .bg-section-alt {
+    background-color: #161616;
+  }
 }
 
 /* Clean Components */
@@ -162,13 +166,14 @@ body {
 }
 
 .card {
-  @apply bg-surface border border-gray-800;
+  @apply bg-surface border;
+  border-color: #171717;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
 }
 
 .card-hover {
-  @apply hover:border-gray-600 hover:bg-surface-2 transition-all duration-200;
+  @apply hover:bg-surface-2 transition-all duration-200;
 }
 
 .card-z {
@@ -195,146 +200,7 @@ body {
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 
-@keyframes flowyBg {
-  0% {
-    background-position: 20% 20%;
-  }
-  25% {
-    background-position: 80% 40%;
-  }
-  50% {
-    background-position: 60% 80%;
-  }
-  75% {
-    background-position: 40% 60%;
-  }
-  100% {
-    background-position: 20% 20%;
-  }
-}
 
-.animate-flowy-bg {
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(ellipse at center, #05051a 0%, #4b006e 30%, #ffe066 60%, #05051a 100%);
-  background-size: 300% 300%;
-  animation: flowyBg 16.67s ease-in-out infinite;
-  opacity: 0.85;
-  z-index: 0;
-}
-
-/* Enhanced Tattoo Line Animations - Brighter and More Visible */
-@keyframes tattooLineDraw {
-  0% {
-    stroke-dasharray: 0 1000;
-    opacity: 0;
-    transform: translateX(-15px) scale(0.98);
-  }
-  
-  5% {
-    opacity: 0.15;
-    transform: translateX(-8px) scale(0.99);
-  }
-  
-  15% {
-    stroke-dasharray: 200 1000;
-    opacity: 0.5;
-    transform: translateX(-2px) scale(1);
-  }
-  
-  35% {
-    stroke-dasharray: 500 1000;
-    opacity: 0.8;
-    transform: translateX(0) scale(1.01);
-  }
-  
-  65% {
-    stroke-dasharray: 800 1000;
-    opacity: 0.9;
-    transform: translateX(2px) scale(1.02);
-  }
-  
-  80% {
-    stroke-dasharray: 1000 1000;
-    opacity: 0.7;
-    transform: translateX(0) scale(1);
-  }
-  
-  95% {
-    stroke-dasharray: 1000 200;
-    opacity: 0.3;
-    transform: translateX(8px) scale(0.99);
-  }
-  
-  100% {
-    stroke-dasharray: 1000 0;
-    opacity: 0;
-    transform: translateX(15px) scale(0.98);
-  }
-}
-
-@keyframes tattooContainerFloat {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  
-  20% {
-    transform: translateY(-3px) rotate(0.3deg);
-  }
-  
-  40% {
-    transform: translateY(2px) rotate(-0.2deg);
-  }
-  
-  60% {
-    transform: translateY(-1px) rotate(0.4deg);
-  }
-  
-  80% {
-    transform: translateY(3px) rotate(-0.3deg);
-  }
-}
-
-/* Optimized tattoo animations with enhanced visibility */
-.tattoo-line-animation {
-  animation: tattooContainerFloat 25s ease-in-out infinite;
-  will-change: transform;
-  transform: translateZ(0); /* Force hardware acceleration */
-  opacity: 0.25; /* Base opacity for better visibility */
-}
-
-.tattoo-path {
-  animation: tattooLineDraw var(--animation-duration, 8s) ease-in-out infinite;
-  will-change: stroke-dasharray, opacity, transform;
-  transform: translateZ(0); /* Force hardware acceleration */
-  stroke-dasharray: 0 1000;
-  stroke-dashoffset: 0;
-  /* Enhanced visibility with subtle glow */
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
-}
-
-/* Performance optimizations for animations */
-@media (prefers-reduced-motion: reduce) {
-  .tattoo-line-animation,
-  .tattoo-path {
-    animation: none !important;
-    opacity: 0.1 !important;
-    filter: none !important;
-  }
-}
-
-/* Responsive adjustments for different screen sizes */
-@media (max-width: 768px) {
-  .tattoo-line-animation {
-    opacity: 0.2; /* Slightly dimmer on mobile for better readability */
-  }
-}
-
-@media (min-width: 1920px) {
-  .tattoo-line-animation {
-    opacity: 0.3; /* Slightly brighter on large screens */
-  }
-}
 
 /* Clean scrollbar */
 ::-webkit-scrollbar {
@@ -450,6 +316,101 @@ body {
   opacity: 0.50;
   pointer-events: none;
   z-index: 1;
+}
+
+/* Tattoo Background Cycling Animations */
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.3; }
+}
+
+/* Optimized background cycling */
+.tattoo-background-cycler {
+  will-change: opacity;
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+.tattoo-background-image {
+  will-change: opacity;
+  transform: translateZ(0);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Glimmering Effect for CTA Button */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes glimmerSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.btn-glimmer {
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    #9ca3af 0%,
+    #d1d5db 25%,
+    #f9fafb 50%,
+    #d1d5db 75%,
+    #9ca3af 100%
+  ) !important;
+  color: #111827 !important;
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.btn-glimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.9) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: glimmerSweep 2s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+
+.btn-glimmer:hover {
+  animation-play-state: paused;
+}
+
+.btn-glimmer:hover::before {
+  animation-play-state: paused;
+}
+
+/* Performance optimizations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .tattoo-background-cycler,
+  .tattoo-background-image {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .btn-glimmer,
+  .btn-glimmer::before {
+    animation: none !important;
+  }
 }
 
 

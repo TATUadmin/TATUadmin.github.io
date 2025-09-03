@@ -9,7 +9,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <nav className="fixed top-0 w-full z-50 backdrop-blur-sm border-b border-gray-800 bg-black/80">
+    <nav className="fixed top-0 w-full z-50 backdrop-blur-sm border-b bg-black/80" style={{borderColor: '#171717'}}>
       <div className="container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -30,16 +30,16 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <Link 
-              href="/explore" 
-              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
-            >
-              Browse
-            </Link>
-            <Link 
               href="/how-it-works" 
               className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
               How it Works
+            </Link>
+            <Link 
+              href="/explore" 
+              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
+            >
+              Browse
             </Link>
             <Link 
               href="/about" 
@@ -105,21 +105,21 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-gray-800 bg-black">
+        <div className="md:hidden border-t bg-black" style={{borderColor: '#171717'}}>
           <div className="container py-4 space-y-4">
-            <Link 
-              href="/explore" 
-              className="block text-gray-400 hover:text-white transition-colors font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Browse
-            </Link>
             <Link 
               href="/how-it-works" 
               className="block text-gray-400 hover:text-white transition-colors font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
               How it Works
+            </Link>
+            <Link 
+              href="/explore" 
+              className="block text-gray-400 hover:text-white transition-colors font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Browse
             </Link>
             <Link 
               href="/about" 
@@ -129,7 +129,7 @@ export default function Navbar() {
               About
             </Link>
             
-            <div className="border-t border-gray-800 pt-4">
+            <div className="border-t pt-4" style={{borderColor: '#171717'}}>
               {session ? (
                 <div className="space-y-4">
                   <Link 

@@ -7,9 +7,9 @@ export default function HowItWorks() {
   const [activeTab, setActiveTab] = useState<'clients' | 'artists'>('clients');
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
-      <section className="py-24 border-b border-gray-800">
+      <section className="py-24">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="display text-5xl md:text-6xl text-white mb-6">
@@ -24,15 +24,15 @@ export default function HowItWorks() {
       </section>
 
       {/* Tab Navigation */}
-      <section className="py-12 border-b border-gray-800">
+      <section className="py-12 bg-surface">
         <div className="container">
           <div className="max-w-2xl mx-auto">
-            <div className="flex bg-gray-800 rounded-lg p-1">
+            <div className="flex bg-surface-2 rounded-lg p-1">
               <button
                 onClick={() => setActiveTab('clients')}
                 className={`flex-1 py-3 px-6 rounded-md font-medium transition-all ${
                   activeTab === 'clients'
-                    ? 'bg-amber-500 text-black'
+                    ? 'bg-white text-black'
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
@@ -42,7 +42,7 @@ export default function HowItWorks() {
                 onClick={() => setActiveTab('artists')}
                 className={`flex-1 py-3 px-6 rounded-md font-medium transition-all ${
                   activeTab === 'artists'
-                    ? 'bg-amber-500 text-black'
+                    ? 'bg-white text-black'
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
@@ -70,42 +70,33 @@ export default function HowItWorks() {
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {[
                   {
-                    step: '01',
+                    step: '1',
                     title: 'Discover Artists',
                     description: 'Browse verified artists by style, location, and availability. View portfolios and read reviews.',
-                    icon: '🔍',
-                    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop'
+                    icon: '🔍'
                   },
                   {
-                    step: '02',
+                    step: '2',
                     title: 'Book Consultation',
                     description: 'Schedule a free consultation to discuss your design, placement, and budget with your chosen artist.',
-                    icon: '📅',
-                    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=300&fit=crop'
+                    icon: '📅'
                   },
                   {
-                    step: '03',
+                    step: '3',
                     title: 'Design & Plan',
                     description: 'Work with your artist to create the perfect design. Get digital mockups and make revisions.',
-                    icon: '✏️',
-                    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=300&fit=crop'
+                    icon: '✏️'
                   },
                   {
-                    step: '04',
+                    step: '4',
                     title: 'Get Inked',
                     description: 'Show up for your appointment with confidence. Your artist is ready to create your masterpiece.',
-                    icon: '🎨',
-                    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop'
+                    icon: '🎨'
                   }
                 ].map((item, index) => (
                   <div key={index} className="card card-hover p-6 text-center animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
-                    <div className="relative mb-6">
-                      <img 
-                        src={item.image} 
-                        alt={item.title}
-                        className="w-full h-48 object-cover rounded-lg mb-4"
-                      />
-                      <div className="absolute top-4 left-4 bg-amber-500 text-black text-lg font-bold px-3 py-1 rounded-full">
+                    <div className="mb-6">
+                      <div className="bg-white text-black text-lg font-bold px-3 py-1 rounded-full inline-block mb-4">
                         {item.step}
                       </div>
                     </div>
@@ -137,42 +128,33 @@ export default function HowItWorks() {
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {[
                   {
-                    step: '01',
+                    step: '1',
                     title: 'Apply & Verify',
                     description: 'Submit your application with portfolio samples. We verify all artists for quality and safety.',
-                    icon: '✅',
-                    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop'
+                    icon: '✅'
                   },
                   {
-                    step: '02',
+                    step: '2',
                     title: 'Build Profile',
                     description: 'Create your artist profile with portfolio, services, pricing, and availability.',
-                    icon: '👤',
-                    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=300&fit=crop'
+                    icon: '👤'
                   },
                   {
-                    step: '03',
+                    step: '3',
                     title: 'Get Bookings',
                     description: 'Receive booking requests from clients. Manage your schedule and consultations.',
-                    icon: '📱',
-                    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=300&fit=crop'
+                    icon: '📱'
                   },
                   {
-                    step: '04',
+                    step: '4',
                     title: 'Earn & Grow',
                     description: 'Complete appointments, get paid securely, and build your client base.',
-                    icon: '💰',
-                    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop'
+                    icon: '💰'
                   }
                 ].map((item, index) => (
                   <div key={index} className="card card-hover p-6 text-center animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
-                    <div className="relative mb-6">
-                      <img 
-                        src={item.image} 
-                        alt={item.title}
-                        className="w-full h-48 object-cover rounded-lg mb-4"
-                      />
-                      <div className="absolute top-4 left-4 bg-amber-500 text-black text-lg font-bold px-3 py-1 rounded-full">
+                    <div className="mb-6">
+                      <div className="bg-white text-black text-lg font-bold px-3 py-1 rounded-full inline-block mb-4">
                         {item.step}
                       </div>
                     </div>
@@ -188,7 +170,7 @@ export default function HowItWorks() {
       )}
 
       {/* Features Section */}
-      <section className="py-24 border-t border-gray-800">
+      <section className="py-24 bg-surface">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
@@ -245,7 +227,7 @@ export default function HowItWorks() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 border-t border-gray-800">
+      <section className="py-24">
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
@@ -291,7 +273,7 @@ export default function HowItWorks() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 border-t border-gray-800">
+      <section className="py-24 bg-surface">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="display text-4xl md:text-5xl text-white mb-6">

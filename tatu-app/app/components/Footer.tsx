@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-black border-t border-gray-800 text-white">
+    <footer className="bg-black border-t text-white" style={{borderColor: '#171717'}}>
       <div className="container py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
@@ -90,7 +90,7 @@ export default function Footer() {
         </div>
 
         {/* Social Links */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
+                  <div className="border-t mt-12 pt-8" style={{borderColor: '#171717'}}>
           <div className="flex justify-center space-x-6 mb-8">
             <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Instagram">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm">
+                  <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center text-sm" style={{borderColor: '#171717'}}>
           <p className="text-gray-400">
             © 2024 TATU. All rights reserved.
           </p>

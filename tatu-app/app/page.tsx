@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import TattooBackgroundAnimation from './components/TattooLineAnimation'
+import TattooBackgroundCycler from './components/TattooBackgroundCycler'
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -11,8 +11,8 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section - Clean and Minimal */}
       <section className="min-h-screen flex items-center justify-center relative">
-        {/* Tattoo Line Animation Background */}
-        <TattooBackgroundAnimation />
+        {/* Cycling Tattoo Background */}
+        <TattooBackgroundCycler />
         
         {/* Subtle texture overlay */}
         <div 
@@ -25,31 +25,22 @@ export default function Home() {
         />
         
         <div className="container relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Logo */}
-            <div className="relative mx-auto mb-12 animate-fade-in" style={{ maxWidth: '200px', width: '60%' }}>
-              <img 
-                src="/tatu-logo.png" 
-                alt="TATU Logo" 
-                className="w-full h-auto filter brightness-0 invert"
-                style={{ filter: 'brightness(0) invert(1)' }}
-              />
-            </div>
-            
+          {/* Main Content - Left Side */}
+          <div className="w-1/2 pt-16 text-left">
             {/* Main Headline */}
-            <h1 className="display text-4xl md:text-6xl lg:text-7xl text-white mb-6 animate-fade-in delay-100">
+            <h1 className="display text-3xl md:text-5xl lg:text-6xl text-white mb-6 animate-fade-in delay-100">
               Professional Tattoo
               <br />
               Artist Marketplace
             </h1>
             
             {/* Description */}
-            <p className="body text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto animate-fade-in delay-200">
+            <p className="body text-lg md:text-xl text-gray-400 mb-12 max-w-lg animate-fade-in delay-200">
               Connect with verified tattoo artists. Browse portfolios. Book appointments with confidence.
             </p>
             
             {/* Search */}
-            <div className="max-w-xl mx-auto mb-12 animate-fade-in delay-300">
+            <div className="max-w-lg mb-12 animate-fade-in delay-300">
               <div className="relative">
                 <input
                   type="text"
@@ -67,8 +58,8 @@ export default function Home() {
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in delay-300">
-              <Link href="/explore" className="btn btn-primary">
+            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in delay-300">
+              <Link href="/explore" className="btn btn-primary btn-glimmer">
                 Browse Artists
               </Link>
               <Link href="/register-artist" className="btn btn-secondary">
@@ -77,7 +68,7 @@ export default function Home() {
             </div>
 
             {/* Quick Navigation */}
-            <div className="flex flex-wrap justify-center gap-4 mt-12 animate-fade-in delay-400">
+            <div className="flex flex-wrap gap-4 mt-12 animate-fade-in delay-400">
               <Link href="/how-it-works" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
                 How It Works
               </Link>
@@ -92,10 +83,22 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Logo - Bottom Center */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+          <div className="relative mx-auto animate-fade-in" style={{ maxWidth: '200px', width: '60%' }}>
+            <img 
+              src="/tatu-logo.png" 
+              alt="TATU Logo" 
+              className="w-full h-auto filter brightness-0 invert"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
+          </div>
+        </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 border-t border-gray-800">
+      <section className="py-16 bg-surface">
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="animate-fade-in">
@@ -132,9 +135,9 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="card p-8 text-center card-hover">
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-6">
-                <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <h3 className="headline text-xl text-white mb-4">Verified Artists</h3>
@@ -144,9 +147,9 @@ export default function Home() {
             </div>
 
             <div className="card p-8 text-center card-hover">
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-6">
-                <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              <div className="flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
               <h3 className="headline text-xl text-white mb-4">Secure Payments</h3>
@@ -156,9 +159,9 @@ export default function Home() {
             </div>
 
             <div className="card p-8 text-center card-hover">
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-6">
-                <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              <div className="flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
               </div>
               <h3 className="headline text-xl text-white mb-4">Quality Guarantee</h3>
@@ -171,7 +174,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 border-t border-gray-800">
+      <section className="py-20 bg-surface">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="display text-3xl md:text-4xl text-white mb-6">

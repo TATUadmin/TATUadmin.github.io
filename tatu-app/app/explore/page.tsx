@@ -94,10 +94,10 @@ export default function ExplorePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black pt-20">
-      <div className="container">
-        {/* Header */}
-        <div className="py-12">
+    <div className="min-h-screen bg-black">
+      {/* Header Section */}
+      <section className="pt-20 pb-12">
+        <div className="container">
           <h1 className="display text-4xl md:text-5xl text-white mb-4">
             Browse Artists
           </h1>
@@ -105,30 +105,34 @@ export default function ExplorePage() {
             Discover verified tattoo artists from around the world. Browse portfolios, read reviews, and book your next session.
           </p>
         </div>
+      </section>
 
-        {/* Search and Filters */}
-        <div className="mb-12">
+      {/* Search and Filters Section */}
+      <section className="py-12 bg-surface">
+        <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             {/* Search */}
             <div className="md:col-span-2 relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
               <input
                 type="text"
                 placeholder="Search artists, styles, or keywords..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="input pl-10"
+                className="input pr-4"
+                style={{paddingLeft: '3.5rem'}}
               />
             </div>
 
             {/* Location Filter */}
             <div className="relative">
-              <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <MapPinIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
               <select
                 value={locationFilter}
                 onChange={(e) => setLocationFilter(e.target.value)}
-                className="input pl-10 appearance-none"
+                className="input pr-4 appearance-none"
+                style={{paddingLeft: '3.5rem'}}
               >
                 <option value="">All Locations</option>
                 <option value="new-york">New York</option>
@@ -180,9 +184,11 @@ export default function ExplorePage() {
             </button>
           </div>
         </div>
+      </section>
 
-        {/* Results */}
-        <div className="pb-20">
+      {/* Results Section */}
+      <section className="py-20">
+        <div className="container">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
@@ -262,7 +268,7 @@ export default function ExplorePage() {
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-gray-800">
+                    <div className="mt-4 pt-4 border-t" style={{borderColor: '#171717'}}>
                       <Link
                         href={`/artist/${artist.id}`}
                         className="btn btn-secondary w-full text-sm"
@@ -293,7 +299,7 @@ export default function ExplorePage() {
             </>
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
 } 

@@ -42,29 +42,23 @@ export default function AboutPage() {
 
   const team = [
     {
-      name: 'Sarah Chen',
+      name: 'Kelso Norden',
       role: 'CEO & Co-Founder',
       bio: 'Former tattoo artist with 15+ years in the industry. Passionate about supporting artists and connecting them with clients.',
-      image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face'
+      image: '/Kelso Headshot.jpg'
     },
     {
-      name: 'Marcus Rodriguez',
+      name: 'Pedro Perin',
       role: 'CTO & Co-Founder',
       bio: 'Tech entrepreneur with expertise in marketplace platforms. Believes technology can enhance human connections.',
-      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face'
-    },
-    {
-      name: 'Alex Kim',
-      role: 'Head of Artist Relations',
-      bio: 'Former gallery curator specializing in contemporary art. Dedicated to showcasing diverse artistic voices.',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face'
+      image: '/Profile Pic BW.jpg'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
-      <section className="py-24 border-b border-gray-800">
+      <section className="py-24">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="display text-5xl md:text-6xl text-white mb-6">
@@ -78,12 +72,12 @@ export default function AboutPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gray-800">
+      <section className="py-16 bg-surface">
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="display text-3xl md:text-4xl text-amber-500 mb-2">{stat.number}</div>
+                <div className="display text-3xl md:text-4xl text-white mb-2">{stat.number}</div>
                 <div className="headline text-lg text-white mb-1">{stat.label}</div>
                 <div className="body text-sm text-gray-300">{stat.description}</div>
               </div>
@@ -104,8 +98,8 @@ export default function AboutPage() {
                   onClick={() => setActiveSection(section.id)}
                   className={`px-6 py-3 rounded-lg font-medium transition-all ${
                     activeSection === section.id
-                      ? 'bg-amber-500 text-black'
-                      : 'bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700'
+                      ? 'bg-white text-black'
+                      : 'bg-surface-2 text-gray-300 hover:text-white hover:bg-surface-3'
                   }`}
                 >
                   {section.icon} {section.title}
@@ -133,7 +127,7 @@ export default function AboutPage() {
       </section>
 
       {/* Team Section */}
-      <section className="py-24 bg-gray-800">
+      <section className="py-24 bg-surface">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
@@ -145,18 +139,18 @@ export default function AboutPage() {
               </p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {team.map((member, index) => (
                 <div key={index} className="text-center">
                   <div className="relative mb-6">
                     <img 
                       src={member.image} 
                       alt={member.name}
-                      className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-gray-700"
+                      className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-gray-600"
                     />
                   </div>
                   <h3 className="headline text-xl text-white mb-2">{member.name}</h3>
-                  <p className="label text-amber-500 mb-3">{member.role}</p>
+                  <p className="label text-gray-300 mb-3">{member.role}</p>
                   <p className="body text-gray-300 text-sm leading-relaxed">{member.bio}</p>
                 </div>
               ))}
