@@ -1,0 +1,89 @@
+{
+  "name": "TATU - Tattoo Artist Discovery & Booking",
+  "short_name": "TATU",
+  "description": "Discover talented tattoo artists, book appointments, and manage your tattoo journey",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["lifestyle", "health", "beauty"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile-1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot-mobile-2.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find Artists",
+      "short_name": "Search",
+      "description": "Search for tattoo artists in your area",
+      "url": "/search",
+      "icons": [
+        {
+          "src": "/shortcut-search.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "My Appointments",
+      "short_name": "Appointments",
+      "description": "View and manage your appointments",
+      "url": "/dashboard/appointments",
+      "icons": [
+        {
+          "src": "/shortcut-calendar.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "My Portfolio",
+      "short_name": "Portfolio",
+      "description": "Manage your tattoo portfolio",
+      "url": "/dashboard/portfolio",
+      "icons": [
+        {
+          "src": "/shortcut-portfolio.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}

@@ -1,240 +1,302 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { useState } from 'react'
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
-export default function StylesPage() {
-  const [hoveredStyle, setHoveredStyle] = useState<string | null>(null)
+interface TattooStyle {
+  id: string;
+  name: string;
+  description: string;
+  characteristics: string[];
+  examples: string[];
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  popularity: 'High' | 'Medium' | 'Low';
+  image: string;
+  color: string;
+}
 
-  const styles = [
-    {
-      id: 'industrial',
-      name: 'Industrial',
-      description: 'Bold, powerful fonts like Bebas Neue and Oswald with strong geometric layouts',
-      fonts: ['Bebas Neue', 'Oswald'],
-      colors: ['Black', 'White', 'Gray'],
-      vibe: 'Strong • Bold • Modern • Powerful',
-      href: '/styles/industrial'
-    },
-    {
-      id: 'futuristic',
-      name: 'Futuristic',
-      description: 'Sci-fi aesthetic with Orbitron font, neon effects, and digital styling',
-      fonts: ['Orbitron'],
-      colors: ['Cyan', 'Purple', 'Green', 'Dark Gray'],
-      vibe: 'Tech • Neon • Digital • Advanced',
-      href: '/styles/futuristic'
-    },
-    {
-      id: 'grunge',
-      name: 'Grunge / Street',
-      description: 'Raw street art style with Bangers and Permanent Marker fonts',
-      fonts: ['Bangers', 'Permanent Marker'],
-      colors: ['Red', 'Yellow', 'Black', 'White'],
-      vibe: 'Raw • Street • Rebellious • Artistic',
-      href: '/styles/grunge'
-    },
-    {
-      id: 'classic',
-      name: 'Classic / Traditional',
-      description: 'Vintage tattoo parlor aesthetic with Playfair Display and Crimson Text fonts',
-      fonts: ['Playfair Display', 'Crimson Text'],
-      colors: ['Amber', 'Cream', 'Brown', 'Gold'],
-      vibe: 'Timeless • Elegant • Vintage • Traditional',
-      href: '/styles/classic'
-    },
-    {
-      id: 'minimalist',
-      name: 'Minimalist / Modern',
-      description: 'Clean, sophisticated design with Inter font and modern layouts',
-      fonts: ['Inter'],
-      colors: ['White', 'Black', 'Gray'],
-      vibe: 'Clean • Refined • Contemporary • Minimal',
-      href: '/styles/minimalist'
-    },
-    {
-      id: 'gothic',
-      name: 'Gothic / Dark',
-      description: 'Dark, mystical aesthetic with Creepster and Nosifer fonts',
-      fonts: ['Creepster', 'Nosifer'],
-      colors: ['Purple', 'Red', 'Black', 'Dark Gray'],
-      vibe: 'Dark • Mystical • Gothic • Dramatic',
-      href: '/styles/gothic'
+const tattooStyles: TattooStyle[] = [
+  {
+    id: 'traditional',
+    name: 'Traditional (American)',
+    description: 'Bold, colorful designs with thick outlines and limited color palette. Classic nautical and patriotic themes.',
+    characteristics: ['Bold outlines', 'Limited color palette', 'Classic themes', 'High contrast'],
+    examples: ['Eagles', 'Roses', 'Anchors', 'Skulls'],
+    difficulty: 'Beginner',
+    popularity: 'High',
+    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+    color: 'text-red-500'
+  },
+  {
+    id: 'realism',
+    name: 'Realism',
+    description: 'Photorealistic tattoos that look like actual photographs or paintings.',
+    characteristics: ['Photorealistic', 'Detailed shading', 'Natural colors', 'Complex gradients'],
+    examples: ['Portraits', 'Animals', 'Landscapes', 'Objects'],
+    difficulty: 'Advanced',
+    popularity: 'High',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
+    color: 'text-blue-500'
+  },
+  {
+    id: 'watercolor',
+    name: 'Watercolor',
+    description: 'Soft, flowing designs that mimic watercolor paintings with splashes and bleeds.',
+    characteristics: ['Soft edges', 'Flowing colors', 'Bleeding effects', 'Pastel tones'],
+    examples: ['Abstract art', 'Nature scenes', 'Flowers', 'Landscapes'],
+    difficulty: 'Intermediate',
+    popularity: 'Medium',
+    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=300&fit=crop',
+    color: 'text-purple-500'
+  },
+  {
+    id: 'minimalist',
+    name: 'Minimalist',
+    description: 'Simple, clean designs with minimal detail and often single-line work.',
+    characteristics: ['Simple lines', 'Minimal detail', 'Clean aesthetic', 'Geometric shapes'],
+    examples: ['Single lines', 'Geometric patterns', 'Simple symbols', 'Minimal text'],
+    difficulty: 'Beginner',
+    popularity: 'High',
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=300&fit=crop',
+    color: 'text-gray-500'
+  },
+  {
+    id: 'japanese',
+    name: 'Japanese (Irezumi)',
+    description: 'Traditional Japanese art with bold colors, detailed backgrounds, and cultural symbolism.',
+    characteristics: ['Bold colors', 'Detailed backgrounds', 'Cultural themes', 'Large scale'],
+    examples: ['Dragons', 'Koi fish', 'Cherry blossoms', 'Samurai'],
+    difficulty: 'Advanced',
+    popularity: 'Medium',
+    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+    color: 'text-orange-500'
+  },
+  {
+    id: 'blackwork',
+    name: 'Blackwork',
+    description: 'Bold, solid black designs often geometric or abstract in nature.',
+    characteristics: ['Solid black', 'Geometric shapes', 'High contrast', 'Bold lines'],
+    examples: ['Geometric patterns', 'Abstract designs', 'Tribal motifs', 'Solid shapes'],
+    difficulty: 'Intermediate',
+    popularity: 'Medium',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
+    color: 'text-black'
+  },
+  {
+    id: 'neo-traditional',
+    name: 'Neo-Traditional',
+    description: 'Modern take on traditional style with more colors, depth, and contemporary themes.',
+    characteristics: ['Modern themes', 'Enhanced depth', 'Expanded color palette', 'Contemporary subjects'],
+    examples: ['Pop culture', 'Modern symbols', 'Enhanced traditional', 'Contemporary art'],
+    difficulty: 'Intermediate',
+    popularity: 'High',
+    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=300&fit=crop',
+    color: 'text-green-500'
+  },
+  {
+    id: 'tribal',
+    name: 'Tribal',
+    description: 'Bold, black designs inspired by indigenous cultures and ancient tribal art.',
+    characteristics: ['Bold black lines', 'Cultural inspiration', 'Geometric patterns', 'Symbolic meaning'],
+    examples: ['Cultural symbols', 'Geometric patterns', 'Ancient motifs', 'Symbolic designs'],
+    difficulty: 'Beginner',
+    popularity: 'Low',
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=300&fit=crop',
+    color: 'text-yellow-500'
+  }
+];
+
+export default function TattooStylesPage() {
+  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
+  const [popularityFilter, setPopularityFilter] = useState<string>('all');
+
+  const filteredStyles = tattooStyles.filter(style => {
+    if (difficultyFilter !== 'all' && style.difficulty !== difficultyFilter) return false;
+    if (popularityFilter !== 'all' && style.popularity !== popularityFilter) return false;
+    return true;
+  });
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Beginner': return 'text-green-500';
+      case 'Intermediate': return 'text-yellow-500';
+      case 'Advanced': return 'text-red-500';
+      default: return 'text-gray-500';
     }
-  ]
+  };
+
+  const getPopularityColor = (popularity: string) => {
+    switch (popularity) {
+      case 'High': return 'text-green-500';
+      case 'Medium': return 'text-yellow-500';
+      case 'Low': return 'text-red-500';
+      default: return 'text-gray-500';
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container py-8">
-          <Link href="/" className="text-gray-600 hover:text-black mb-4 inline-block">
-            ← Back to Home
-          </Link>
-          <h1 className="font-playfair text-4xl md:text-5xl font-bold text-black mb-4">
-            TATU Style Variants
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl">
-            Explore different aesthetic approaches for the TATU tattoo marketplace. Each style uses different fonts and design elements to appeal to various tattoo culture segments.
-          </p>
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Hero Section */}
+      <section className="py-24 border-b border-gray-800">
+        <div className="container">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="display text-5xl md:text-6xl text-white mb-6">
+              Tattoo Styles Guide
+            </h1>
+            <p className="body text-xl text-gray-300 max-w-2xl mx-auto">
+              Discover different tattoo styles, understand their characteristics, and find the perfect style for your next tattoo.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Style Grid */}
-      <div className="container py-12">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {styles.map((style) => (
-            <Link
-              key={style.id}
-              href={style.href}
-              className="group block"
-              onMouseEnter={() => setHoveredStyle(style.id)}
-              onMouseLeave={() => setHoveredStyle(null)}
-            >
-              <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group-hover:border-gray-300">
-                {/* Preview Header */}
-                <div className={`h-32 flex items-center justify-center text-white font-bold text-2xl transition-all duration-300 ${
-                  style.id === 'industrial' ? 'bg-black font-bebas tracking-[0.3em]' :
-                  style.id === 'futuristic' ? 'bg-gray-950 font-orbitron tracking-[0.2em]' :
-                  style.id === 'grunge' ? 'bg-gray-900 font-bangers tracking-wider transform -rotate-1' :
-                  style.id === 'classic' ? 'bg-amber-800 font-playfair tracking-[0.2em]' :
-                  style.id === 'minimalist' ? 'bg-white text-black font-inter tracking-[0.3em] font-light' :
-                  style.id === 'gothic' ? 'bg-gray-950 font-creepster tracking-[0.1em]' :
-                  'bg-gray-900 font-bangers tracking-wider transform -rotate-1'
-                } ${hoveredStyle === style.id ? 'scale-105' : ''}`}>
-                  {style.id === 'futuristic' ? (
-                    <span style={{
-                      textShadow: '0 0 20px cyan, 0 0 40px cyan',
-                      filter: 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.5))'
-                    }}>
-                      TATU
-                    </span>
-                  ) : style.id === 'grunge' ? (
-                    <span style={{
-                      textShadow: '4px 4px 0px #dc2626, 8px 8px 0px #991b1b',
-                      filter: 'drop-shadow(0 0 10px rgba(220, 38, 38, 0.5))'
-                    }}>
-                      TATU
-                    </span>
-                  ) : style.id === 'classic' ? (
-                    <span style={{
-                      textShadow: '2px 2px 4px rgba(120, 53, 15, 0.8)',
-                      color: '#fefdf7'
-                    }}>
-                      TATU
-                    </span>
-                  ) : style.id === 'minimalist' ? (
-                    <span className="text-black">
-                      TATU
-                    </span>
-                  ) : style.id === 'gothic' ? (
-                    <span style={{
-                      textShadow: '0 0 20px rgba(168, 85, 247, 0.6), 0 0 40px rgba(168, 85, 247, 0.4)',
-                      color: '#a855f7'
-                    }}>
-                      TATU
-                    </span>
-                  ) : (
-                    <span className="text-shadow-lg">TATU</span>
-                  )}
-                </div>
+      {/* Filters */}
+      <section className="py-12 bg-gray-800">
+        <div className="container">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-wrap gap-4 justify-center">
+              <select
+                value={difficultyFilter}
+                onChange={(e) => setDifficultyFilter(e.target.value)}
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:ring-2 focus:ring-amber-500"
+              >
+                <option value="all">All Difficulties</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
 
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="font-playfair text-2xl font-bold text-black mb-2">
-                    {style.name}
-                  </h3>
-                  <p className="text-gray-600 mb-4 leading-relaxed">
-                    {style.description}
-                  </p>
-
-                  {/* Fonts */}
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-2">FONTS:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {style.fonts.map((font) => (
-                        <span key={font} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          {font}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Colors */}
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-2">COLORS:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {style.colors.map((color) => (
-                        <span key={color} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          {color}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Vibe */}
-                  <div className="mb-6">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-2">VIBE:</h4>
-                    <p className="text-gray-600 text-sm font-medium">{style.vibe}</p>
-                  </div>
-
-                  {/* CTA */}
-                  <div className="flex items-center justify-between">
-                    <span className="btn-primary group-hover:bg-gray-800 transition-colors duration-300">
-                      View Style →
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Additional Info */}
-        <div className="mt-16 bg-white rounded-xl p-8 border border-gray-200">
-          <h2 className="font-playfair text-3xl font-bold text-black mb-4">
-            Font Psychology in Tattoo Culture
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 text-gray-600">
-            <div>
-              <h3 className="font-semibold text-black mb-2">Industrial Style</h3>
-              <p className="text-sm leading-relaxed">
-                Appeals to those seeking bold, statement pieces. Strong geometric fonts convey reliability and power, perfect for traditional and blackwork styles.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-black mb-2">Futuristic Style</h3>
-              <p className="text-sm leading-relaxed">
-                Attracts tech-savvy clients and those interested in cyberpunk, geometric, and avant-garde tattoo styles. The digital aesthetic suggests innovation.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-black mb-2">Grunge Style</h3>
-              <p className="text-sm leading-relaxed">
-                Resonates with traditional tattoo culture, street art enthusiasts, and those seeking authentic, raw artistic expression with rebellious energy.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-black mb-2">Classic Style</h3>
-              <p className="text-sm leading-relaxed">
-                Appeals to clients who appreciate timeless elegance and traditional tattoo parlor atmosphere. Perfect for vintage americana and old-school designs.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-black mb-2">Minimalist Style</h3>
-              <p className="text-sm leading-relaxed">
-                Attracts modern professionals and those interested in fine line work, geometric designs, and contemporary minimalist tattoo styles.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-black mb-2">Gothic Style</h3>
-              <p className="text-sm leading-relaxed">
-                Resonates with those drawn to dark art, occult symbolism, and mystical designs. Appeals to gothic and alternative culture enthusiasts.
-              </p>
+              <select
+                value={popularityFilter}
+                onChange={(e) => setPopularityFilter(e.target.value)}
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:ring-2 focus:ring-amber-500"
+              >
+                <option value="all">All Popularity</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Styles Grid */}
+      <section className="py-24">
+        <div className="container">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            {filteredStyles.map((style) => (
+              <div
+                key={style.id}
+                className={`bg-gray-800 rounded-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer ${
+                  selectedStyle === style.id ? 'ring-2 ring-amber-500' : ''
+                }`}
+                onClick={() => setSelectedStyle(selectedStyle === style.id ? null : style.id)}
+              >
+                {/* Style Image */}
+                <div className="relative h-48">
+                  <Image
+                    src={style.image}
+                    alt={style.name}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40" />
+                  <div className="absolute bottom-4 left-4">
+                    <h3 className={`text-xl font-bold ${style.color}`}>{style.name}</h3>
+                  </div>
+                </div>
+
+                {/* Style Info */}
+                <div className="p-6">
+                  <p className="text-gray-300 mb-4 line-clamp-3">{style.description}</p>
+                  
+                  {/* Difficulty and Popularity */}
+                  <div className="flex justify-between items-center mb-4">
+                    <span className={`text-sm font-medium ${getDifficultyColor(style.difficulty)}`}>
+                      {style.difficulty}
+                    </span>
+                    <span className={`text-sm font-medium ${getPopularityColor(style.popularity)}`}>
+                      {style.popularity} Popularity
+                    </span>
+                  </div>
+
+                  {/* Characteristics */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Characteristics:</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {style.characteristics.slice(0, 3).map((char, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full"
+                        >
+                          {char}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Examples */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Examples:</h4>
+                    <p className="text-sm text-gray-300">{style.examples.join(', ')}</p>
+                  </div>
+
+                  {/* Expandable Content */}
+                  {selectedStyle === style.id && (
+                    <div className="mt-4 pt-4 border-t border-gray-700">
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-gray-400 mb-2">All Characteristics:</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {style.characteristics.map((char, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full"
+                            >
+                              {char}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <Link
+                        href={`/explore?style=${style.name.toLowerCase()}`}
+                        className="inline-block bg-amber-500 text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-400 transition-colors"
+                      >
+                        Find {style.name} Artists
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 bg-gray-800">
+        <div className="container">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="display text-4xl md:text-5xl text-white mb-6">
+              Ready to Find Your Artist?
+            </h2>
+            <p className="body text-xl text-gray-300 mb-8">
+              Now that you understand the different styles, find the perfect artist to bring your vision to life.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/explore" className="btn btn-primary">
+                Browse All Artists
+              </Link>
+              <Link href="/how-it-works" className="btn btn-ghost">
+                Learn How It Works
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-  )
+  );
 } 

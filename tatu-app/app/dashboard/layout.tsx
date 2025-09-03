@@ -29,6 +29,8 @@ export default function DashboardLayout({
       { name: 'My Profile', href: '/dashboard' },
       { name: 'My Portfolio', href: '/dashboard/portfolio' },
       { name: 'Appointments', href: '/dashboard/appointments' },
+      { name: 'Communications', href: '/dashboard/communications' },
+      { name: 'Analytics', href: '/dashboard/analytics' },
       { name: 'Reviews', href: '/dashboard/reviews' },
     ],
     SHOP_OWNER: [
@@ -36,6 +38,8 @@ export default function DashboardLayout({
       { name: 'My Shops', href: '/dashboard/shops' },
       { name: 'Artists', href: '/dashboard/artists' },
       { name: 'Appointments', href: '/dashboard/appointments' },
+      { name: 'Communications', href: '/dashboard/communications' },
+      { name: 'Analytics', href: '/dashboard/analytics' },
       { name: 'Reviews', href: '/dashboard/reviews' },
     ],
   }

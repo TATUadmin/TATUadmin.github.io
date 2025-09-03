@@ -43,7 +43,7 @@ export async function GET() {
     const reminderPromises = appointments.map(async (appointment) => {
       try {
         await sendAppointmentReminder({
-          appointmentTitle: appointment.title,
+          appointmentTitle: appointment.service.name,
           shopName: appointment.shop.name,
           artistName: appointment.artist.name || 'Your Artist',
           clientName: appointment.client.name || 'Valued Client',
@@ -80,7 +80,5 @@ export async function GET() {
 }
 
 // Add Vercel Cron configuration
-export const config = {
-  runtime: 'edge',
-  regions: ['iad1'], // Use the region closest to your users
-} 
+export const runtime = 'edge'
+export const preferredRegion = ['iad1'] // Use the region closest to your users 

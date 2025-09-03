@@ -14,7 +14,24 @@ import { PortfolioItem, Collection, FilterOptions } from '@/app/types/portfolio'
 import PortfolioFilters from '@/app/components/PortfolioFilters'
 import PortfolioAnalytics from '@/app/components/PortfolioAnalytics'
 import Link from 'next/link'
-import { PlusIcon, FolderIcon, PhotoIcon, PencilIcon, TrashIcon, EyeIcon, TagIcon } from '@heroicons/react/24/outline'
+import { 
+  PlusIcon, 
+  FolderIcon, 
+  PhotoIcon, 
+  PencilIcon, 
+  TrashIcon, 
+  EyeIcon, 
+  TagIcon,
+  ChartBarIcon,
+  StarIcon,
+  HeartIcon,
+  CalendarIcon,
+  CurrencyDollarIcon,
+  UsersIcon,
+  SparklesIcon,
+  ArrowUpIcon,
+  ArrowDownIcon
+} from '@heroicons/react/24/outline'
 
 interface PortfolioCollection {
   id: string
@@ -22,6 +39,16 @@ interface PortfolioCollection {
   description: string | null
   coverImage: string | null
   itemCount: number
+}
+
+interface PortfolioStats {
+  totalItems: number
+  totalViews: number
+  totalLikes: number
+  featuredItems: number
+  recentUploads: number
+  popularStyles: { style: string; count: number }[]
+  monthlyGrowth: number
 }
 
 const TATTOO_STYLES = [
@@ -35,7 +62,7 @@ export default function PortfolioPage() {
   const { data: session } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [activeTab, setActiveTab] = useState<'items' | 'analytics'>('items')
+  const [activeTab, setActiveTab] = useState<'overview' | 'items' | 'collections' | 'analytics'>('overview')
   const [items, setItems] = useState<PortfolioItem[]>([])
   const [collections, setCollections] = useState<PortfolioCollection[]>([])
   const [isAddingNew, setIsAddingNew] = useState(false)
@@ -48,7 +75,6 @@ export default function PortfolioPage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FilterOptions>(() => {
-    // Try to load filters from localStorage
     if (typeof window !== 'undefined') {
       const savedFilters = localStorage.getItem('portfolioFilters')
       if (savedFilters) {
@@ -60,7 +86,6 @@ export default function PortfolioPage() {
       }
     }
     
-    // Default filters
     return {
       style: searchParams.get('style') || '',
       tags: searchParams.get('tags')?.split(',').filter(Boolean) || [],
@@ -100,6 +125,15 @@ export default function PortfolioPage() {
     style: '',
     image: null as File | null
   })
+  const [portfolioStats, setPortfolioStats] = useState<PortfolioStats>({
+    totalItems: 0,
+    totalViews: 0,
+    totalLikes: 0,
+    featuredItems: 0,
+    recentUploads: 0,
+    popularStyles: [],
+    monthlyGrowth: 0
+  })
 
   // Save filters to localStorage when they change
   useEffect(() => {
@@ -134,6 +168,7 @@ export default function PortfolioPage() {
     if (session?.user) {
       fetchCollections()
       fetchFeaturedItems()
+      fetchPortfolioStats()
     }
   }, [session])
 
@@ -160,6 +195,29 @@ export default function PortfolioPage() {
       console.error('Error fetching featured items:', error)
       toast.error('Failed to load featured items')
       setIsLoading(false)
+    }
+  }
+
+  const fetchPortfolioStats = async () => {
+    try {
+      // Mock stats for now - in real app, this would come from API
+      setPortfolioStats({
+        totalItems: 24,
+        totalViews: 1247,
+        totalLikes: 89,
+        featuredItems: 6,
+        recentUploads: 3,
+        popularStyles: [
+          { style: 'Minimalist', count: 8 },
+          { style: 'Traditional', count: 6 },
+          { style: 'Watercolor', count: 4 },
+          { style: 'Realism', count: 3 },
+          { style: 'Geometric', count: 3 }
+        ],
+        monthlyGrowth: 12.5
+      })
+    } catch (error) {
+      console.error('Error fetching portfolio stats:', error)
     }
   }
 
@@ -357,7 +415,7 @@ export default function PortfolioPage() {
 
         case 'move':
           setIsMoveModalOpen(true)
-          return // Exit early as the actual move will happen in handleMove
+          return
 
         case 'feature':
           await Promise.all(
@@ -387,7 +445,6 @@ export default function PortfolioPage() {
     try {
       const collectionId = targetCollectionId === 'none' ? null : targetCollectionId
 
-      // Update all selected items with new collection ID
       await Promise.all(
         selectedItems.map(id =>
           fetch(`/api/portfolio/${id}`, {
@@ -434,10 +491,8 @@ export default function PortfolioPage() {
     const [removed] = itemsCopy.splice(sourceIndex, 1)
     itemsCopy.splice(destinationIndex, 0, removed)
 
-    // Update the UI immediately
     setItems(itemsCopy)
 
-    // Send the reorder request to the server
     try {
       const response = await fetch('/api/portfolio/reorder', {
         method: 'PUT',
@@ -459,7 +514,6 @@ export default function PortfolioPage() {
     } catch (error) {
       console.error('Error reordering items:', error)
       toast.error('Failed to reorder items')
-      // Revert the UI if the server request fails
       fetchPortfolioItems()
     }
   }
@@ -472,7 +526,6 @@ export default function PortfolioPage() {
 
     setIsUploading(true)
     try {
-      // First upload the image
       const formData = new FormData()
       formData.append('file', uploadData.image)
       formData.append('type', 'portfolio')
@@ -488,7 +541,6 @@ export default function PortfolioPage() {
 
       const { url: imageUrl } = await uploadResponse.json()
 
-      // Then create the portfolio item
       const portfolioResponse = await fetch('/api/portfolio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -505,6 +557,7 @@ export default function PortfolioPage() {
         setShowUploadModal(false)
         setUploadData({ title: '', description: '', style: '', image: null })
         fetchPortfolioItems()
+        fetchPortfolioStats()
       } else {
         throw new Error('Failed to create portfolio item')
       }
@@ -544,7 +597,7 @@ export default function PortfolioPage() {
             </div>
             <button
               onClick={() => setShowUploadModal(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-md font-medium transition-colors inline-flex items-center"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center shadow-lg"
             >
               <PlusIcon className="h-5 w-5 mr-2" />
               Add New Work
@@ -553,63 +606,289 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      {/* Portfolio Grid */}
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4">
+          <nav className="flex space-x-8">
+            {[
+              { id: 'overview', label: 'Overview', icon: <SparklesIcon className="h-5 w-5" /> },
+              { id: 'items', label: 'Portfolio Items', icon: <PhotoIcon className="h-5 w-5" /> },
+              { id: 'collections', label: 'Collections', icon: <FolderIcon className="h-5 w-5" /> },
+              { id: 'analytics', label: 'Analytics', icon: <ChartBarIcon className="h-5 w-5" /> }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {items.length === 0 ? (
-          <div className="text-center py-12">
-            <PhotoIcon className="h-24 w-24 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-medium text-gray-900 mb-2">No portfolio items yet</h3>
-            <p className="text-gray-600 mb-6">Start building your portfolio by uploading your best work</p>
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-md font-medium transition-colors"
-            >
-              Upload Your First Piece
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {items.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group">
-                <div className="relative aspect-square">
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="flex space-x-2">
-                      <button className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors">
-                        <EyeIcon className="h-4 w-4 text-gray-700" />
-                      </button>
-                      <button className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors">
-                        <PencilIcon className="h-4 w-4 text-gray-700" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(item.id)}
-                        className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
-                      >
-                        <TrashIcon className="h-4 w-4 text-red-600" />
-                      </button>
-                    </div>
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <PhotoIcon className="h-6 w-6 text-blue-600" />
                   </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-900 mb-1">{item.title}</h3>
-                  <div className="flex items-center text-sm text-gray-500 mb-2">
-                    <TagIcon className="h-4 w-4 mr-1" />
-                    {item.style}
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total Items</p>
+                    <p className="text-2xl font-bold text-gray-900">{portfolioStats.totalItems}</p>
                   </div>
-                  {item.description && (
-                    <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-                  )}
-                  <p className="text-xs text-gray-400 mt-2">
-                    {new Date(item.createdAt).toLocaleDateString()}
-                  </p>
                 </div>
               </div>
-            ))}
+
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <EyeIcon className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total Views</p>
+                    <p className="text-2xl font-bold text-gray-900">{portfolioStats.totalViews.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-red-100 rounded-lg">
+                    <HeartIcon className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total Likes</p>
+                    <p className="text-2xl font-bold text-gray-900">{portfolioStats.totalLikes}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <StarIcon className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Featured Items</p>
+                    <p className="text-2xl font-bold text-gray-900">{portfolioStats.featuredItems}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Growth & Popular Styles */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Growth</h3>
+                <div className="flex items-center">
+                  <div className={`p-2 rounded-lg ${portfolioStats.monthlyGrowth >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                    {portfolioStats.monthlyGrowth >= 0 ? (
+                      <ArrowUpIcon className="h-6 w-6 text-green-600" />
+                    ) : (
+                      <ArrowDownIcon className="h-6 w-6 text-red-600" />
+                    )}
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-2xl font-bold text-gray-900">
+                      {portfolioStats.monthlyGrowth >= 0 ? '+' : ''}{portfolioStats.monthlyGrowth}%
+                    </p>
+                    <p className="text-sm text-gray-600">vs last month</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Styles</h3>
+                <div className="space-y-3">
+                  {portfolioStats.popularStyles.slice(0, 5).map((style, index) => (
+                    <div key={style.style} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">{style.style}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-indigo-600 h-2 rounded-full" 
+                            style={{ width: `${(style.count / portfolioStats.totalItems) * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">{style.count}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button
+                  onClick={() => setShowUploadModal(true)}
+                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors group"
+                >
+                  <div className="p-2 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
+                    <PlusIcon className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-medium text-gray-900">Upload New Work</h4>
+                    <p className="text-sm text-gray-500">Add to your portfolio</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('collections')}
+                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors group"
+                >
+                  <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                    <FolderIcon className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-medium text-gray-900">Organize Collections</h4>
+                    <p className="text-sm text-gray-500">Group your work</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('analytics')}
+                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors group"
+                >
+                  <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                    <ChartBarIcon className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-medium text-gray-900">View Analytics</h4>
+                    <p className="text-sm text-gray-500">Track performance</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Portfolio Items Tab */}
+        {activeTab === 'items' && (
+          <div className="space-y-6">
+            {items.length === 0 ? (
+              <div className="text-center py-12">
+                <PhotoIcon className="h-24 w-24 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-900 mb-2">No portfolio items yet</h3>
+                <p className="text-gray-600 mb-6">Start building your portfolio by uploading your best work</p>
+                <button
+                  onClick={() => setShowUploadModal(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                >
+                  Upload Your First Piece
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {items.map((item) => (
+                  <div key={item.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group">
+                    <div className="relative aspect-square">
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <div className="flex space-x-2">
+                          <button className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors">
+                            <EyeIcon className="h-4 w-4 text-gray-700" />
+                          </button>
+                          <button className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors">
+                            <PencilIcon className="h-4 w-4 text-gray-700" />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(item.id)}
+                            className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+                          >
+                            <TrashIcon className="h-4 w-4 text-red-600" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-medium text-gray-900 mb-1">{item.title}</h3>
+                      <div className="flex items-center text-sm text-gray-500 mb-2">
+                        <TagIcon className="h-4 w-4 mr-1" />
+                        {item.style}
+                      </div>
+                      {item.description && (
+                        <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-2">
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Collections Tab */}
+        {activeTab === 'collections' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Portfolio Collections</h2>
+              <button
+                onClick={() => setIsAddingCollection(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                <PlusIcon className="h-4 w-4 mr-2" />
+                New Collection
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {collections.map((collection) => (
+                <div key={collection.id} className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <FolderIcon className="h-6 w-6 text-indigo-600" />
+                    </div>
+                    <span className="text-sm text-gray-500">{collection.itemCount} items</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{collection.name}</h3>
+                  {collection.description && (
+                    <p className="text-gray-600 text-sm mb-4">{collection.description}</p>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                      View Items
+                    </button>
+                    <button className="text-gray-600 hover:text-gray-700 text-sm font-medium">
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Portfolio Analytics</h2>
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <p className="text-gray-600">Analytics dashboard coming soon...</p>
+            </div>
           </div>
         )}
       </div>
@@ -672,7 +951,7 @@ export default function PortfolioPage() {
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file)
+                    if (file) setUploadData(prev => ({ ...prev, image: file }))
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />

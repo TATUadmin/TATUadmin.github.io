@@ -228,6 +228,19 @@ export default function Home() {
                 </span>
               </Link>
             </div>
+
+            {/* Quick Navigation */}
+            <div className="flex flex-wrap justify-center gap-3 mt-8 animate-fade-in delay-400">
+              <Link href="/how-it-works" className="text-sm text-gray-300 hover:text-amber-400 transition-colors px-3 py-1 rounded-full border border-gray-600 hover:border-amber-500">
+                How It Works
+              </Link>
+              <Link href="/about" className="text-sm text-gray-300 hover:text-amber-400 transition-colors px-3 py-1 rounded-full border border-gray-600 hover:border-amber-500">
+                About TATU
+              </Link>
+              <Link href="/styles" className="text-sm text-gray-300 hover:text-amber-400 transition-colors px-3 py-1 rounded-full border border-gray-600 hover:border-amber-500">
+                Tattoo Styles
+              </Link>
+            </div>
           </div>
         </div>
         
@@ -359,9 +372,9 @@ export default function Home() {
                 <p className="label text-gray-300 mb-1">{artist.location}</p>
                 <p className="body text-gray-300 text-sm mb-1">{artist.specialty}</p>
                 <p className="caption text-gray-400 text-xs">{artist.experience}</p>
-                <button className="mt-4 text-amber-500 hover:text-amber-400 text-sm font-medium transition-colors">
+                <Link href={`/artist/${artist.name.toLowerCase().replace(' ', '-')}`} className="mt-4 text-amber-500 hover:text-amber-400 text-sm font-medium transition-colors inline-block">
                   View Portfolio →
-                </button>
+                </Link>
               </div>
             ))}
           </div>
@@ -379,11 +392,17 @@ export default function Home() {
               Join thousands of artists and clients on the world's leading tattoo platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/explore" className="btn btn-primary">
-                Browse Artists
+              <Link
+                href="/search"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
+              >
+                Find Artists
               </Link>
-              <Link href="/register-artist" className="btn btn-ghost">
-                Apply as Artist
+              <Link
+                href="/register-artist"
+                className="bg-white hover:bg-gray-50 text-indigo-600 px-8 py-3 rounded-lg font-semibold text-lg border-2 border-indigo-600 transition-colors"
+              >
+                Join as Artist
               </Link>
             </div>
           </div>
@@ -391,6 +410,40 @@ export default function Home() {
       </section>
       </div>
 
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="relative group">
+          <button className="w-14 h-14 bg-amber-500 hover:bg-amber-600 text-black rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+          
+          {/* Quick Actions Menu */}
+          <div className="absolute bottom-16 right-0 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
+            <div className="bg-gray-800 rounded-lg shadow-xl p-2 space-y-2 min-w-[200px]">
+              <Link href="/explore" className="flex items-center space-x-3 p-3 text-white hover:bg-gray-700 rounded-md transition-colors">
+                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span>Browse Artists</span>
+              </Link>
+              <Link href="/register-artist" className="flex items-center space-x-3 p-3 text-white hover:bg-gray-700 rounded-md transition-colors">
+                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span>Join as Artist</span>
+              </Link>
+              <Link href="/how-it-works" className="flex items-center space-x-3 p-3 text-white hover:bg-gray-700 rounded-md transition-colors">
+                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>How It Works</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
   )
