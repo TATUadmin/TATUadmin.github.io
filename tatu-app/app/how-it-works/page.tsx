@@ -12,13 +12,10 @@ export default function HowItWorks() {
       <section className="py-24">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="display text-5xl md:text-6xl text-white mb-6">
-              How It Works
-            </h1>
-            <p className="body text-xl text-gray-300 max-w-2xl mx-auto">
-              Whether you're looking for the perfect tattoo or building your artist career, 
+            <h1 className="display text-4xl md:text-5xl text-white leading-relaxed">
+              Whether you're looking for the perfect tattoo or building your career as an artist, 
               we've made the process simple and secure.
-            </p>
+            </h1>
           </div>
         </div>
       </section>
@@ -36,7 +33,7 @@ export default function HowItWorks() {
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
-                For Clients
+                I'm a client
               </button>
               <button
                 onClick={() => setActiveTab('artists')}
@@ -46,7 +43,7 @@ export default function HowItWorks() {
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
-                For Artists
+                I'm an artist
               </button>
             </div>
           </div>

@@ -34,7 +34,7 @@ export default function ExplorePage() {
 
   const styles = [
     'Traditional', 'Realism', 'Watercolor', 'Geometric', 'Minimalist',
-    'Japanese', 'Blackwork', 'Neo-Traditional', 'Tribal', 'Portrait'
+    'Japanese', 'Blackwork', 'Neo-Traditional', 'Tribal', 'Portrait', 'Other'
   ]
 
   useEffect(() => {
@@ -128,19 +128,15 @@ export default function ExplorePage() {
             {/* Location Filter */}
             <div className="relative">
               <MapPinIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
-              <select
+              <input
+                type="text"
+                placeholder="Enter location..."
                 value={locationFilter}
                 onChange={(e) => setLocationFilter(e.target.value)}
-                className="input pr-4 appearance-none"
+                onKeyPress={handleKeyPress}
+                className="input pr-4"
                 style={{paddingLeft: '3.5rem'}}
-              >
-                <option value="">All Locations</option>
-                <option value="new-york">New York</option>
-                <option value="los-angeles">Los Angeles</option>
-                <option value="london">London</option>
-                <option value="tokyo">Tokyo</option>
-                <option value="berlin">Berlin</option>
-              </select>
+              />
             </div>
 
             {/* Style Filter */}

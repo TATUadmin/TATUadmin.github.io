@@ -368,7 +368,7 @@ body {
   ) !important;
   color: #111827 !important;
   background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
+  animation: shimmer 6s ease-in-out infinite;
   overflow: hidden;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
@@ -387,7 +387,7 @@ body {
     transparent 100%
   );
   transform: translateX(-100%);
-  animation: glimmerSweep 2s ease-in-out infinite;
+  animation: glimmerSweep 6s ease-in-out infinite;
   animation-delay: 0.3s;
 }
 
