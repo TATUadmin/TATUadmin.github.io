@@ -61,12 +61,9 @@ export default function AboutPage() {
       <section className="py-24">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="display text-5xl md:text-6xl text-white mb-6">
-              About TATU
+            <h1 className="display text-4xl md:text-5xl text-white mb-6">
+              TATU is a professional tattoo artist marketplace. We're building the future of tattoo art discovery and artist-client connections.
             </h1>
-            <p className="body text-xl text-gray-300 max-w-2xl mx-auto">
-              We're building the future of tattoo art discovery and artist-client connections.
-            </p>
           </div>
         </div>
       </section>

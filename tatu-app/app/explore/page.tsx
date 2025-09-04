@@ -26,7 +26,7 @@ export default function ExplorePage() {
   const searchParams = useSearchParams()
   const [artists, setArtists] = useState<Artist[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || searchParams.get('search') || '')
   const [locationFilter, setLocationFilter] = useState(searchParams.get('location') || '')
   const [styleFilter, setStyleFilter] = useState(searchParams.get('style') || '')
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || '')
@@ -41,23 +41,188 @@ export default function ExplorePage() {
     fetchArtists()
   }, [])
 
+  // Trigger search when searchQuery changes from URL params
+  useEffect(() => {
+    if (searchQuery) {
+      fetchArtists()
+    }
+  }, [searchQuery])
+
+  // Mock data for demonstration - replace with actual API call
+  const mockArtists: Artist[] = [
+    {
+      id: "1",
+      name: "Alex Rivera",
+      bio: "Professional tattoo artist with over 8 years of experience specializing in traditional American, neo-traditional, and blackwork styles.",
+      avatar: "/api/placeholder/150/150",
+      location: "Los Angeles, CA",
+      specialties: ["Traditional American", "Neo-Traditional", "Blackwork"],
+      instagram: "@alexrivera_tattoo",
+      portfolioCount: 24,
+      rating: 4.8,
+      reviewCount: 127,
+      featured: true
+    },
+    {
+      id: "2",
+      name: "Sarah Chen",
+      bio: "Watercolor and minimalist tattoo specialist with a passion for creating delicate, artistic pieces that tell unique stories.",
+      avatar: "/api/placeholder/150/150",
+      location: "Portland, OR",
+      specialties: ["Watercolor", "Minimalist", "Fine Line"],
+      instagram: "@sarahchen_ink",
+      portfolioCount: 18,
+      rating: 4.9,
+      reviewCount: 89,
+      featured: false
+    },
+    {
+      id: "3",
+      name: "Marcus Johnson",
+      bio: "Realism and portrait artist known for incredibly detailed work and capturing the essence of subjects in ink.",
+      avatar: "/api/placeholder/150/150",
+      location: "Portland, OR",
+      specialties: ["Realism", "Portraits", "Black & Gray"],
+      instagram: "@marcusjohnson_tattoo",
+      portfolioCount: 31,
+      rating: 4.7,
+      reviewCount: 156,
+      featured: true
+    },
+    {
+      id: "4",
+      name: "Elena Rodriguez",
+      bio: "Japanese traditional and geometric tattoo artist with a modern twist on classic designs.",
+      avatar: "/api/placeholder/150/150",
+      location: "Seattle, WA",
+      specialties: ["Japanese Traditional", "Geometric", "Tribal"],
+      instagram: "@elenarodriguez_ink",
+      portfolioCount: 22,
+      rating: 4.6,
+      reviewCount: 94,
+      featured: false
+    },
+    {
+      id: "5",
+      name: "David Kim",
+      bio: "Neo-traditional and new school artist specializing in bold colors and dynamic compositions.",
+      avatar: "/api/placeholder/150/150",
+      location: "Austin, TX",
+      specialties: ["Neo-Traditional", "New School", "Color"],
+      instagram: "@davidkim_tattoo",
+      portfolioCount: 19,
+      rating: 4.8,
+      reviewCount: 112,
+      featured: false
+    },
+    {
+      id: "6",
+      name: "Lisa Thompson",
+      bio: "Fine line and minimalist specialist creating elegant, subtle tattoos with precision and artistry.",
+      avatar: "/api/placeholder/150/150",
+      location: "Portland, OR",
+      specialties: ["Fine Line", "Minimalist", "Geometric"],
+      instagram: "@lisathompson_ink",
+      portfolioCount: 15,
+      rating: 4.9,
+      reviewCount: 67,
+      featured: false
+    },
+    {
+      id: "7",
+      name: "Sarah Wilson",
+      bio: "Portland-based artist specializing in traditional American and neo-traditional styles with bold colors.",
+      avatar: "/api/placeholder/150/150",
+      location: "Portland, OR",
+      specialties: ["Traditional American", "Neo-Traditional", "Bold Colors"],
+      instagram: "@sarahwilson_tattoo",
+      portfolioCount: 28,
+      rating: 4.7,
+      reviewCount: 134,
+      featured: false
+    },
+    {
+      id: "8",
+      name: "Mike Chen",
+      bio: "Seattle artist known for geometric designs and minimalist blackwork tattoos.",
+      avatar: "/api/placeholder/150/150",
+      location: "Seattle, WA",
+      specialties: ["Geometric", "Minimalist", "Blackwork"],
+      instagram: "@mikechen_ink",
+      portfolioCount: 21,
+      rating: 4.6,
+      reviewCount: 89,
+      featured: false
+    }
+  ]
+
   const fetchArtists = async () => {
     setIsLoading(true)
     try {
-      const params = new URLSearchParams()
-      if (searchQuery) params.append('q', searchQuery)
-      if (locationFilter) params.append('location', locationFilter)
-      if (styleFilter) params.append('style', styleFilter)
-      if (sortBy) params.append('sort', sortBy)
-      else params.append('sort', 'rating')
-
-      const response = await fetch(`/api/artists?${params.toString()}`)
-      if (!response.ok) throw new Error('Failed to fetch artists')
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500))
       
-      const data = await response.json()
-      setArtists(data)
+      let filteredArtists = [...mockArtists]
+      
+      // Search by name, bio, specialties, or location
+      if (searchQuery) {
+        const searchTerms = searchQuery.toLowerCase().trim().split(/\s+/).filter(term => term.length > 0)
+        
+        if (searchTerms.length > 0) {
+          filteredArtists = filteredArtists.filter(artist => {
+            // Check if ALL search terms match somewhere in the artist's profile
+            return searchTerms.every(term => 
+              artist.name.toLowerCase().includes(term) ||
+              artist.bio.toLowerCase().includes(term) ||
+              artist.specialties.some(specialty => specialty.toLowerCase().includes(term)) ||
+              artist.location.toLowerCase().includes(term)
+            )
+          })
+        }
+      }
+      
+      // Filter by location
+      if (locationFilter) {
+        const location = locationFilter.toLowerCase()
+        filteredArtists = filteredArtists.filter(artist => 
+          artist.location.toLowerCase().includes(location)
+        )
+      }
+      
+      // Filter by style
+      if (styleFilter) {
+        const style = styleFilter.toLowerCase()
+        filteredArtists = filteredArtists.filter(artist => 
+          artist.specialties.some(specialty => specialty.toLowerCase().includes(style))
+        )
+      }
+      
+      // Sort artists
+      if (sortBy) {
+        switch (sortBy) {
+          case 'rating':
+            filteredArtists.sort((a, b) => b.rating - a.rating)
+            break
+          case 'reviews':
+            filteredArtists.sort((a, b) => b.reviewCount - a.reviewCount)
+            break
+          case 'portfolio':
+            filteredArtists.sort((a, b) => b.portfolioCount - a.portfolioCount)
+            break
+          case 'recent':
+            // For demo purposes, sort by ID (newer artists have higher IDs)
+            filteredArtists.sort((a, b) => parseInt(b.id) - parseInt(a.id))
+            break
+          default:
+            break
+        }
+      }
+      
+      setArtists(filteredArtists)
     } catch (error) {
       console.error('Error fetching artists:', error)
+      // Fallback to mock data on error
+      setArtists(mockArtists)
     } finally {
       setIsLoading(false)
     }
@@ -110,13 +275,13 @@ export default function ExplorePage() {
       {/* Search and Filters Section */}
       <section className="py-12 bg-surface">
         <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             {/* Search */}
             <div className="md:col-span-2 relative">
               <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
               <input
                 type="text"
-                placeholder="Search artists, styles, or keywords..."
+                placeholder="Search artists, styles, locations, or keywords... (multi-word search supported)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -154,6 +319,14 @@ export default function ExplorePage() {
                 ))}
               </select>
             </div>
+          </div>
+          
+          {/* Search Hint */}
+          <div className="mb-6">
+            <p className="text-sm text-gray-400">
+              💡 <strong>Search Tip:</strong> Use multiple words to find artists that match ALL criteria. 
+              Try "portland sarah" to find artists named Sarah in Portland, or "traditional watercolor" to find artists specializing in both styles.
+            </p>
           </div>
 
           {/* Sort and Search Button */}

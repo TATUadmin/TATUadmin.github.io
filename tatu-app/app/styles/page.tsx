@@ -120,26 +120,26 @@ export default function TattooStylesPage() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Beginner': return 'text-green-500';
-      case 'Intermediate': return 'text-yellow-500';
-      case 'Advanced': return 'text-red-500';
+      case 'Beginner': return 'text-white';
+      case 'Intermediate': return 'text-gray-300';
+      case 'Advanced': return 'text-gray-400';
       default: return 'text-gray-500';
     }
   };
 
   const getPopularityColor = (popularity: string) => {
     switch (popularity) {
-      case 'High': return 'text-green-500';
-      case 'Medium': return 'text-yellow-500';
-      case 'Low': return 'text-red-500';
+      case 'High': return 'text-white';
+      case 'Medium': return 'text-gray-300';
+      case 'Low': return 'text-gray-400';
       default: return 'text-gray-500';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
-      <section className="py-24 border-b border-gray-800">
+      <section className="py-24 border-b" style={{borderColor: '#171717'}}>
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="display text-5xl md:text-6xl text-white mb-6">
@@ -153,14 +153,15 @@ export default function TattooStylesPage() {
       </section>
 
       {/* Filters */}
-      <section className="py-12 bg-gray-800">
+      <section className="py-12 bg-surface">
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <div className="flex flex-wrap gap-4 justify-center">
               <select
                 value={difficultyFilter}
                 onChange={(e) => setDifficultyFilter(e.target.value)}
-                className="px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:ring-2 focus:ring-amber-500"
+                className="px-4 py-2 bg-surface-2 text-white rounded-lg border focus:ring-2 focus:ring-white"
+                style={{borderColor: '#171717'}}
               >
                 <option value="all">All Difficulties</option>
                 <option value="Beginner">Beginner</option>
@@ -171,7 +172,8 @@ export default function TattooStylesPage() {
               <select
                 value={popularityFilter}
                 onChange={(e) => setPopularityFilter(e.target.value)}
-                className="px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:ring-2 focus:ring-amber-500"
+                className="px-4 py-2 bg-surface-2 text-white rounded-lg border focus:ring-2 focus:ring-white"
+                style={{borderColor: '#171717'}}
               >
                 <option value="all">All Popularity</option>
                 <option value="High">High</option>
@@ -190,8 +192,8 @@ export default function TattooStylesPage() {
             {filteredStyles.map((style) => (
               <div
                 key={style.id}
-                className={`bg-gray-800 rounded-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer ${
-                  selectedStyle === style.id ? 'ring-2 ring-amber-500' : ''
+                className={`bg-surface rounded-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300 cursor-pointer ${
+                  selectedStyle === style.id ? 'ring-2 ring-white' : ''
                 }`}
                 onClick={() => setSelectedStyle(selectedStyle === style.id ? null : style.id)}
               >
@@ -205,7 +207,7 @@ export default function TattooStylesPage() {
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-40" />
                   <div className="absolute bottom-4 left-4">
-                    <h3 className={`text-xl font-bold ${style.color}`}>{style.name}</h3>
+                    <h3 className="text-xl font-bold text-white">{style.name}</h3>
                   </div>
                 </div>
 
@@ -230,7 +232,7 @@ export default function TattooStylesPage() {
                       {style.characteristics.slice(0, 3).map((char, index) => (
                         <span
                           key={index}
-                          className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full"
+                          className="px-2 py-1 bg-surface-2 text-gray-300 text-xs rounded-full"
                         >
                           {char}
                         </span>
@@ -246,24 +248,24 @@ export default function TattooStylesPage() {
 
                   {/* Expandable Content */}
                   {selectedStyle === style.id && (
-                    <div className="mt-4 pt-4 border-t border-gray-700">
+                    <div className="mt-4 pt-4 border-t" style={{borderColor: '#171717'}}>
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-gray-400 mb-2">All Characteristics:</h4>
                         <div className="flex flex-wrap gap-1">
                           {style.characteristics.map((char, index) => (
                             <span
                               key={index}
-                              className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full"
+                              className="px-2 py-1 bg-surface-2 text-gray-300 text-xs rounded-full"
                             >
                               {char}
-                            </span>
+                        </span>
                           ))}
                         </div>
                       </div>
                       
                       <Link
                         href={`/explore?style=${style.name.toLowerCase()}`}
-                        className="inline-block bg-amber-500 text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-400 transition-colors"
+                        className="inline-block bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                       >
                         Find {style.name} Artists
                       </Link>
@@ -277,7 +279,7 @@ export default function TattooStylesPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gray-800">
+      <section className="py-24 bg-surface">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="display text-4xl md:text-5xl text-white mb-6">

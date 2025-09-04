@@ -9,7 +9,11 @@ const TattooBackgroundCycler = () => {
     '/tattoo-bg-1.png',
     '/tattoo-bg-2.png', 
     '/tattoo-bg-3.png',
-    '/tattoo-bg-4.png'
+    '/tattoo-bg-4.png',
+    '/tattoo-bg-5.png',
+    '/tattoo-bg-6.png',
+    '/tattoo-bg-7.png',
+    '/tattoo-bg-8.png'
   ]
 
   // Start with a random image
@@ -48,8 +52,8 @@ const TattooBackgroundCycler = () => {
   const getImageFilter = (imageSrc: string) => {
     if (debugMode) return 'none'
     
-    // Don't apply white filter to tattoo-bg-3.png
-    if (imageSrc === '/tattoo-bg-3.png') {
+    // Don't apply white filter to tattoo-bg-3.png and tattoo-bg-6.png
+    if (imageSrc === '/tattoo-bg-3.png' || imageSrc === '/tattoo-bg-6.png') {
       return 'opacity(0.7)' // Just reduce opacity for visibility
     }
     
@@ -72,7 +76,7 @@ const TattooBackgroundCycler = () => {
           <div 
             className="relative w-full h-full flex items-center justify-center"
             style={{
-              transform: 'scale(0.67)', // 2/3 size (67%)
+              transform: 'scale(0.67)', // Back to previous smaller size
               transformOrigin: 'center center'
             }}
           >

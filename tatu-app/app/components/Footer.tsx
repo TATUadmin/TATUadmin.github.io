@@ -13,8 +13,7 @@ export default function Footer() {
               className="mb-4" 
               style={{ 
                 width: '48px', 
-                height: 'auto',
-                filter: 'brightness(0) invert(1)'
+                height: 'auto'
               }}
             />
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
@@ -78,6 +77,11 @@ export default function Footer() {
               <li>
                 <Link href="/styles" className="text-gray-400 hover:text-white transition-colors">
                   Tattoo Styles
+                </Link>
+              </li>
+              <li>
+                <Link href="/help" className="text-gray-400 hover:text-white transition-colors">
+                  Help Center
                 </Link>
               </li>
               <li>

@@ -34,7 +34,7 @@ export default function SignUpPage() {
             <img 
               src="/tatu-logo.png" 
               alt="TATU Logo" 
-              className="h-12 w-auto mx-auto filter brightness-0 invert"
+              className="h-12 w-auto mx-auto"
             />
           </Link>
           <h2 className="display text-3xl text-white mb-2">

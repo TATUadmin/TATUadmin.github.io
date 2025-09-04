@@ -50,8 +50,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        {/* Simple black background */}
+        <div 
+          className="fixed inset-0 z-0 bg-black"
+        />
         <AuthProvider>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen relative z-10">
             <Navbar />
             <MobileNavigation />
             <main className="flex-1">{children}</main>

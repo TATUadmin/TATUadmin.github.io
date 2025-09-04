@@ -20,8 +20,7 @@ export default function Navbar() {
               style={{ 
                 height: '28px', 
                 width: 'auto', 
-                marginRight: '0.5rem',
-                filter: 'brightness(0) invert(1)'
+                marginRight: '0.5rem'
               }}
               className="inline-block align-middle"
             />
@@ -29,6 +28,12 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            <Link 
+              href="/about" 
+              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
+            >
+              About
+            </Link>
             <Link 
               href="/how-it-works" 
               className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
@@ -40,12 +45,6 @@ export default function Navbar() {
               className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
               Browse
-            </Link>
-            <Link 
-              href="/about" 
-              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
-            >
-              About
             </Link>
           </div>
 
@@ -108,6 +107,13 @@ export default function Navbar() {
         <div className="md:hidden border-t bg-black" style={{borderColor: '#171717'}}>
           <div className="container py-4 space-y-4">
             <Link 
+              href="/about" 
+              className="block text-gray-400 hover:text-white transition-colors font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              About
+            </Link>
+            <Link 
               href="/how-it-works" 
               className="block text-gray-400 hover:text-white transition-colors font-medium"
               onClick={() => setIsMenuOpen(false)}
@@ -120,13 +126,6 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               Browse
-            </Link>
-            <Link 
-              href="/about" 
-              className="block text-gray-400 hover:text-white transition-colors font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
             </Link>
             
             <div className="border-t pt-4" style={{borderColor: '#171717'}}>

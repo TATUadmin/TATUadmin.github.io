@@ -34,23 +34,23 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
             Reset your password
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-300">
             Enter your email address and we'll send you a link to reset your password.
           </p>
         </div>
 
         {status === 'success' ? (
-          <div className="rounded-md bg-green-50 p-4">
+          <div className="rounded-md bg-surface p-4">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-green-400"
+                  className="h-5 w-5 text-white"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
+                <p className="text-sm font-medium text-white">
                   Check your email for a link to reset your password.
                 </p>
               </div>
@@ -83,18 +83,19 @@ export default function ForgotPasswordPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-md relative block w-full px-3 py-2 border placeholder-gray-400 text-white bg-surface-2 focus:outline-none focus:ring-white focus:border-white focus:z-10 sm:text-sm"
+                  style={{borderColor: '#171717'}}
                   placeholder="Email address"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-4">
+              <div className="rounded-md bg-surface p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <svg
-                      className="h-5 w-5 text-red-400"
+                      className="h-5 w-5 text-white"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -106,7 +107,7 @@ export default function ForgotPasswordPage() {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-red-800">{error}</p>
+                    <p className="text-sm font-medium text-white">{error}</p>
                   </div>
                 </div>
               </div>
@@ -116,7 +117,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-black bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white ${
                   status === 'loading' ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >

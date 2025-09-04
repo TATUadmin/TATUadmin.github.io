@@ -1,14 +1,16 @@
 'use client';
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import TattooBackgroundCycler from './components/TattooBackgroundCycler'
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
+  const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-transparent text-white">
       {/* Hero Section - Clean and Minimal */}
       <section className="min-h-screen flex items-center justify-center relative">
         {/* Cycling Tattoo Background */}
@@ -28,26 +30,41 @@ export default function Home() {
           {/* Main Content - Left Side */}
           <div className="w-1/2 pt-16 text-left">
             {/* Main Headline */}
-            <h1 className="display text-3xl md:text-5xl lg:text-6xl text-white mb-6 animate-fade-in delay-100">
-              Professional Tattoo
-              <br />
-              Artist Marketplace
+            <h1 className="display text-2xl md:text-4xl lg:text-5xl text-white mb-6 animate-fade-in delay-100">
+              Connect with verified tattoo artists near you & across the globe. Browse portfolios & reviews. Book appointments with confidence.
             </h1>
-            
-            {/* Description */}
-            <p className="body text-lg md:text-xl text-gray-400 mb-12 max-w-lg animate-fade-in delay-200">
-              Connect with verified tattoo artists. Browse portfolios. Book appointments with confidence.
-            </p>
             
             {/* Search */}
             <div className="max-w-lg mb-12 animate-fade-in delay-300">
               <div className="relative">
+                {!searchTerm && (
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{zIndex: 1}}>
+                    <span className="text-gray-400 text-lg">
+                      Search by{' '}
+                      <span style={{color: '#20B2AA'}}>artist</span>
+                      ,{' '}
+                      <span style={{color: '#FFD700'}}>style</span>
+                      , or{' '}
+                      <span style={{color: '#FF8C00'}}>location</span>
+                      ...
+                    </span>
+                  </div>
+                )}
                 <input
                   type="text"
-                  placeholder="Search by artist, style, or location..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="input"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && searchTerm.trim()) {
+                      router.push(`/explore?search=${encodeURIComponent(searchTerm.trim())}`)
+                    }
+                  }}
+                  className="input text-lg"
+                  style={{
+                    fontSize: '1.125rem',
+                    color: '#ffffff',
+                    paddingLeft: '16px'
+                  }}
                 />
                 <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,11 +89,11 @@ export default function Home() {
               <Link href="/how-it-works" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
                 How It Works
               </Link>
-              <span className="text-gray-700">•</span>
+              <span className="text-gray-500">•</span>
               <Link href="/about" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
                 About TATU
               </Link>
-              <span className="text-gray-700">•</span>
+              <span className="text-gray-500">•</span>
               <Link href="/styles" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
                 Tattoo Styles
               </Link>
@@ -86,21 +103,20 @@ export default function Home() {
 
         {/* Logo - Bottom Center */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
-          <div className="relative mx-auto animate-fade-in" style={{ maxWidth: '200px', width: '60%' }}>
+          <div className="relative mx-auto animate-fade-in text-center" style={{ maxWidth: '200px', width: '60%' }}>
             <img 
               src="/tatu-logo.png" 
               alt="TATU Logo" 
-              className="w-full h-auto filter brightness-0 invert"
-              style={{ filter: 'brightness(0) invert(1)' }}
+              className="w-full h-auto"
             />
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-surface">
+      <section className="py-16 bg-transparent">
         <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-3 gap-8 text-center">
             <div className="animate-fade-in">
               <div className="display text-2xl md:text-3xl text-white mb-2">10K+</div>
               <div className="body text-sm text-gray-400 uppercase tracking-wider">Artists</div>
@@ -112,10 +128,6 @@ export default function Home() {
             <div className="animate-fade-in delay-200">
               <div className="display text-2xl md:text-3xl text-white mb-2">200+</div>
               <div className="body text-sm text-gray-400 uppercase tracking-wider">Cities</div>
-            </div>
-            <div className="animate-fade-in delay-300">
-              <div className="display text-2xl md:text-3xl text-white mb-2">99%</div>
-              <div className="body text-sm text-gray-400 uppercase tracking-wider">Satisfaction</div>
             </div>
           </div>
         </div>
@@ -136,7 +148,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="card p-8 text-center card-hover">
               <div className="flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#FF8C00'}}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -148,7 +160,7 @@ export default function Home() {
 
             <div className="card p-8 text-center card-hover">
               <div className="flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#FFD700'}}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
@@ -160,7 +172,7 @@ export default function Home() {
 
             <div className="card p-8 text-center card-hover">
               <div className="flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#20B2AA'}}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
               </div>
@@ -174,7 +186,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-surface">
+      <section className="py-20 bg-transparent">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="display text-3xl md:text-4xl text-white mb-6">

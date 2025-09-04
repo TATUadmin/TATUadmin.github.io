@@ -413,4 +413,19 @@ body {
   }
 }
 
+/* Custom search input placeholder colors */
+.search-input-brand::placeholder {
+  color: #9CA3AF !important;
+}
 
+.search-input-brand::placeholder::-webkit-input-placeholder {
+  color: #9CA3AF !important;
+}
+
+.search-input-brand::placeholder::-moz-placeholder {
+  color: #9CA3AF !important;
+}
+
+.search-input-brand::placeholder:-ms-input-placeholder {
+  color: #9CA3AF !important;
+}
