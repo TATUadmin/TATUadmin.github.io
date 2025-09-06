@@ -31,7 +31,7 @@ export default function Home() {
           <div className="w-1/2 pt-16 text-left">
             {/* Main Headline */}
             <h1 className="display text-2xl md:text-4xl lg:text-5xl text-white mb-6 animate-fade-in delay-100">
-              Connect with verified tattoo artists near you & across the globe. Browse portfolios & reviews. Book appointments with confidence.
+              At last, every tattoo artist in one place. Browse portfolios & reviews. Book appointments with confidence.
             </h1>
             
             {/* Search */}
