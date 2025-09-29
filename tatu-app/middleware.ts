@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { withAuth } from 'next-auth/middleware'
+import { securityHeaders, corsHeaders } from '@/lib/rate-limit'
+import { logger } from '@/lib/monitoring'
 
 // Add paths that don't require authentication
 const publicPaths = [
@@ -13,7 +15,9 @@ const publicPaths = [
   '/explore',
   '/artist',
   '/api/artists',
-  '/api/auth'
+  '/api/auth',
+  '/api/portfolio',
+  '/api/search'
 ]
 
 // Add paths that don't require profile completion
@@ -28,6 +32,21 @@ export default withAuth(
     const { nextUrl, nextauth } = req
     const isLoggedIn = !!nextauth?.token
     const path = nextUrl.pathname
+
+    // Log request for monitoring
+    logger.logRequest(req)
+
+    // Apply security headers
+    const securityResponse = securityHeaders(req)
+    if (securityResponse) {
+      return securityResponse
+    }
+
+    // Apply CORS headers
+    const corsResponse = corsHeaders(req)
+    if (corsResponse) {
+      return corsResponse
+    }
 
     // Allow public paths
     if (publicPaths.some(p => path.startsWith(p))) {
