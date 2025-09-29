@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { optionalAuth } from '@/lib/auth-middleware'
+import { ValidationSchemas } from '@/lib/validation'
+import { ApiResponse, withErrorHandling } from '@/lib/api-response'
+import { rateLimiters } from '@/lib/rate-limit'
+import { logger } from '@/lib/monitoring'
+import { cacheService } from '@/lib/cache'
+import { CacheTags, CacheKeyGenerators } from '@/lib/cache'
 
 const prisma = new PrismaClient()
 
@@ -85,21 +92,78 @@ const mockArtists = [
   }
 ]
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const query = searchParams.get('q') || ''
-    const location = searchParams.get('location') || ''
-    const style = searchParams.get('style') || ''
-    const sort = searchParams.get('sort') || 'rating'
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const offset = parseInt(searchParams.get('offset') || '0')
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  // Rate limiting
+  const rateLimitResult = await rateLimiters.search.check(request)
+  if (!rateLimitResult.allowed) {
+    return ApiResponse.rateLimited('Too many requests', rateLimitResult.retryAfter)
+  }
 
+  // Optional authentication
+  const authContext = await optionalAuth(request)
+  const { searchParams } = new URL(request.url)
+  
+  // Validate search parameters
+  const searchValidation = ValidationSchemas.Search.artists.safeParse({
+    query: searchParams.get('q') || '',
+    location: searchParams.get('location') || '',
+    style: searchParams.get('style') || '',
+    minPrice: searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : undefined,
+    maxPrice: searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : undefined,
+    rating: searchParams.get('rating') ? parseFloat(searchParams.get('rating')!) : undefined,
+    limit: parseInt(searchParams.get('limit') || '20'),
+    offset: parseInt(searchParams.get('offset') || '0'),
+    sortBy: searchParams.get('sort') || 'rating',
+    sortOrder: 'desc'
+  })
+
+  if (!searchValidation.success) {
+    return ApiResponse.validationError(searchValidation.error.errors, { requestId: authContext?.requestId })
+  }
+
+  const {
+    query,
+    location,
+    style,
+    minPrice,
+    maxPrice,
+    rating,
+    limit,
+    offset,
+    sortBy,
+    sortOrder
+  } = searchValidation.data
+
+  // Generate cache key
+  const cacheKey = CacheKeyGenerators.search('artists', {
+    query,
+    location,
+    style,
+    minPrice,
+    maxPrice,
+    rating,
+    limit,
+    offset,
+    sortBy,
+    sortOrder
+  })
+
+  // Try to get from cache
+  if (cacheService) {
+    const cached = await cacheService.get(cacheKey)
+    if (cached) {
+      return ApiResponse.success(cached, 200, { requestId: authContext?.requestId })
+    }
+  }
+
+  try {
     // Build where conditions
     const whereConditions: any = {
       role: 'ARTIST',
+      status: 'ACTIVE',
       profile: {
-        completedRegistration: true
+        completedRegistration: true,
+        verified: true
       }
     }
 
@@ -127,17 +191,40 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Price range filter
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      whereConditions.profile = {
+        ...whereConditions.profile,
+        hourlyRate: {
+          ...(minPrice !== undefined && { gte: minPrice }),
+          ...(maxPrice !== undefined && { lte: maxPrice })
+        }
+      }
+    }
+
+    // Rating filter
+    if (rating !== undefined) {
+      whereConditions.reviews = {
+        some: {
+          rating: { gte: rating }
+        }
+      }
+    }
+
     // Determine sort order
     let orderBy: any = []
-    switch (sort) {
+    switch (sortBy) {
       case 'rating':
-        orderBy = [{ reviews: { _count: 'desc' } }] // Temp: sort by review count as proxy for rating
+        orderBy = [{ reviews: { _count: 'desc' } }]
         break
       case 'reviews':
         orderBy = [{ reviews: { _count: 'desc' } }]
         break
       case 'portfolio':
         orderBy = [{ portfolioItems: { _count: 'desc' } }]
+        break
+      case 'price':
+        orderBy = [{ profile: { hourlyRate: sortOrder === 'asc' ? 'asc' : 'desc' } }]
         break
       case 'newest':
         orderBy = [{ createdAt: 'desc' }]
@@ -146,29 +233,45 @@ export async function GET(request: NextRequest) {
         orderBy = [{ createdAt: 'desc' }]
     }
 
-    const artists = await prisma.user.findMany({
-      where: whereConditions,
-      include: {
-        profile: true,
-        portfolioItems: {
-          take: 1,
-          orderBy: { createdAt: 'desc' },
-          select: { imageUrl: true }
-        },
-        reviews: {
-          select: { rating: true }
-        },
-        _count: {
-          select: {
-            portfolioItems: true,
-            reviews: true
+    const [artists, total] = await Promise.all([
+      prisma.user.findMany({
+        where: whereConditions,
+        include: {
+          profile: true,
+          shop: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+              verified: true
+            }
+          },
+          portfolioItems: {
+            take: 3,
+            orderBy: { createdAt: 'desc' },
+            select: { 
+              id: true,
+              title: true,
+              images: true,
+              style: true
+            }
+          },
+          reviews: {
+            select: { rating: true }
+          },
+          _count: {
+            select: {
+              portfolioItems: true,
+              reviews: true
+            }
           }
-        }
-      },
-      orderBy,
-      take: limit,
-      skip: offset
-    })
+        },
+        orderBy,
+        take: limit,
+        skip: offset
+      }),
+      prisma.user.count({ where: whereConditions })
+    ])
 
     // Transform data for frontend
     const transformedArtists = artists.map(artist => {
@@ -181,30 +284,65 @@ export async function GET(request: NextRequest) {
         id: artist.id,
         name: artist.name || 'Unknown Artist',
         bio: artist.profile?.bio || '',
-        avatar: artist.portfolioItems[0]?.imageUrl || artist.profile?.avatar || '',
+        avatar: artist.profile?.avatar || '',
         location: artist.profile?.location || '',
         specialties: artist.profile?.specialties || [],
         instagram: artist.profile?.instagram || '',
+        website: artist.profile?.website || '',
         portfolioCount: artist._count.portfolioItems,
-        rating: Math.round(avgRating * 10) / 10, // Round to 1 decimal
+        rating: Math.round(avgRating * 10) / 10,
         reviewCount: artist._count.reviews,
-        featured: false // TODO: Add featured logic
+        hourlyRate: artist.profile?.hourlyRate || 0,
+        experience: artist.profile?.experience || 0,
+        verified: artist.profile?.verified || false,
+        featured: false, // TODO: Add featured logic
+        shop: artist.shop,
+        recentWork: artist.portfolioItems
       }
     })
 
-    return NextResponse.json(transformedArtists)
+    const result = {
+      artists: transformedArtists,
+      pagination: {
+        page: Math.floor(offset / limit) + 1,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: offset + limit < total,
+        hasPrev: offset > 0
+      }
+    }
+
+    // Cache the result
+    if (cacheService) {
+      await cacheService.set(cacheKey, result, 300, [CacheTags.ARTIST, CacheTags.SEARCH]) // 5 minutes
+    }
+
+    // Log search event
+    logger.logBusinessEvent('artist_search', {
+      query,
+      location,
+      style,
+      results: transformedArtists.length,
+      userId: authContext?.user.id
+    }, request)
+
+    return ApiResponse.paginated(transformedArtists, {
+      page: Math.floor(offset / limit) + 1,
+      limit,
+      total
+    }, { requestId: authContext?.requestId })
+
   } catch (error) {
-    console.error('Error fetching artists:', error)
+    logger.error('Database error, returning mock data', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      query,
+      location,
+      style
+    })
     
     // Return mock data when database is unavailable
-    console.log('Database unavailable, returning mock data for development')
-    
-    // Filter mock data based on search parameters if provided
     let filteredMockData = [...mockArtists]
-    
-    const query = new URL(request.url).searchParams.get('q') || ''
-    const location = new URL(request.url).searchParams.get('location') || ''
-    const style = new URL(request.url).searchParams.get('style') || ''
     
     if (query) {
       filteredMockData = filteredMockData.filter(artist => 
@@ -226,7 +364,14 @@ export async function GET(request: NextRequest) {
         )
       )
     }
+
+    // Apply pagination to mock data
+    const paginatedData = filteredMockData.slice(offset, offset + limit)
     
-    return NextResponse.json(filteredMockData)
+    return ApiResponse.paginated(paginatedData, {
+      page: Math.floor(offset / limit) + 1,
+      limit,
+      total: filteredMockData.length
+    }, { requestId: authContext?.requestId })
   }
-} 
+}) 
