@@ -98,9 +98,8 @@ export const authOptions = {
   }
 }
 
-// Simple auth function for server components
+// Auth function for server components
 export async function auth() {
-  // This is a placeholder - in production you'd use NextAuth's auth function
-  // For now, return null to avoid build errors
-  return null;
+  const { auth } = await import('next-auth')
+  return await auth()
 } 

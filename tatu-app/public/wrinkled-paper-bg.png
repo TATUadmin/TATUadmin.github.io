@@ -1,0 +1,6 @@
+# This is a placeholder file
+# To convert the SVG to PNG:
+# 1. Open wrinkled-paper-bg.svg in a browser
+# 2. Take a screenshot or use browser dev tools to save as PNG
+# 3. Replace this file with the actual PNG
+# 4. Update layout.tsx to use .png instead of .svg 

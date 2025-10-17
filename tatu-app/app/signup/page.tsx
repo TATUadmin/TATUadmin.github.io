@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
+import { toast } from 'react-hot-toast'
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -11,11 +12,53 @@ export default function SignUpPage() {
     password: '',
     confirmPassword: ''
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Mock functionality - just show an alert
-    alert('Sign up functionality coming soon! This is a demo interface.')
+    setIsLoading(true)
+
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match')
+      setIsLoading(false)
+      return
+    }
+
+    if (formData.password.length < 8) {
+      toast.error('Password must be at least 8 characters long')
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('Account created successfully! Please check your email to verify your account.')
+        router.push('/login')
+      } else {
+        toast.error(data.error || 'Failed to create account')
+      }
+    } catch (error) {
+      console.error('Sign up error:', error)
+      toast.error('An error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -45,10 +88,10 @@ export default function SignUpPage() {
           </p>
         </div>
 
-        {/* Coming Soon Banner */}
+        {/* Authentication Status */}
         <div className="bg-surface border border-gray-600 rounded-lg p-4 text-center">
-          <p className="text-white text-sm font-medium">🚧 Demo Interface</p>
-          <p className="text-gray-400 text-xs mt-1">Authentication coming soon</p>
+          <p className="text-white text-sm font-medium">🔐 Secure Registration</p>
+          <p className="text-gray-400 text-xs mt-1">Create your TATU account</p>
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -113,9 +156,17 @@ export default function SignUpPage() {
           <div>
             <button
               type="submit"
-              className="btn btn-primary w-full"
+              disabled={isLoading}
+              className="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Creating Account...
+                </>
+              ) : (
+                'Create Account'
+              )}
             </button>
           </div>
 

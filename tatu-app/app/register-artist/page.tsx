@@ -139,7 +139,7 @@ export default function RegisterArtist() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="input"
+                    className="w-full px-4 py-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600/50 focus:border-gray-600 transition-all duration-200"
                     placeholder="Your professional name"
                   />
                 </div>
@@ -153,7 +153,7 @@ export default function RegisterArtist() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="input"
+                    className="w-full px-4 py-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600/50 focus:border-gray-600 transition-all duration-200"
                     placeholder="your@email.com"
                   />
                 </div>

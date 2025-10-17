@@ -128,146 +128,58 @@ export default function SearchPage() {
   }, [])
 
   useEffect(() => {
+    fetchArtists()
+  }, [filters])
+
+  useEffect(() => {
     applyFilters()
-  }, [filters, artists])
+  }, [artists])
 
   const fetchArtists = async () => {
     setIsLoading(true)
     try {
-      // Mock data for now - in real app, this would come from API
-      const mockArtists: Artist[] = [
-        {
-          id: '1',
-          name: 'Sarah Chen',
-          avatar: '/api/placeholder/80/80',
-          rating: 4.9,
-          reviewCount: 127,
-          location: 'San Francisco, CA',
-          distance: 2.3,
-          specialties: ['Portraits', 'Realism', 'Fine Line'],
-          styles: ['Realism', 'Fine Line', 'Color'],
-          experience: 8,
-          consultationFee: 75,
-          isAvailable: true,
-          nextAvailable: '2024-02-20',
-          isVerified: true,
-          isFeatured: true,
-          portfolioCount: 45,
-          responseTime: '2 hours',
-          languages: ['English', 'Mandarin'],
-          certifications: ['Bloodborne Pathogens', 'First Aid']
-        },
-        {
-          id: '2',
-          name: 'Mike Rodriguez',
-          avatar: '/api/placeholder/80/80',
-          rating: 4.7,
-          reviewCount: 89,
-          location: 'Oakland, CA',
-          distance: 8.1,
-          specialties: ['Traditional', 'Japanese', 'Blackwork'],
-          styles: ['Traditional', 'Japanese', 'Blackwork'],
-          experience: 12,
-          consultationFee: 50,
-          isAvailable: true,
-          nextAvailable: '2024-02-18',
-          isVerified: true,
-          isFeatured: false,
-          portfolioCount: 67,
-          responseTime: '4 hours',
-          languages: ['English', 'Spanish'],
-          certifications: ['Bloodborne Pathogens', 'First Aid', 'CPR']
-        },
-        {
-          id: '3',
-          name: 'Emma Thompson',
-          avatar: '/api/placeholder/80/80',
-          rating: 4.8,
-          reviewCount: 156,
-          location: 'Berkeley, CA',
-          distance: 12.5,
-          specialties: ['Watercolor', 'Nature', 'Abstract'],
-          styles: ['Watercolor', 'Abstract', 'Color'],
-          experience: 6,
-          consultationFee: 60,
-          isAvailable: false,
-          nextAvailable: '2024-02-25',
-          isVerified: true,
-          isFeatured: true,
-          portfolioCount: 38,
-          responseTime: '1 hour',
-          languages: ['English'],
-          certifications: ['Bloodborne Pathogens']
-        },
-        {
-          id: '4',
-          name: 'Alex Kim',
-          avatar: '/api/placeholder/80/80',
-          rating: 4.6,
-          reviewCount: 73,
-          location: 'San Jose, CA',
-          distance: 45.2,
-          specialties: ['Geometric', 'Minimalist', 'Dotwork'],
-          styles: ['Geometric', 'Minimalist', 'Dotwork'],
-          experience: 4,
-          consultationFee: 40,
-          isAvailable: true,
-          nextAvailable: '2024-02-19',
-          isVerified: false,
-          isFeatured: false,
-          portfolioCount: 24,
-          responseTime: '6 hours',
-          languages: ['English', 'Korean'],
-          certifications: ['Bloodborne Pathogens']
-        },
-        {
-          id: '5',
-          name: 'David Martinez',
-          avatar: '/api/placeholder/80/80',
-          rating: 4.9,
-          reviewCount: 203,
-          location: 'San Francisco, CA',
-          distance: 1.8,
-          specialties: ['Portraits', 'Realism', 'Cover-ups'],
-          styles: ['Realism', 'Portraits', 'Black & Grey'],
-          experience: 15,
-          consultationFee: 100,
-          isAvailable: true,
-          nextAvailable: '2024-02-22',
-          isVerified: true,
-          isFeatured: true,
-          portfolioCount: 89,
-          responseTime: '30 minutes',
-          languages: ['English', 'Spanish'],
-          certifications: ['Bloodborne Pathogens', 'First Aid', 'CPR', 'Advanced Life Support']
-        },
-        {
-          id: '6',
-          name: 'Lisa Wang',
-          avatar: '/api/placeholder/80/80',
-          rating: 4.5,
-          reviewCount: 67,
-          location: 'Fremont, CA',
-          distance: 32.7,
-          specialties: ['Lettering', 'Minimalist', 'Fine Line'],
-          styles: ['Minimalist', 'Fine Line', 'Lettering'],
-          experience: 3,
-          consultationFee: 35,
-          isAvailable: true,
-          nextAvailable: '2024-02-21',
-          isVerified: false,
-          isFeatured: false,
-          portfolioCount: 19,
-          responseTime: '8 hours',
-          languages: ['English', 'Mandarin'],
-          certifications: ['Bloodborne Pathogens']
-        }
-      ]
-
-      setArtists(mockArtists)
+      // Build search parameters
+      const searchParams = new URLSearchParams()
+      searchParams.set('type', 'artists')
+      searchParams.set('limit', '20')
+      
+      if (filters.query) searchParams.set('q', filters.query)
+      if (filters.location) searchParams.set('location', filters.location)
+      if (filters.styles.length > 0) searchParams.set('style', filters.styles[0])
+      
+      const response = await fetch(`/api/search?${searchParams.toString()}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch artists')
+      }
+      
+      const data = await response.json()
+      const artists: Artist[] = data.artists.map((artist: any) => ({
+        id: artist.id,
+        name: artist.name,
+        avatar: artist.avatar || '/api/placeholder/80/80',
+        rating: artist.rating || 0,
+        reviewCount: artist.reviewCount || 0,
+        location: artist.location || '',
+        distance: 0, // TODO: Calculate distance based on user location
+        specialties: artist.specialties || [],
+        styles: artist.specialties || [],
+        experience: artist.experience || 0,
+        consultationFee: artist.hourlyRate || 0,
+        isAvailable: true, // TODO: Check availability from API
+        nextAvailable: '2024-02-20', // TODO: Get from availability API
+        isVerified: artist.verified || false,
+        isFeatured: false, // TODO: Add featured flag to API
+        portfolioCount: artist.portfolioCount || 0,
+        responseTime: '2 hours', // TODO: Get from API
+        languages: ['English'], // TODO: Add to user profile
+        certifications: [] // TODO: Add to user profile
+      }))
+      
+      setArtists(artists)
     } catch (error) {
       console.error('Error fetching artists:', error)
-      toast.error('Failed to load artists')
+      // Fallback to empty array on error
+      setArtists([])
     } finally {
       setIsLoading(false)
     }

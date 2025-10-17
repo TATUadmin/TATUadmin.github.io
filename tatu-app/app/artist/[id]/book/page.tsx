@@ -62,7 +62,7 @@ export default function BookAppointmentPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <section className="bg-surface py-8">
+      <section className="bg-black py-8 border-b border-gray-800">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-4 mb-6">
             <Link
@@ -72,8 +72,8 @@ export default function BookAppointmentPage() {
               <ArrowLeftIcon className="w-6 h-6" />
             </Link>
             <div>
-              <h1 className="display text-2xl text-white">Book Appointment</h1>
-              <p className="body text-gray-400">Schedule your tattoo session</p>
+              <h1 className="text-2xl font-bold text-white">Book Appointment</h1>
+              <p className="text-gray-400">Schedule your tattoo session</p>
             </div>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function BookAppointmentPage() {
       {/* Booking Form */}
       <section className="py-12">
         <div className="container mx-auto px-4 max-w-2xl">
-          <div className="card p-8">
+          <div className="bg-transparent border-2 border-gray-400 rounded-lg p-8">
             <h2 className="headline text-xl text-white mb-6">Appointment Details</h2>
             
             <form onSubmit={handleSubmit} className="space-y-6">

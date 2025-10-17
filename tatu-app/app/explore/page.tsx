@@ -7,20 +7,9 @@ import Link from 'next/link'
 import { MagnifyingGlassIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
-
-interface Artist {
-  id: string
-  name: string
-  bio: string
-  avatar: string
-  location: string
-  specialties: string[]
-  instagram: string
-  portfolioCount: number
-  rating: number
-  reviewCount: number
-  featured?: boolean
-}
+import LeafletMap from '../components/LeafletMap'
+import { classifySearch, formatSearchClassification } from '@/lib/smart-search'
+import { ALL_ARTISTS, Artist } from '@/lib/all-artists-data'
 
 export default function ExplorePage() {
   const searchParams = useSearchParams()
@@ -30,7 +19,14 @@ export default function ExplorePage() {
   const [locationFilter, setLocationFilter] = useState(searchParams.get('location') || '')
   const [styleFilter, setStyleFilter] = useState(searchParams.get('style') || '')
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || '')
+  const [minReviews, setMinReviews] = useState(0)
   const [favoriteArtists, setFavoriteArtists] = useState<string[]>([])
+  const [mapLocation, setMapLocation] = useState('') // Separate state for map panning
+  const [lastSearchClassification, setLastSearchClassification] = useState<any>(null) // Track what was detected
+  
+  // Track whether user manually edited filter boxes (resets on each search)
+  const [manualLocationEdit, setManualLocationEdit] = useState(false)
+  const [manualStyleEdit, setManualStyleEdit] = useState(false)
 
   const styles = [
     'Traditional', 'Realism', 'Watercolor', 'Geometric', 'Minimalist',
@@ -41,120 +37,102 @@ export default function ExplorePage() {
     fetchArtists()
   }, [])
 
-  // Trigger search when searchQuery changes from URL params
+  // Only trigger search on initial load if there's a URL search param
   useEffect(() => {
-    if (searchQuery) {
+    const urlSearch = searchParams.get('search') || searchParams.get('q')
+    if (urlSearch && urlSearch.trim().length > 0) {
+      // Parse search query to determine if it's a location or person
+      parseSearchQuery(urlSearch)
       fetchArtists()
     }
-  }, [searchQuery])
+  }, []) // Empty dependency array - only runs once on mount
 
-  // Mock data for demonstration - replace with actual API call
-  const mockArtists: Artist[] = [
-    {
-      id: "1",
-      name: "Alex Rivera",
-      bio: "Professional tattoo artist with over 8 years of experience specializing in traditional American, neo-traditional, and blackwork styles.",
-      avatar: "/api/placeholder/150/150",
-      location: "Los Angeles, CA",
-      specialties: ["Traditional American", "Neo-Traditional", "Blackwork"],
-      instagram: "@alexrivera_tattoo",
-      portfolioCount: 24,
-      rating: 4.8,
-      reviewCount: 127,
-      featured: true
-    },
-    {
-      id: "2",
-      name: "Sarah Chen",
-      bio: "Watercolor and minimalist tattoo specialist with a passion for creating delicate, artistic pieces that tell unique stories.",
-      avatar: "/api/placeholder/150/150",
-      location: "Portland, OR",
-      specialties: ["Watercolor", "Minimalist", "Fine Line"],
-      instagram: "@sarahchen_ink",
-      portfolioCount: 18,
-      rating: 4.9,
-      reviewCount: 89,
-      featured: false
-    },
-    {
-      id: "3",
-      name: "Marcus Johnson",
-      bio: "Realism and portrait artist known for incredibly detailed work and capturing the essence of subjects in ink.",
-      avatar: "/api/placeholder/150/150",
-      location: "Portland, OR",
-      specialties: ["Realism", "Portraits", "Black & Gray"],
-      instagram: "@marcusjohnson_tattoo",
-      portfolioCount: 31,
-      rating: 4.7,
-      reviewCount: 156,
-      featured: true
-    },
-    {
-      id: "4",
-      name: "Elena Rodriguez",
-      bio: "Japanese traditional and geometric tattoo artist with a modern twist on classic designs.",
-      avatar: "/api/placeholder/150/150",
-      location: "Seattle, WA",
-      specialties: ["Japanese Traditional", "Geometric", "Tribal"],
-      instagram: "@elenarodriguez_ink",
-      portfolioCount: 22,
-      rating: 4.6,
-      reviewCount: 94,
-      featured: false
-    },
-    {
-      id: "5",
-      name: "David Kim",
-      bio: "Neo-traditional and new school artist specializing in bold colors and dynamic compositions.",
-      avatar: "/api/placeholder/150/150",
-      location: "Austin, TX",
-      specialties: ["Neo-Traditional", "New School", "Color"],
-      instagram: "@davidkim_tattoo",
-      portfolioCount: 19,
-      rating: 4.8,
-      reviewCount: 112,
-      featured: false
-    },
-    {
-      id: "6",
-      name: "Lisa Thompson",
-      bio: "Fine line and minimalist specialist creating elegant, subtle tattoos with precision and artistry.",
-      avatar: "/api/placeholder/150/150",
-      location: "Portland, OR",
-      specialties: ["Fine Line", "Minimalist", "Geometric"],
-      instagram: "@lisathompson_ink",
-      portfolioCount: 15,
-      rating: 4.9,
-      reviewCount: 67,
-      featured: false
-    },
-    {
-      id: "7",
-      name: "Sarah Wilson",
-      bio: "Portland-based artist specializing in traditional American and neo-traditional styles with bold colors.",
-      avatar: "/api/placeholder/150/150",
-      location: "Portland, OR",
-      specialties: ["Traditional American", "Neo-Traditional", "Bold Colors"],
-      instagram: "@sarahwilson_tattoo",
-      portfolioCount: 28,
-      rating: 4.7,
-      reviewCount: 134,
-      featured: false
-    },
-    {
-      id: "8",
-      name: "Mike Chen",
-      bio: "Seattle artist known for geometric designs and minimalist blackwork tattoos.",
-      avatar: "/api/placeholder/150/150",
-      location: "Seattle, WA",
-      specialties: ["Geometric", "Minimalist", "Blackwork"],
-      instagram: "@mikechen_ink",
-      portfolioCount: 21,
-      rating: 4.6,
-      reviewCount: 89,
-      featured: false
+  // Handle URL location parameter for map panning (runs on mount and URL changes)
+  useEffect(() => {
+    const urlLocation = searchParams.get('location')
+    const urlSearch = searchParams.get('search')
+    console.log('🗺️ URL params changed - location:', urlLocation, 'search:', urlSearch)
+    console.log('🗺️ Current mapLocation state before update:', mapLocation)
+    if (urlLocation && urlLocation.trim().length > 0) {
+      console.log('🗺️ ⚠️ Setting map location from URL to:', urlLocation)
+      setMapLocation(urlLocation)
+      setLocationFilter(urlLocation)
+      console.log('🗺️ mapLocation state should now be:', urlLocation)
+    } else {
+      console.log('🗺️ ❌ No location parameter in URL or empty')
     }
-  ]
+  }, [searchParams])
+
+  // Parse search query using smart AI-like classification
+  const parseSearchQuery = (query: string) => {
+    console.log('🔍 Smart Search: Analyzing query:', query)
+    
+    // Use the smart search classifier
+    const classification = classifySearch(query)
+    console.log('📊 Classification Result:', formatSearchClassification(classification))
+    
+    // Save classification for UI display
+    setLastSearchClassification(classification)
+    
+    // Reset filters first
+    setLocationFilter('')
+    setStyleFilter('')
+    setMapLocation('')
+    
+    // Apply classification results based on type
+    switch (classification.type) {
+      case 'location':
+        console.log('📍 Location detected:', classification.location)
+        if (classification.location) {
+          setLocationFilter(classification.location)
+          setMapLocation(classification.location)
+        }
+        break
+        
+      case 'style':
+        console.log('🎨 Style detected:', classification.style)
+        if (classification.style) {
+          setStyleFilter(classification.style)
+        }
+        break
+        
+      case 'artist_name':
+        console.log('👤 Artist name detected:', classification.artistName)
+        // Keep in main search query for name matching
+        break
+        
+      case 'combined':
+        console.log('🔄 Combined search detected')
+        if (classification.location) {
+          console.log('  📍 Location:', classification.location)
+          setLocationFilter(classification.location)
+          setMapLocation(classification.location)
+        }
+        if (classification.style) {
+          console.log('  🎨 Style:', classification.style)
+          setStyleFilter(classification.style)
+        }
+        if (classification.artistName) {
+          console.log('  👤 Artist:', classification.artistName)
+          // This will be used in general search filtering
+        }
+        break
+        
+      case 'general':
+        console.log('🔎 General search - will search all fields')
+        // Keep query as-is for general search
+        break
+    }
+    
+    console.log('✅ Filters applied:', {
+      location: locationFilter,
+      style: styleFilter,
+      mapLocation: mapLocation
+    })
+  }
+
+  // Use centralized artist data
+  const mockArtists: Artist[] = ALL_ARTISTS
 
   const fetchArtists = async () => {
     setIsLoading(true)
@@ -164,7 +142,7 @@ export default function ExplorePage() {
       
       let filteredArtists = [...mockArtists]
       
-      // Search by name, bio, specialties, or location
+      // Enhanced search by name, bio, specialties, or location
       if (searchQuery) {
         const searchTerms = searchQuery.toLowerCase().trim().split(/\s+/).filter(term => term.length > 0)
         
@@ -175,27 +153,44 @@ export default function ExplorePage() {
               artist.name.toLowerCase().includes(term) ||
               artist.bio.toLowerCase().includes(term) ||
               artist.specialties.some(specialty => specialty.toLowerCase().includes(term)) ||
-              artist.location.toLowerCase().includes(term)
+              artist.location.toLowerCase().includes(term) ||
+              artist.instagram.toLowerCase().includes(term)
             )
           })
         }
       }
       
-      // Filter by location
+      // Filter by location (more flexible matching)
       if (locationFilter) {
-        const location = locationFilter.toLowerCase()
-        filteredArtists = filteredArtists.filter(artist => 
-          artist.location.toLowerCase().includes(location)
-        )
+        const searchLocation = locationFilter.toLowerCase().trim()
+        filteredArtists = filteredArtists.filter(artist => {
+          // Check if the artist's location contains the searched city or state
+          const artistLocation = artist.location.toLowerCase()
+          const cityMatch = artistLocation.includes(searchLocation)
+          const stateMatch = artistLocation.includes(searchLocation)
+          return cityMatch || stateMatch
+        })
       }
       
-      // Filter by style
+      // Filter by style (more flexible matching)
       if (styleFilter) {
         const style = styleFilter.toLowerCase()
-        filteredArtists = filteredArtists.filter(artist => 
-          artist.specialties.some(specialty => specialty.toLowerCase().includes(style))
-        )
+        console.log('Filtering by style:', style)
+        const beforeCount = filteredArtists.length
+        filteredArtists = filteredArtists.filter(artist => {
+          const hasStyle = artist.specialties.some(specialty => 
+            specialty.toLowerCase().includes(style) ||
+            specialty.toLowerCase().replace(/\s+/g, '').includes(style.replace(/\s+/g, ''))
+          )
+          console.log(`Artist ${artist.name} has style ${style}:`, hasStyle, 'Specialties:', artist.specialties)
+          return hasStyle
+        })
+        console.log(`Style filter applied: ${beforeCount} -> ${filteredArtists.length} artists`)
       }
+      
+      // Note: When both locationFilter and styleFilter are specified,
+      // the filtering above will show only artists that meet BOTH criteria
+      // because the filters are applied sequentially (AND logic)
       
       // Sort artists
       if (sortBy) {
@@ -229,7 +224,64 @@ export default function ExplorePage() {
   }
 
   const handleSearch = () => {
-    fetchArtists()
+    console.log('🔍 Starting fresh search - clearing previous results')
+    
+    // Clear previous search results and classification indicator
+    setArtists([])
+    setIsLoading(true)
+    setLastSearchClassification(null) // Clear previous classification
+    
+    // Start with filter box values (these take priority if manually filled)
+    let finalLocationFilter = locationFilter
+    let finalStyleFilter = styleFilter
+    let finalMapLocation = locationFilter // Map location follows location filter (will be updated below)
+    
+    // ALWAYS run smart search if there's a query in the main search box
+    // This allows users to do new searches even after previous filters are populated
+    if (searchQuery && searchQuery.trim().length > 0) {
+      const classification = classifySearch(searchQuery.trim())
+      console.log('🔍 Search classification:', classification)
+
+      // Save classification for UI display
+      setLastSearchClassification(classification)
+
+      // Smart search populates filter boxes ONLY if user hasn't manually edited them
+      if (classification.style && !manualStyleEdit) {
+        finalStyleFilter = classification.style
+        console.log('✅ Populating style filter with:', classification.style)
+      } else if (manualStyleEdit) {
+        console.log('⏭️ Skipping style override - user manually edited it')
+      }
+      
+      if (classification.location && !manualLocationEdit) {
+        finalLocationFilter = classification.location
+        console.log('✅ Populating location filter with:', classification.location)
+      } else if (classification.type === 'location' && !manualLocationEdit) {
+        // If classified as location but no specific location extracted, use the whole query
+        finalLocationFilter = searchQuery.trim()
+        console.log('✅ Populating location filter with full query:', searchQuery.trim())
+      } else if (manualLocationEdit) {
+        console.log('⏭️ Skipping location override - user manually edited it')
+      }
+    }
+    
+    // Update finalMapLocation AFTER determining the final location filter
+    finalMapLocation = finalLocationFilter
+    
+    // Update state with final filter values - this will populate the input boxes
+    console.log('📝 Setting filters - Location:', finalLocationFilter, 'Style:', finalStyleFilter, 'Map:', finalMapLocation)
+    setStyleFilter(finalStyleFilter)
+    setLocationFilter(finalLocationFilter)
+    setMapLocation(finalMapLocation)
+    
+    // Reset manual edit flags after search completes - ready for next search
+    setManualLocationEdit(false)
+    setManualStyleEdit(false)
+
+    // Small delay to ensure state updates are applied, then fetch
+    setTimeout(() => {
+      fetchArtists()
+    }, 50)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -259,9 +311,9 @@ export default function ExplorePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black text-white">
       {/* Header Section */}
-      <section className="pt-20 pb-12">
+      <section className="pt-20 pb-8">
         <div className="container">
           <h1 className="display text-4xl md:text-5xl text-white mb-4">
             Browse Artists
@@ -272,91 +324,181 @@ export default function ExplorePage() {
         </div>
       </section>
 
-      {/* Search and Filters Section */}
-      <section className="py-12 bg-surface">
+      {/* Map Section - Full Width Edge to Edge */}
+      <section className="relative">
+        {/* Full Width Interactive Map - Edge to Edge */}
+        <div className="w-full">
+          <LeafletMap searchLocation={mapLocation} styleFilter={styleFilter} minReviews={minReviews} />
+        </div>
+      </section>
+
+      {/* Search Section */}
+      <section className="py-10 -mt-8 bg-black relative z-10">
         <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          {/* First Row - Search input and Sort By */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             {/* Search */}
-            <div className="md:col-span-2 relative">
-              <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
+            <div className="md:col-span-2 relative flex items-center">
+              <MagnifyingGlassIcon className="absolute left-4 w-5 h-5 text-gray-400 pointer-events-none z-10" style={{top: '50%', transform: 'translateY(-50%)'}} />
               <input
                 type="text"
-                placeholder="Search artists, styles, locations, or keywords... (multi-word search supported)"
+                placeholder="Search artists, styles, keywords..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="input pr-4"
-                style={{paddingLeft: '3.5rem'}}
+                className="w-full py-3 pl-14 pr-4 bg-transparent border-2 border-gray-400 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200"
               />
             </div>
 
+            {/* Min Reviews Slider */}
+            <div className="relative px-2">
+              <label className="block text-sm text-gray-400 font-medium mb-2">
+                Min Reviews: {minReviews}+
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="200"
+                value={minReviews}
+                onChange={(e) => setMinReviews(parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                style={{
+                  background: `linear-gradient(to right, #20B2AA 0%, #20B2AA ${(minReviews / 200) * 100}%, #374151 ${(minReviews / 200) * 100}%, #374151 100%)`
+                }}
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>0</span>
+                <span>200</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Second Row - Location, Style, Search Button, and Clear Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             {/* Location Filter */}
             <div className="relative">
               <MapPinIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
               <input
                 type="text"
-                placeholder="Enter location..."
+                placeholder="Enter a location"
                 value={locationFilter}
-                onChange={(e) => setLocationFilter(e.target.value)}
+                onChange={(e) => {
+                  setLocationFilter(e.target.value)
+                  setManualLocationEdit(true) // User manually edited this field
+                }}
                 onKeyPress={handleKeyPress}
-                className="input pr-4"
+                className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200"
                 style={{paddingLeft: '3.5rem'}}
               />
             </div>
 
             {/* Style Filter */}
-            <div>
+            <div className="relative">
               <select
                 value={styleFilter}
-                onChange={(e) => setStyleFilter(e.target.value)}
-                className="input appearance-none"
+                onChange={(e) => {
+                  setStyleFilter(e.target.value)
+                  setManualStyleEdit(true) // User manually edited this field
+                }}
+                className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-full text-white focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200 appearance-none cursor-pointer"
+                style={{paddingRight: '3rem'}}
               >
-                <option value="">All Styles</option>
+                <option value="" className="bg-gray-800 text-white">All Styles</option>
                 {styles.map((style) => (
-                  <option key={style} value={style.toLowerCase()}>
+                  <option key={style} value={style.toLowerCase()} className="bg-gray-800 text-white">
                     {style}
                   </option>
                 ))}
               </select>
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Search Button */}
+            <div>
+              <button
+                onClick={handleSearch}
+                className="w-full px-8 py-3 bg-white border-2 border-gray-400 text-black rounded-full font-semibold hover:bg-gray-100 transition-all duration-200 text-center"
+              >
+                Search
+              </button>
+            </div>
+
+            {/* Clear Filters Button */}
+            <div>
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  setLocationFilter('')
+                  setStyleFilter('')
+                  setMinReviews(0)
+                  // Don't reset mapLocation - keep map where user left it
+                  setLastSearchClassification(null)
+                  setManualLocationEdit(false)
+                  setManualStyleEdit(false)
+                  fetchArtists()
+                }}
+                className="w-full px-8 py-3 bg-transparent border-2 border-gray-400 text-white rounded-full font-semibold hover:bg-gray-700 transition-all duration-200 text-center"
+              >
+                Clear Filters
+              </button>
             </div>
           </div>
           
-          {/* Search Hint */}
-          <div className="mb-6">
-            <p className="text-sm text-gray-400">
-              💡 <strong>Search Tip:</strong> Use multiple words to find artists that match ALL criteria. 
-              Try "portland sarah" to find artists named Sarah in Portland, or "traditional watercolor" to find artists specializing in both styles.
-            </p>
+          {/* Smart Search Indicator */}
+          {lastSearchClassification && lastSearchClassification.type !== 'general' && (
+            <div className="mt-3 py-2 px-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-400">Smart Search detected:</span>
+                {lastSearchClassification.type === 'location' && (
+                  <span className="text-orange-400 font-medium">
+                    📍 Location: {lastSearchClassification.location}
+                  </span>
+                )}
+                {lastSearchClassification.type === 'style' && (
+                  <span className="text-yellow-400 font-medium">
+                    🎨 Style: {lastSearchClassification.style}
+                  </span>
+                )}
+                {lastSearchClassification.type === 'artist_name' && (
+                  <span className="text-teal-400 font-medium">
+                    👤 Artist: {lastSearchClassification.artistName}
+                  </span>
+                )}
+                {lastSearchClassification.type === 'combined' && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {lastSearchClassification.location && (
+                      <span className="text-orange-400 font-medium">
+                        📍 {lastSearchClassification.location}
+                      </span>
+                    )}
+                    {lastSearchClassification.style && (
+                      <span className="text-yellow-400 font-medium">
+                        🎨 {lastSearchClassification.style}
+                      </span>
+                    )}
+                    {lastSearchClassification.artistName && (
+                      <span className="text-teal-400 font-medium">
+                        👤 {lastSearchClassification.artistName}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <span className="ml-auto text-xs text-gray-500">
+                  {(lastSearchClassification.confidence * 100).toFixed(0)}% confidence
+                </span>
           </div>
-
-          {/* Sort and Search Button */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <label className="text-sm text-gray-400">Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent border border-gray-600 text-white px-3 py-2 rounded text-sm"
-              >
-                <option value="rating">Highest Rated</option>
-                <option value="reviews">Most Reviews</option>
-                <option value="portfolio">Portfolio Size</option>
-                <option value="recent">Recently Active</option>
-              </select>
             </div>
-            
-            <button
-              onClick={handleSearch}
-              className="btn btn-primary"
-            >
-              Search Artists
-            </button>
-          </div>
+          )}
+
         </div>
       </section>
 
       {/* Results Section */}
-      <section className="py-20">
+      <section className="py-20 bg-black">
         <div className="container">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

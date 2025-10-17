@@ -60,6 +60,33 @@ export default withAuth(
       return NextResponse.redirect(redirectUrl)
     }
 
+    // Role-based access control for protected routes
+    if (isLoggedIn && nextauth?.token) {
+      const userRole = nextauth.token.role
+      
+      // Admin-only routes
+      if (path.startsWith('/admin') && userRole !== 'ADMIN') {
+        return NextResponse.redirect(new URL('/dashboard', nextUrl))
+      }
+      
+      // Artist-only routes
+      if (path.startsWith('/dashboard/portfolio') && userRole !== 'ARTIST') {
+        return NextResponse.redirect(new URL('/dashboard', nextUrl))
+      }
+      
+      // Shop owner routes
+      if (path.startsWith('/dashboard/shops') && userRole !== 'SHOP_OWNER' && userRole !== 'ADMIN') {
+        return NextResponse.redirect(new URL('/dashboard', nextUrl))
+      }
+      
+      // Profile setup redirect for incomplete profiles
+      if (path.startsWith('/dashboard') && !path.includes('/profile-setup')) {
+        // Check if user needs to complete profile setup
+        // This would typically check a database field
+        // For now, we'll skip this check
+      }
+    }
+
     return NextResponse.next()
   },
   {

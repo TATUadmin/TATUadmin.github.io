@@ -55,7 +55,7 @@ export default function ContactArtistPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <section className="bg-surface py-8">
+      <section className="bg-black py-8 border-b border-gray-800">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-4 mb-6">
             <Link
@@ -65,8 +65,8 @@ export default function ContactArtistPage() {
               <ArrowLeftIcon className="w-6 h-6" />
             </Link>
             <div>
-              <h1 className="display text-2xl text-white">Contact Artist</h1>
-              <p className="body text-gray-400">Get in touch with the artist</p>
+              <h1 className="text-2xl font-bold text-white">Contact Artist</h1>
+              <p className="text-gray-400">Get in touch with the artist</p>
             </div>
           </div>
         </div>
@@ -75,8 +75,8 @@ export default function ContactArtistPage() {
       {/* Contact Form */}
       <section className="py-12">
         <div className="container mx-auto px-4 max-w-2xl">
-          <div className="card p-8">
-            <h2 className="headline text-xl text-white mb-6">Send Message</h2>
+          <div className="bg-transparent border-2 border-gray-400 rounded-lg p-8">
+            <h2 className="text-xl font-bold text-white mb-6">Send Message</h2>
             
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Personal Information */}
@@ -92,7 +92,7 @@ export default function ContactArtistPage() {
                     required
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="input w-full"
+                    className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -108,7 +108,7 @@ export default function ContactArtistPage() {
                     required
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="input w-full"
+                    className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -124,7 +124,7 @@ export default function ContactArtistPage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="input w-full"
+                  className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200"
                   placeholder="Enter your phone number"
                 />
               </div>
@@ -140,7 +140,7 @@ export default function ContactArtistPage() {
                   required
                   value={formData.subject}
                   onChange={handleInputChange}
-                  className="input w-full"
+                  className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200"
                   placeholder="What is this about?"
                 />
               </div>
@@ -156,13 +156,13 @@ export default function ContactArtistPage() {
                   rows={6}
                   value={formData.message}
                   onChange={handleInputChange}
-                  className="input w-full resize-none"
+                  className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200 resize-none"
                   placeholder="Tell the artist what you'd like to discuss..."
                 />
               </div>
 
               {/* Contact Information */}
-              <div className="bg-surface-2 p-4 rounded-lg border border-gray-600">
+              <div className="bg-transparent p-4 rounded-lg border-2 border-gray-400">
                 <h3 className="text-white font-medium mb-3">Other Ways to Connect</h3>
                 <div className="space-y-2 text-sm text-gray-300">
                   <div className="flex items-center gap-2">
@@ -184,14 +184,14 @@ export default function ContactArtistPage() {
               <div className="flex gap-4 pt-4">
                 <Link
                   href={`/artist/${artistId}`}
-                  className="btn btn-secondary flex-1"
+                  className="flex-1 px-6 py-3 bg-transparent border-2 border-gray-400 text-white rounded-lg font-semibold hover:bg-gray-900 transition-all duration-200 text-center"
                 >
                   Cancel
                 </Link>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="btn btn-primary flex-1"
+                  className="flex-1 px-6 py-3 bg-white border-2 border-gray-400 text-black rounded-lg font-semibold hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>

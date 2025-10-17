@@ -1,18 +1,44 @@
 'use client'
 
 import { useState } from 'react'
+import { signIn, getSession } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { toast } from 'react-hot-toast'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Mock functionality - just show an alert
-    alert('Sign in functionality coming soon! This is a demo interface.')
+    setIsLoading(true)
+
+    try {
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false
+      })
+
+      if (result?.error) {
+        toast.error('Invalid credentials. Please try again.')
+      } else if (result?.ok) {
+        toast.success('Signed in successfully!')
+        router.push(callbackUrl)
+      }
+    } catch (error) {
+      console.error('Sign in error:', error)
+      toast.error('An error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -46,10 +72,10 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Coming Soon Banner */}
+        {/* Authentication Status */}
         <div className="bg-surface border border-gray-600 rounded-lg p-4 text-center">
-          <p className="text-white text-sm font-medium">🚧 Demo Interface</p>
-          <p className="text-gray-400 text-xs mt-1">Authentication coming soon</p>
+          <p className="text-white text-sm font-medium">🔐 Secure Authentication</p>
+          <p className="text-gray-400 text-xs mt-1">Sign in with your TATU account</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -94,9 +120,17 @@ export default function LoginPage() {
           <div className="space-y-3">
             <button
               type="submit"
-              className="btn btn-primary w-full"
+              disabled={isLoading}
+              className="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </button>
 
             <div className="relative">

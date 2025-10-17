@@ -143,69 +143,34 @@ export default function AppointmentsPage() {
   const fetchAppointments = async () => {
     setIsLoading(true)
     try {
-      // Mock data for now - in real app, this would come from API
-      const mockAppointments: Appointment[] = [
-        {
-          id: '1',
-          clientId: 'client1',
-          clientName: 'Sarah Johnson',
-          clientEmail: 'sarah.j@email.com',
-          clientPhone: '+1 (555) 123-4567',
-          serviceName: 'Consultation + Small Tattoo',
-          serviceType: 'tattoo',
-          date: '2024-02-15',
-          startTime: '14:00',
-          endTime: '16:00',
-          duration: 120,
-          status: 'confirmed',
-          amount: 15000,
-          notes: 'Client wants a small geometric design on wrist',
-          isFirstTime: true,
-          tattooSize: 'small',
-          placement: 'left wrist',
-          createdAt: '2024-02-01T10:00:00Z'
-        },
-        {
-          id: '2',
-          clientId: 'client2',
-          clientName: 'Mike Chen',
-          clientEmail: 'mike.chen@email.com',
-          clientPhone: '+1 (555) 987-6543',
-          serviceName: 'Initial Consultation',
-          serviceType: 'consultation',
-          date: '2024-02-16',
-          startTime: '10:00',
-          endTime: '11:00',
-          duration: 60,
-          status: 'pending',
-          amount: 5000,
-          notes: 'Interested in Japanese-style sleeve',
-          isFirstTime: false,
-          createdAt: '2024-02-02T14:30:00Z'
-        },
-        {
-          id: '3',
-          clientId: 'client3',
-          clientName: 'Emma Rodriguez',
-          clientEmail: 'emma.r@email.com',
-          clientPhone: '+1 (555) 456-7890',
-          serviceName: 'Large Tattoo Session',
-          serviceType: 'tattoo',
-          date: '2024-02-17',
-          startTime: '13:00',
-          endTime: '17:00',
-          duration: 240,
-          status: 'confirmed',
-          amount: 40000,
-          notes: 'Full back piece - traditional style',
-          isFirstTime: false,
-          tattooSize: 'extra-large',
-          placement: 'full back',
-          createdAt: '2024-02-03T09:15:00Z'
-        }
-      ]
-
-      setAppointments(mockAppointments)
+      const response = await fetch('/api/appointments')
+      if (!response.ok) {
+        throw new Error('Failed to fetch appointments')
+      }
+      
+      const data = await response.json()
+      const appointments: Appointment[] = data.map((appointment: any) => ({
+        id: appointment.id,
+        clientId: appointment.clientId,
+        clientName: appointment.clientName,
+        clientEmail: appointment.clientEmail,
+        clientPhone: appointment.clientPhone,
+        serviceName: appointment.serviceName,
+        serviceType: appointment.serviceType,
+        date: appointment.date,
+        startTime: appointment.startTime,
+        endTime: appointment.endTime,
+        duration: appointment.duration,
+        status: appointment.status,
+        amount: appointment.amount,
+        notes: appointment.notes,
+        isFirstTime: appointment.isFirstTime || false,
+        tattooSize: appointment.tattooSize,
+        placement: appointment.placement,
+        createdAt: appointment.createdAt
+      }))
+      
+      setAppointments(appointments)
     } catch (error) {
       console.error('Error fetching appointments:', error)
       toast.error('Failed to load appointments')

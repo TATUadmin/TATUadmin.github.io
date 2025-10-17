@@ -82,6 +82,10 @@ model User {
   connectedAccounts ConnectedAccount[]
   unifiedMessages   UnifiedMessage[]
   messageThreads    MessageThread[]
+  
+  // Payments
+  clientPayments    Payment[] @relation("ClientPayments")
+  artistPayments    Payment[] @relation("ArtistPayments")
 }
 
 model Profile {
@@ -185,6 +189,9 @@ model Appointment {
   service     Service          @relation(fields: [serviceId], references: [id])
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  
+  // Payments
+  payments    Payment[]
 
   @@index([shopId])
   @@index([artistId])
@@ -450,4 +457,51 @@ model Favorite {
   @@unique([userId, artistId], name: "userId_artistId")
   @@index([userId])
   @@index([artistId])
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentType {
+  CONSULTATION
+  DEPOSIT
+  FULL_PAYMENT
+  REFUND
+  PLATFORM_FEE
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  appointmentId     String?
+  appointment       Appointment?  @relation(fields: [appointmentId], references: [id])
+  clientId          String
+  client            User          @relation("ClientPayments", fields: [clientId], references: [id])
+  artistId          String
+  artist            User          @relation("ArtistPayments", fields: [artistId], references: [id])
+  amount            Int           // Amount in cents
+  currency          String        @default("usd")
+  status            PaymentStatus  @default(PENDING)
+  type              PaymentType
+  stripePaymentId   String?       @unique
+  stripeSessionId   String?       @unique
+  platformFee       Int           // Platform fee in cents
+  artistAmount      Int           // Amount going to artist in cents
+  description       String?
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  completedAt       DateTime?
+
+  @@index([clientId])
+  @@index([artistId])
+  @@index([appointmentId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
 }
