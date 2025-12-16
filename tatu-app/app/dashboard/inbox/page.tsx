@@ -4,6 +4,8 @@ import { MessageList } from '@/components/inbox/MessageList'
 import { MessageSidebar } from '@/components/inbox/MessageSidebar'
 import { redirect } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default async function InboxPage() {
   const session = await auth()
   if (!session?.user) {

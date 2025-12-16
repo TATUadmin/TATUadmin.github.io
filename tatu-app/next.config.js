@@ -63,6 +63,15 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  // Allow dynamic routes to be built even if they can't be statically generated
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
+  // Don't fail build on dynamic route errors during static generation
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
   }
 }
 

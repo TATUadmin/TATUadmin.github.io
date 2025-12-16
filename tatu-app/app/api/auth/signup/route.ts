@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-import { sendVerificationEmail } from '@/lib/email'
+import { sendWelcomeEmail } from '@/lib/email-service'
 import crypto from 'crypto'
 import { z } from 'zod'
 import { Prisma } from '@prisma/client'
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
     })
 
     // Send verification email
-    await sendVerificationEmail(user.email, token)
+    await sendWelcomeEmail(user.email, user.name || 'User', token)
 
     return NextResponse.json(
       { 

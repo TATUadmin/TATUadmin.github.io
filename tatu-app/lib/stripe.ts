@@ -13,7 +13,15 @@ export const stripe = process.env.STRIPE_SECRET_KEY
 
 export const STRIPE_CONFIG = {
   currency: 'usd',
-  consultationFee: 5000, // $50 in cents
-  minimumPayment: 2000, // $20 in cents
-  platformFeePercentage: 0.10, // 10% platform fee
+  // Card hold amounts
+  appointmentHoldAmount: 5000, // $50 hold for appointments
+  minimumHoldAmount: 2000, // $20 minimum hold
+  // Visibility boost pricing
+  visibilityBoostDaily: 1000, // $10/day for visibility boost
+  visibilityBoostWeekly: 5000, // $50/week for visibility boost
+  visibilityBoostMonthly: 15000, // $150/month for visibility boost
+  // Donation amounts
+  donationAmounts: [500, 1000, 2500, 5000, 10000], // $5, $10, $25, $50, $100
+  // Platform fees
+  platformFeePercentage: 0.05, // 5% platform fee (reduced for new model)
 } 

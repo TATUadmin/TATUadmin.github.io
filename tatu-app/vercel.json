@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/sync-messages",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 8 * * *"
     },
     {
       "path": "/api/cron/appointment-reminders",

@@ -3,7 +3,19 @@ import { ArtistInvitationEmail } from '@/emails/ArtistInvitationEmail'
 import { AppointmentConfirmationEmail } from '@/emails/AppointmentConfirmationEmail'
 import { render } from '@react-email/render'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy initialization to avoid build-time errors when env var is not set
+let resendInstance: Resend | null = null
+
+const getResend = () => {
+  if (!resendInstance) {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY is not set')
+    }
+    resendInstance = new Resend(apiKey)
+  }
+  return resendInstance
+}
 
 export const sendArtistInvitation = async ({
   artistEmail,
@@ -25,7 +37,7 @@ export const sendArtistInvitation = async ({
       })
     )
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'TATU <notifications@tatu.app>',
       to: artistEmail,
       subject: `You've been invited to join ${shopName} on TATU`,
@@ -54,7 +66,7 @@ export const sendArtistRemovalNotification = async ({
   shopName: string
 }) => {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'TATU <notifications@tatu.app>',
       to: artistEmail,
       subject: `Update regarding your association with ${shopName}`,
@@ -89,7 +101,7 @@ export const sendShopStatusUpdateNotification = async ({
   newStatus: string
 }) => {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'TATU <notifications@tatu.app>',
       to: ownerEmail,
       subject: `Shop Status Update: ${shopName}`,
@@ -155,7 +167,7 @@ export const sendAppointmentConfirmation = async ({
       })
     )
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'TATU <notifications@tatu.app>',
       to: clientEmail,
       subject: `Appointment Confirmed: ${appointmentTitle} at ${shopName}`,
@@ -188,7 +200,7 @@ export const sendAppointmentCancellation = async ({
   startTime: Date
 }) => {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'TATU <notifications@tatu.app>',
       to: clientEmail,
       subject: `Appointment Cancelled: ${appointmentTitle} at ${shopName}`,
@@ -234,7 +246,7 @@ export const sendAppointmentReminder = async ({
   notes?: string
 }) => {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'TATU <notifications@tatu.app>',
       to: clientEmail,
       subject: `Reminder: Your Appointment at ${shopName} Tomorrow`,

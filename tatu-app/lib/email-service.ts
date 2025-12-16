@@ -47,11 +47,11 @@ export class EmailService {
   private config: EmailConfig
 
   constructor() {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY is not set')
-    }
-
-    this.resend = new Resend(process.env.RESEND_API_KEY)
+    // Allow initialization during build time even if key is not set
+    // Will throw error at runtime when actually sending emails
+    // Use a dummy key during build to prevent Resend from throwing
+    const apiKey = process.env.RESEND_API_KEY || 're_dummy_key_for_build_time_only'
+    this.resend = new Resend(apiKey)
     this.config = {
       from: process.env.EMAIL_FROM || 'TATU <noreply@tatu.app>',
       replyTo: process.env.EMAIL_REPLY_TO || 'support@tatu.app',
@@ -74,6 +74,9 @@ export class EmailService {
     template: EmailTemplate,
     config?: Partial<EmailConfig>
   ): Promise<EmailResult> {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not set')
+    }
     try {
       const recipients = Array.isArray(to) ? to : [to]
       const toEmails = recipients.filter(r => r.type !== 'cc' && r.type !== 'bcc')

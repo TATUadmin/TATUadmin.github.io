@@ -1,119 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe, STRIPE_CONFIG } from '@/lib/stripe'
 import { PrismaClient } from '@prisma/client'
+import { requireAuth } from '@/lib/auth-middleware'
+import { ValidationSchemas } from '@/lib/validation'
+import { ApiResponse, withErrorHandling } from '@/lib/api-response'
+import { rateLimiters } from '@/lib/rate-limit'
+import { logger } from '@/lib/monitoring'
+import { cacheService } from '@/lib/cache'
+import { CacheTags, CacheKeyGenerators } from '@/lib/cache'
 
 const prisma = new PrismaClient()
 
-export async function POST(request: NextRequest) {
-  try {
-    // Check if Stripe is configured
-    if (!stripe) {
-      return NextResponse.json(
-        { error: 'Payment processing is not configured. Please set up Stripe environment variables.' },
-        { status: 503 }
-      )
-    }
-
-    const { 
-      appointmentId, 
-      artistId, 
-      amount, 
-      paymentType, 
-      description 
-    } = await request.json()
-
-    if (!appointmentId || !artistId || !amount || !paymentType) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
-    }
-
-    // Validate minimum payment amount
-    if (amount < STRIPE_CONFIG.minimumPayment) {
-      return NextResponse.json(
-        { error: `Minimum payment amount is ${STRIPE_CONFIG.minimumPayment / 100}` },
-        { status: 400 }
-      )
-    }
-
-    // Get artist and appointment details
-    const [artist, appointment] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: artistId },
-        include: { profile: true }
-      }),
-      prisma.appointment.findUnique({
-        where: { id: appointmentId }
-      })
-    ])
-
-    if (!artist || !appointment) {
-      return NextResponse.json(
-        { error: 'Artist or appointment not found' },
-        { status: 404 }
-      )
-    }
-
-    // Calculate platform fee
-    const platformFee = Math.round(amount * STRIPE_CONFIG.platformFeePercentage)
-    const artistAmount = amount - platformFee
-
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: STRIPE_CONFIG.currency,
-            product_data: {
-              name: `${paymentType === 'consultation' ? 'Consultation' : 'Tattoo'} Payment`,
-              description: description || `Payment for appointment ${appointmentId}`,
-            },
-            unit_amount: amount,
-          },
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        appointmentId,
-        artistId,
-        paymentType,
-        platformFee: platformFee.toString(),
-        artistAmount: artistAmount.toString(),
-      },
-      success_url: `${process.env.NEXTAUTH_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/payment/cancelled`,
-      payment_intent_data: {
-        application_fee_amount: platformFee,
-        metadata: {
-          appointmentId,
-          artistId,
-          paymentType,
-        },
-      },
-    })
-
-    // Store payment intent in database (TODO: Add Payment model to schema)
-    console.log('Payment session created:', {
-      sessionId: session.id,
-      appointmentId,
-      artistId,
-      amount,
-      platformFee,
-      paymentType
-    })
-
-    return NextResponse.json({ 
-      sessionId: session.id,
-      url: session.url 
-    })
-  } catch (error: any) {
-    console.error('Payment error:', error)
-    return NextResponse.json(
-      { error: 'Failed to create payment session' },
-      { status: 500 }
-    )
-  }
-} 
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  // This endpoint is deprecated - redirect to new payment system
+  return ApiResponse.gone(
+    'This payment endpoint is deprecated. Please use the new payment system: /api/payments/hold for appointment holds, /api/payments/visibility-boost for artist visibility, and /api/payments/donation for donations.',
+    { 
+      newEndpoints: {
+        appointmentHold: '/api/payments/hold',
+        visibilityBoost: '/api/payments/visibility-boost', 
+        donation: '/api/payments/donation'
+      }
+    },
+    { requestId: 'deprecated' }
+  )
+}) 

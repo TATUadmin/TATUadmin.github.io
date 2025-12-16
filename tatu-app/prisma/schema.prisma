@@ -82,6 +82,13 @@ model User {
   connectedAccounts ConnectedAccount[]
   unifiedMessages   UnifiedMessage[]
   messageThreads    MessageThread[]
+  
+  // Payment relations
+  visibilityBoosts  VisibilityBoost[]
+  artistPayments    Payment[]        @relation("ArtistPayments")
+  clientPayments    Payment[]        @relation("ClientPayments")
+  artistDonations   Donation[]       @relation("ArtistDonations")
+  clientDonations   Donation[]       @relation("ClientDonations")
 }
 
 model Profile {
@@ -94,6 +101,10 @@ model Profile {
   location    String?
   specialties String[]  // Array of tattoo styles/specialties
   completedRegistration Boolean @default(false)
+  
+  // Visibility boost fields
+  visibilityBoostActive Boolean @default(false)
+  visibilityBoostEndDate DateTime?
   
   // Relations
   userId      String    @unique
@@ -185,6 +196,10 @@ model Appointment {
   service     Service          @relation(fields: [serviceId], references: [id])
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  
+  // Payment relations
+  payments    Payment[]
+  donations   Donation[]
 
   @@index([shopId])
   @@index([artistId])
@@ -450,4 +465,109 @@ model Favorite {
   @@unique([userId, artistId], name: "userId_artistId")
   @@index([userId])
   @@index([artistId])
+}
+
+// New Payment Models
+
+enum PaymentStatus {
+  PENDING
+  HELD
+  CAPTURED
+  RELEASED
+  REFUNDED
+  FAILED
+  CANCELLED
+}
+
+enum PaymentType {
+  APPOINTMENT_HOLD
+  VISIBILITY_BOOST
+  DONATION
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  appointmentId         String?
+  artistId              String
+  clientId              String
+  amount                Int           // Amount in cents
+  currency              String        @default("usd")
+  status                PaymentStatus @default(PENDING)
+  type                  PaymentType
+  stripePaymentIntentId String?       @unique
+  stripeChargeId        String?
+  metadata              Json?         // Additional payment data
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  // Relations
+  appointment           Appointment?  @relation(fields: [appointmentId], references: [id])
+  artist                User          @relation("ArtistPayments", fields: [artistId], references: [id])
+  client                User          @relation("ClientPayments", fields: [clientId], references: [id])
+
+  @@index([appointmentId])
+  @@index([artistId])
+  @@index([clientId])
+  @@index([status])
+  @@index([type])
+}
+
+enum VisibilityBoostStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model VisibilityBoost {
+  id                    String                @id @default(cuid())
+  artistId              String
+  amount                Int                   // Amount in cents
+  duration              String                // DAILY, WEEKLY, MONTHLY
+  durationDays          Int
+  startDate             DateTime
+  endDate               DateTime
+  status                VisibilityBoostStatus @default(ACTIVE)
+  stripePaymentIntentId String?               @unique
+  metadata              Json?                 // Additional boost data
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  // Relations
+  artist                User                  @relation(fields: [artistId], references: [id])
+
+  @@index([artistId])
+  @@index([status])
+  @@index([endDate])
+}
+
+enum DonationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Donation {
+  id                    String          @id @default(cuid())
+  appointmentId         String
+  artistId              String
+  clientId              String
+  amount                Int             // Amount in cents
+  currency              String          @default("usd")
+  message               String?         // Optional donation message
+  status                DonationStatus  @default(PENDING)
+  stripePaymentIntentId String?         @unique
+  metadata              Json?           // Additional donation data
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  // Relations
+  appointment           Appointment     @relation(fields: [appointmentId], references: [id])
+  artist                User            @relation("ArtistDonations", fields: [artistId], references: [id])
+  client                User            @relation("ClientDonations", fields: [clientId], references: [id])
+
+  @@index([appointmentId])
+  @@index([artistId])
+  @@index([clientId])
+  @@index([status])
 }

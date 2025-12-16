@@ -79,6 +79,5 @@ export async function GET() {
   }
 }
 
-// Add Vercel Cron configuration
-export const runtime = 'edge'
-export const preferredRegion = ['iad1'] // Use the region closest to your users 
+// Note: Using Node.js runtime (not Edge) because Prisma requires Node.js runtime
+// Vercel Cron Jobs work fine with Node.js runtime 

@@ -99,8 +99,15 @@ export const authOptions = {
 }
 
 // Simple auth function for server components
+// This will be used by server components to get the current session
 export async function auth() {
-  // This is a placeholder - in production you'd use NextAuth's auth function
-  // For now, return null to avoid build errors
-  return null;
+  // Import NextAuth's auth function dynamically to avoid build issues
+  try {
+    const { auth: nextAuth } = await import('@/lib/auth')
+    return await nextAuth()
+  } catch (error) {
+    // If auth fails (e.g., missing env vars), return null instead of throwing
+    console.error('Auth error:', error)
+    return null
+  }
 } 
