@@ -579,25 +579,25 @@ export default function PortfolioPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-gray-950 shadow-sm border-b border-gray-900">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Portfolio Management</h1>
-              <p className="text-gray-600 mt-1">Manage your tattoo portfolio and showcase your work</p>
+              <h1 className="text-3xl font-bold text-white">Portfolio Management</h1>
+              <p className="text-gray-400 mt-1">Manage your tattoo portfolio and showcase your work</p>
             </div>
             <button
               onClick={() => setShowUploadModal(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center shadow-lg"
+              className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors inline-flex items-center"
             >
               <PlusIcon className="h-5 w-5 mr-2" />
               Add New Work
@@ -607,7 +607,7 @@ export default function PortfolioPage() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white border-b">
+      <div className="bg-gray-950 border-b border-gray-900">
         <div className="max-w-7xl mx-auto px-4">
           <nav className="flex space-x-8">
             {[
@@ -621,8 +621,8 @@ export default function PortfolioPage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-white text-white'
+                    : 'border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-700'
                 }`}
               >
                 {tab.icon}
@@ -640,50 +640,50 @@ export default function PortfolioPage() {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
                 <div className="flex items-center">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <PhotoIcon className="h-6 w-6 text-blue-600" />
+                  <div className="p-2 bg-gray-800 rounded-lg">
+                    <PhotoIcon className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Items</p>
-                    <p className="text-2xl font-bold text-gray-900">{portfolioStats.totalItems}</p>
+                    <p className="text-sm font-medium text-gray-400">Total Items</p>
+                    <p className="text-2xl font-bold text-white">{portfolioStats.totalItems}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
                 <div className="flex items-center">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <EyeIcon className="h-6 w-6 text-green-600" />
+                  <div className="p-2 bg-gray-800 rounded-lg">
+                    <EyeIcon className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Views</p>
-                    <p className="text-2xl font-bold text-gray-900">{portfolioStats.totalViews.toLocaleString()}</p>
+                    <p className="text-sm font-medium text-gray-400">Total Views</p>
+                    <p className="text-2xl font-bold text-white">{portfolioStats.totalViews.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
                 <div className="flex items-center">
-                  <div className="p-2 bg-red-100 rounded-lg">
-                    <HeartIcon className="h-6 w-6 text-red-600" />
+                  <div className="p-2 bg-gray-800 rounded-lg">
+                    <HeartIcon className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Likes</p>
-                    <p className="text-2xl font-bold text-gray-900">{portfolioStats.totalLikes}</p>
+                    <p className="text-sm font-medium text-gray-400">Total Likes</p>
+                    <p className="text-2xl font-bold text-white">{portfolioStats.totalLikes}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
                 <div className="flex items-center">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <StarIcon className="h-6 w-6 text-purple-600" />
+                  <div className="p-2 bg-gray-800 rounded-lg">
+                    <StarIcon className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Featured Items</p>
-                    <p className="text-2xl font-bold text-gray-900">{portfolioStats.featuredItems}</p>
+                    <p className="text-sm font-medium text-gray-400">Featured Items</p>
+                    <p className="text-2xl font-bold text-white">{portfolioStats.featuredItems}</p>
                   </div>
                 </div>
               </div>
@@ -691,39 +691,39 @@ export default function PortfolioPage() {
 
             {/* Growth & Popular Styles */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Growth</h3>
+              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Monthly Growth</h3>
                 <div className="flex items-center">
-                  <div className={`p-2 rounded-lg ${portfolioStats.monthlyGrowth >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                  <div className={`p-2 rounded-lg ${portfolioStats.monthlyGrowth >= 0 ? 'bg-gray-800' : 'bg-gray-800'}`}>
                     {portfolioStats.monthlyGrowth >= 0 ? (
-                      <ArrowUpIcon className="h-6 w-6 text-green-600" />
+                      <ArrowUpIcon className="h-6 w-6 text-white" />
                     ) : (
-                      <ArrowDownIcon className="h-6 w-6 text-red-600" />
+                      <ArrowDownIcon className="h-6 w-6 text-white" />
                     )}
                   </div>
                   <div className="ml-4">
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-2xl font-bold text-white">
                       {portfolioStats.monthlyGrowth >= 0 ? '+' : ''}{portfolioStats.monthlyGrowth}%
                     </p>
-                    <p className="text-sm text-gray-600">vs last month</p>
+                    <p className="text-sm text-gray-400">vs last month</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Styles</h3>
+              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Popular Styles</h3>
                 <div className="space-y-3">
                   {portfolioStats.popularStyles.slice(0, 5).map((style, index) => (
                     <div key={style.style} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">{style.style}</span>
+                      <span className="text-sm text-gray-300">{style.style}</span>
                       <div className="flex items-center gap-2">
-                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div className="w-20 bg-gray-800 rounded-full h-2">
                           <div 
-                            className="bg-indigo-600 h-2 rounded-full" 
+                            className="bg-white h-2 rounded-full" 
                             style={{ width: `${(style.count / portfolioStats.totalItems) * 100}%` }}
                           ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{style.count}</span>
+                        <span className="text-sm font-medium text-white">{style.count}</span>
                       </div>
                     </div>
                   ))}
@@ -732,45 +732,45 @@ export default function PortfolioPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors group"
+                  className="flex items-center p-4 border border-gray-800 rounded-lg hover:border-gray-700 hover:bg-gray-800 transition-colors group"
                 >
-                  <div className="p-2 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                    <PlusIcon className="h-6 w-6 text-indigo-600" />
+                  <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-gray-700 transition-colors">
+                    <PlusIcon className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <h4 className="font-medium text-gray-900">Upload New Work</h4>
-                    <p className="text-sm text-gray-500">Add to your portfolio</p>
+                    <h4 className="font-medium text-white">Upload New Work</h4>
+                    <p className="text-sm text-gray-400">Add to your portfolio</p>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('collections')}
-                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors group"
+                  className="flex items-center p-4 border border-gray-800 rounded-lg hover:border-gray-700 hover:bg-gray-800 transition-colors group"
                 >
-                  <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
-                    <FolderIcon className="h-6 w-6 text-green-600" />
+                  <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-gray-700 transition-colors">
+                    <FolderIcon className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <h4 className="font-medium text-gray-900">Organize Collections</h4>
-                    <p className="text-sm text-gray-500">Group your work</p>
+                    <h4 className="font-medium text-white">Organize Collections</h4>
+                    <p className="text-sm text-gray-400">Group your work</p>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('analytics')}
-                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors group"
+                  className="flex items-center p-4 border border-gray-800 rounded-lg hover:border-gray-700 hover:bg-gray-800 transition-colors group"
                 >
-                  <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                    <ChartBarIcon className="h-6 w-6 text-purple-600" />
+                  <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-gray-700 transition-colors">
+                    <ChartBarIcon className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <h4 className="font-medium text-gray-900">View Analytics</h4>
-                    <p className="text-sm text-gray-500">Track performance</p>
+                    <h4 className="font-medium text-white">View Analytics</h4>
+                    <p className="text-sm text-gray-400">Track performance</p>
                   </div>
                 </button>
               </div>

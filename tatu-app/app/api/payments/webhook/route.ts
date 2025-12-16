@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
-import { PrismaClient } from '@prisma/client'
+import { paymentService } from '@/lib/payment'
 import Stripe from 'stripe'
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +16,10 @@ export async function POST(request: NextRequest) {
     let event: Stripe.Event
 
     try {
+      if (!stripe) {
+        throw new Error('Stripe is not configured')
+      }
+      
       event = stripe.webhooks.constructEvent(
         body,
         signature,
@@ -55,29 +57,23 @@ export async function POST(request: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   try {
-    const { appointmentId, artistId, paymentType } = session.metadata || {}
+    const { paymentId } = session.metadata || {}
 
-    if (!appointmentId) {
-      console.error('No appointmentId in session metadata')
+    if (!paymentId) {
+      console.error('No paymentId in session metadata')
       return
     }
 
-    console.log('Payment completed for appointment:', appointmentId, {
+    console.log('Checkout session completed:', {
       sessionId: session.id,
-      amount: session.amount_total,
-      paymentType,
-      artistId
+      paymentId,
+      amount: session.amount_total
     })
 
-    // TODO: Update appointment status when Payment model is added
-    // await prisma.appointment.update({
-    //   where: { id: appointmentId },
-    //   data: { 
-    //     status: paymentType === 'CONSULTATION' ? 'CONFIRMED' : 'PAID'
-    //   }
-    // })
-
-    // TODO: Send confirmation emails to artist and customer
+    // Handle payment success
+    if (session.payment_intent) {
+      await paymentService.handlePaymentSuccess(session.payment_intent as string)
+    }
 
   } catch (error) {
     console.error('Error handling checkout completion:', error)
@@ -86,16 +82,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   try {
-    const { appointmentId, paymentType } = paymentIntent.metadata || {}
-
     console.log('Payment succeeded:', {
       paymentIntentId: paymentIntent.id,
-      appointmentId,
-      amount: paymentIntent.amount,
-      paymentType
+      amount: paymentIntent.amount
     })
 
-    // TODO: Additional post-payment processing
+    await paymentService.handlePaymentSuccess(paymentIntent.id)
 
   } catch (error) {
     console.error('Error handling payment success:', error)
@@ -104,16 +96,12 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   try {
-    const { appointmentId } = paymentIntent.metadata || {}
-
     console.log('Payment failed:', {
       paymentIntentId: paymentIntent.id,
-      appointmentId,
       amount: paymentIntent.amount
     })
 
-    // TODO: Update appointment status to PAYMENT_FAILED
-    // TODO: Send notification to customer about failed payment
+    await paymentService.handlePaymentFailure(paymentIntent.id)
 
   } catch (error) {
     console.error('Error handling payment failure:', error)

@@ -14,6 +14,7 @@ import {
   PhoneIcon,
   GlobeAltIcon
 } from '@heroicons/react/24/outline'
+import { ALL_ARTISTS } from '@/lib/all-artists-data'
 
 interface PortfolioItem {
   id: string
@@ -61,79 +62,81 @@ export default function ArtistPortfolioPage() {
 
   const fetchArtistData = async () => {
     try {
-      // Mock data for now - replace with actual API call
-      const mockArtist: Artist = {
+      // Find artist from centralized database
+      const foundArtist = ALL_ARTISTS.find(a => a.id === artistId)
+      
+      // Convert to Artist interface with additional fields
+      const mockArtist: Artist = foundArtist ? {
+        ...foundArtist,
+        experience: "5+ years", // Default value, could be enhanced later
+        studio: "Local Tattoo Studio", // Default value
+        phone: "+1 (555) 000-0000", // Default value
+        website: `https://${foundArtist.instagram.replace('@', '')}.com`
+      } : {
         id: artistId,
-        name: "Alex Rivera",
-        bio: "Professional tattoo artist with over 8 years of experience specializing in traditional American, neo-traditional, and blackwork styles. Passionate about creating unique, meaningful pieces that tell your story.",
+        name: "Artist Profile",
+        bio: "Talented tattoo artist with a unique style and dedication to the craft.",
         avatar: "/api/placeholder/150/150",
-        location: "Los Angeles, CA",
-        specialties: ["Traditional American", "Neo-Traditional", "Blackwork", "Portraits"],
-        instagram: "@alexrivera_tattoo",
-        portfolioCount: 24,
-        rating: 4.8,
-        reviewCount: 127,
-        experience: "8+ years",
-        studio: "Ink & Soul Tattoo",
-        phone: "(555) 123-4567",
-        website: "www.alexrivera.com"
+        location: "United States",
+        specialties: ["Custom", "Various Styles"],
+        instagram: "@artist_tattoo",
+        portfolioCount: 15,
+        rating: 4.5,
+        reviewCount: 50,
+        experience: "5+ years",
+        studio: "Local Tattoo Studio",
+        phone: "+1 (555) 000-0000",
+        website: "https://artist.com"
       }
+      
       setArtist(mockArtist)
+      setIsLoading(false)
     } catch (error) {
       console.error('Error fetching artist:', error)
+      setIsLoading(false)
     }
   }
 
   const fetchPortfolioItems = async () => {
     try {
-      // Mock data for now - replace with actual API call
-      const mockPortfolio: PortfolioItem[] = [
+      // Mock portfolio data - replace with actual API call
+      const mockPortfolioItems: PortfolioItem[] = [
         {
-          id: "1",
-          title: "Traditional Rose",
-          description: "Classic American traditional rose with bold colors and clean lines",
-          imageUrl: "/api/placeholder/400/400",
-          style: "Traditional American",
+          id: '1',
+          title: 'Traditional Eagle',
+          description: 'Classic American traditional eagle design with bold lines and vibrant colors.',
+          imageUrl: '/api/placeholder/400/400',
+          style: 'Traditional American',
           likes: 45,
           comments: 12,
-          createdAt: "2024-01-15"
+          createdAt: '2024-01-15'
         },
         {
-          id: "2",
-          title: "Geometric Wolf",
-          description: "Modern geometric wolf design with sharp angles and minimal shading",
-          imageUrl: "/api/placeholder/400/400",
-          style: "Geometric",
+          id: '2',
+          title: 'Neo-Traditional Rose',
+          description: 'Modern twist on traditional rose with contemporary color palette.',
+          imageUrl: '/api/placeholder/400/400',
+          style: 'Neo-Traditional',
           likes: 38,
           comments: 8,
-          createdAt: "2024-01-10"
+          createdAt: '2024-01-10'
         },
         {
-          id: "3",
-          title: "Portrait Tattoo",
-          description: "Realistic portrait tattoo with detailed shading and depth",
-          imageUrl: "/api/placeholder/400/400",
-          style: "Portraits",
+          id: '3',
+          title: 'Blackwork Mandala',
+          description: 'Intricate blackwork mandala with geometric patterns.',
+          imageUrl: '/api/placeholder/400/400',
+          style: 'Blackwork',
           likes: 52,
           comments: 15,
-          createdAt: "2024-01-05"
-        },
-        {
-          id: "4",
-          title: "Neo-Traditional Eagle",
-          description: "Contemporary take on traditional eagle with modern color palette",
-          imageUrl: "/api/placeholder/400/400",
-          style: "Neo-Traditional",
-          likes: 41,
-          comments: 11,
-          createdAt: "2024-01-01"
+          createdAt: '2024-01-05'
         }
       ]
-      setPortfolioItems(mockPortfolio)
+      setPortfolioItems(mockPortfolioItems)
     } catch (error) {
       console.error('Error fetching portfolio:', error)
-    } finally {
-      setIsLoading(false)
+      // Fallback to empty array
+      setPortfolioItems([])
     }
   }
 
@@ -182,90 +185,107 @@ export default function ArtistPortfolioPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Hero Section */}
-      <section className="bg-surface py-12">
+      {/* Hero Section with Cover */}
+      <section className="relative">
+        {/* Cover Image */}
+        <div className="w-full h-64 bg-gradient-to-b from-gray-900 to-black"></div>
+        
+        {/* Profile Content */}
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-start gap-8">
-            {/* Artist Info */}
-            <div className="flex-1">
-              <div className="flex items-center gap-4 mb-6">
-                <img
-                  src={artist.avatar}
-                  alt={artist.name}
-                  className="w-24 h-24 rounded-full object-cover border-2 border-white"
-                />
-                <div>
-                  <h1 className="display text-3xl text-white mb-2">{artist.name}</h1>
-                  <p className="body text-gray-400 flex items-center">
-                    <MapPinIcon className="w-5 h-5 mr-2" />
-                    {artist.location}
-                  </p>
-                </div>
-                <button
-                  onClick={toggleFavorite}
-                  className="ml-auto text-gray-400 hover:text-white transition-colors"
-                >
-                  {isFavorite ? (
-                    <HeartSolid className="w-8 h-8 text-white" />
-                  ) : (
-                    <HeartOutline className="w-8 h-8" />
+          <div className="relative -mt-32 mb-12">
+            <div className="flex flex-col md:flex-row items-start gap-8">
+              {/* Artist Info */}
+              <div className="flex-1">
+                <div className="flex items-start gap-6 mb-6">
+              <div className="relative">
+                    <img
+                      src={artist.avatar}
+                      alt={artist.name}
+                      className="w-32 h-32 rounded-lg object-cover border-4 border-black shadow-xl"
+                    />
+                    {artist.featured && (
+                      <div className="absolute -top-2 -right-2 bg-white text-black px-2 py-1 rounded text-xs font-bold">
+                        VERIFIED
+                    </div>
                   )}
-                </button>
+                  </div>
+                  <div className="flex-1 pt-16">
+                    <div className="flex items-center justify-between mb-2">
+                      <h1 className="text-4xl font-bold text-white">{artist.name}</h1>
+                      <button
+                        onClick={toggleFavorite}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        {isFavorite ? (
+                          <HeartSolid className="w-8 h-8 text-white" />
+                        ) : (
+                          <HeartOutline className="w-8 h-8" />
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-gray-400 flex items-center mb-4">
+                      <MapPinIcon className="w-5 h-5 mr-2" />
+                      {artist.location}
+                    </p>
+                    
+                    {/* Stats Row */}
+                    <div className="flex items-center gap-6 text-sm mb-6">
+                      <div className="flex items-center text-gray-400">
+                        <StarIcon className="w-5 h-5 mr-2 text-white" />
+                        <span className="text-white font-semibold">{artist.rating}</span>
+                        <span className="text-gray-500 ml-1">({artist.reviewCount} reviews)</span>
+                      </div>
+                      <div className="text-gray-400">
+                        <span className="text-white font-semibold">{artist.portfolioCount}</span> works
+                      </div>
+                      <div className="text-gray-400">
+                        <span className="text-white font-semibold">{artist.experience}</span> experience
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="text-gray-300 mb-6 leading-relaxed">
+                  {artist.bio}
+                </p>
+
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {artist.specialties.map((specialty) => (
+                    <span
+                      key={specialty}
+                      className="px-3 py-2 bg-gray-800 text-white rounded-lg text-sm border border-gray-700"
+                    >
+                      {specialty}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              <p className="body text-gray-300 mb-6 leading-relaxed">
-                {artist.bio}
-              </p>
-
-              <div className="flex flex-wrap gap-4 mb-6">
-                {artist.specialties.map((specialty) => (
-                  <span
-                    key={specialty}
-                    className="px-3 py-2 bg-surface-2 text-white rounded-lg text-sm border border-gray-600"
-                  >
-                    {specialty}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-6 text-sm">
-                <div className="flex items-center text-gray-400">
-                  <StarIcon className="w-5 h-5 mr-2 text-yellow-400" />
-                  <span className="text-white font-semibold">{artist.rating}</span>
-                  <span className="text-gray-500 ml-1">({artist.reviewCount} reviews)</span>
-                </div>
-                <div className="text-gray-400">
-                  <span className="text-white font-semibold">{artist.portfolioCount}</span> portfolio works
-                </div>
-                <div className="text-gray-400">
-                  <span className="text-white font-semibold">{artist.experience}</span> experience
-                </div>
-              </div>
-            </div>
-
-            {/* Contact & Booking */}
-            <div className="w-full md:w-80">
-              <div className="card p-6">
-                <h3 className="headline text-xl text-white mb-4">Contact & Booking</h3>
+              {/* Contact & Booking */}
+              <div className="w-full md:w-96">
+              <div className="bg-transparent border-2 border-gray-400 rounded-lg p-6 sticky top-4">
+                <h3 className="text-xl font-bold text-white mb-6">Contact & Booking</h3>
                 
                 <div className="space-y-4 mb-6">
-                  <div className="flex items-center text-gray-300">
-                    <GlobeAltIcon className="w-5 h-5 mr-3" />
-                    <span>{artist.studio}</span>
+                  <div className="flex items-center text-gray-300 hover:text-white transition-colors">
+                    <GlobeAltIcon className="w-5 h-5 mr-3 flex-shrink-0" />
+                    <span className="text-sm">{artist.studio}</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
-                    <PhoneIcon className="w-5 h-5 mr-3" />
-                    <span>{artist.phone}</span>
+                  <div className="flex items-center text-gray-300 hover:text-white transition-colors">
+                    <PhoneIcon className="w-5 h-5 mr-3 flex-shrink-0" />
+                    <a href={`tel:${artist.phone}`} className="text-sm hover:underline">{artist.phone}</a>
                   </div>
-                  <div className="flex items-center text-gray-300">
-                    <GlobeAltIcon className="w-5 h-5 mr-3" />
-                    <span>{artist.instagram}</span>
+                  <div className="flex items-center text-gray-300 hover:text-white transition-colors">
+                    <GlobeAltIcon className="w-5 h-5 mr-3 flex-shrink-0" />
+                    <a href={`https://${artist.instagram}`} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline">
+                      {artist.instagram}
+                    </a>
                   </div>
                 </div>
 
                 <Link
                   href={`/artist/${artist.id}/book`}
-                  className="btn btn-primary w-full mb-3"
+                  className="flex items-center justify-center w-full bg-white text-black px-6 py-3 rounded-lg font-semibold border-2 border-gray-400 hover:bg-gray-100 transition-colors mb-3"
                 >
                   <CalendarIcon className="w-5 h-5 mr-2" />
                   Book Appointment
@@ -273,11 +293,24 @@ export default function ArtistPortfolioPage() {
                 
                 <Link
                   href={`/artist/${artist.id}/contact`}
-                  className="btn btn-secondary w-full"
+                  className="flex items-center justify-center w-full bg-transparent text-white px-6 py-3 rounded-lg font-semibold border-2 border-gray-400 hover:bg-gray-900 transition-colors"
                 >
                   <PhoneIcon className="w-5 h-5 mr-2" />
                   Contact Artist
                 </Link>
+                
+                {/* Quick Info */}
+                <div className="mt-6 pt-6 border-t-2 border-gray-400">
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-gray-400">Response Time</span>
+                    <span className="text-white font-medium">~ 2 hours</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Booking Rate</span>
+                    <span className="text-white font-medium">95%</span>
+                  </div>
+                </div>
+              </div>
               </div>
             </div>
           </div>
@@ -285,19 +318,19 @@ export default function ArtistPortfolioPage() {
       </section>
 
       {/* Portfolio Section */}
-      <section className="py-12">
+      <section className="py-16 bg-black">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <h2 className="display text-2xl text-white mb-4 md:mb-0">Portfolio</h2>
-            
-            {/* Style Filter */}
-            <div className="flex gap-2">
+            <h2 className="text-3xl font-bold text-white mb-4 md:mb-0">Portfolio</h2>
+                
+                {/* Style Filter */}
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedStyle('all')}
-                className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   selectedStyle === 'all'
                     ? 'bg-white text-black'
-                    : 'bg-surface-2 text-gray-300 hover:text-white border border-gray-600'
+                    : 'bg-gray-900 text-gray-300 hover:bg-gray-800 hover:text-white border border-gray-800'
                 }`}
               >
                 All Styles
@@ -306,117 +339,133 @@ export default function ArtistPortfolioPage() {
                 <button
                   key={style}
                   onClick={() => setSelectedStyle(style)}
-                  className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     selectedStyle === style
                       ? 'bg-white text-black'
-                      : 'bg-surface-2 text-gray-300 hover:text-white border border-gray-600'
+                      : 'bg-gray-900 text-gray-300 hover:bg-gray-800 hover:text-white border border-gray-800'
                   }`}
                 >
                   {style}
                 </button>
               ))}
-            </div>
-          </div>
+                </div>
+              </div>
 
           {filteredPortfolio.length === 0 ? (
-            <div className="text-center py-12">
+                <div className="text-center py-12">
               <p className="text-gray-400 text-lg">No portfolio items found for this style.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPortfolio.map((item) => (
-                <div key={item.id} className="card p-4 card-hover group">
-                  <div className="relative mb-4">
-                    <div className="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">Portfolio Image</span>
-                    </div>
-                    <div className="absolute top-2 right-2">
-                      <span className="px-2 py-1 bg-black/80 text-white text-xs rounded">
+                <div key={item.id} className="group cursor-pointer">
+                  <div className="relative mb-4 overflow-hidden rounded-lg bg-gray-900 border border-gray-800">
+                    <div className="w-full h-80 bg-gray-800 flex items-center justify-center">
+                      <span className="text-gray-600 text-sm">Portfolio Image</span>
+                </div>
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300"></div>
+                    <div className="absolute top-3 right-3">
+                      <span className="px-3 py-1 bg-black/90 text-white text-xs font-medium rounded-full border border-gray-700">
                         {item.style}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <h3 className="headline text-lg text-white mb-2 group-hover:text-gray-100 transition-colors">
+                  </span>
+                </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <p className="text-white text-sm line-clamp-2">{item.description}</p>
+                </div>
+              </div>
+
+                  <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-gray-300 transition-colors">
                     {item.title}
                   </h3>
-                  <p className="body text-gray-400 text-sm mb-3 line-clamp-2">
-                    {item.description}
-                  </p>
                   
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center space-x-4 text-gray-400">
-                      <span className="flex items-center">
+                      <span className="flex items-center hover:text-white transition-colors">
                         <HeartOutline className="w-4 h-4 mr-1" />
                         {item.likes}
                       </span>
-                      <span>{item.comments} comments</span>
+                      <span className="hover:text-white transition-colors">{item.comments} comments</span>
                     </div>
                     <span className="text-gray-500 text-xs">
                       {new Date(item.createdAt).toLocaleDateString()}
                     </span>
+                      </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              )}
             </div>
-          )}
-        </div>
       </section>
 
       {/* Reviews Section */}
-      <section className="bg-surface py-12">
+      <section className="bg-gray-950 py-16 border-t border-gray-900">
         <div className="container mx-auto px-4">
-          <h2 className="display text-2xl text-white mb-8">Reviews</h2>
-          
-          <div className="space-y-6">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold text-white">Reviews ({artist.reviewCount})</h2>
+            <Link 
+              href={`/artist/${artist.id}/reviews`}
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              View All →
+            </Link>
+          </div>
+
+              <div className="space-y-4">
             {/* Mock Reviews */}
-            <div className="card p-6">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gray-700 rounded-full"></div>
+                  <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold">SM</span>
+                  </div>
                   <div>
-                    <h4 className="text-white font-medium">Sarah M.</h4>
-                    <div className="flex items-center">
+                    <h4 className="text-white font-semibold">Sarah M.</h4>
+                    <div className="flex items-center mt-1">
                       {[...Array(5)].map((_, i) => (
-                        <StarIcon key={i} className="w-4 h-4 text-yellow-400" />
+                        <StarIcon key={i} className="w-4 h-4 text-white fill-white" />
                       ))}
                     </div>
                   </div>
                 </div>
-                <span className="text-gray-400 text-sm">2 weeks ago</span>
+                <span className="text-gray-500 text-sm">2 weeks ago</span>
               </div>
-              <p className="text-gray-300">
+              <p className="text-gray-300 leading-relaxed">
                 "Amazing work! Alex really captured the vision I had for my traditional rose tattoo. 
                 Clean lines, perfect shading, and the healing process was smooth. Highly recommend!"
               </p>
             </div>
 
-            <div className="card p-6">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gray-700 rounded-full"></div>
-                  <div>
-                    <h4 className="text-white font-medium">Mike R.</h4>
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <StarIcon key={i} className="w-4 h-4 text-yellow-400" />
-                      ))}
-                    </div>
+                  <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold">MR</span>
                   </div>
-                </div>
-                <span className="text-gray-400 text-sm">1 month ago</span>
+                  <div>
+                    <h4 className="text-white font-semibold">Mike R.</h4>
+                    <div className="flex items-center mt-1">
+                      {[...Array(5)].map((_, i) => (
+                        <StarIcon key={i} className="w-4 h-4 text-white fill-white" />
+                      ))}
               </div>
-              <p className="text-gray-300">
+            </div>
+                </div>
+                <span className="text-gray-500 text-sm">1 month ago</span>
+              </div>
+              <p className="text-gray-300 leading-relaxed">
                 "Professional artist with incredible attention to detail. My geometric wolf tattoo 
                 turned out exactly as I imagined. The studio is clean and the atmosphere is great."
               </p>
-            </div>
-          </div>
+        </div>
+      </div>
 
           <div className="text-center mt-8">
-            <button className="btn btn-secondary">
-              View All Reviews
-            </button>
+            <Link
+              href={`/artist/${artist.id}/reviews`}
+              className="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold border border-gray-800 hover:bg-gray-800 hover:border-gray-700 transition-colors"
+            >
+              View All {artist.reviewCount} Reviews
+            </Link>
           </div>
         </div>
       </section>

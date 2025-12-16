@@ -109,182 +109,36 @@ export default function ShopsPage() {
   const fetchShops = async () => {
     setIsLoading(true)
     try {
-      // Mock data for now - in real app, this would come from API
-      const mockShops: Shop[] = [
-        {
-          id: '1',
-          name: 'Ink & Soul Tattoo Studio',
-          description: 'Premium tattoo studio specializing in custom designs and traditional styles',
-          logo: '/api/placeholder/80/80',
-          coverImage: '/api/placeholder/400/200',
-          address: '123 Main Street',
-          city: 'San Francisco',
-          state: 'CA',
-          zipCode: '94102',
-          phone: '(415) 555-0123',
-          email: 'hello@inkandsoul.com',
-          website: 'https://inkandsoul.com',
-          rating: 4.8,
-          reviewCount: 342,
-          isVerified: true,
-          isFeatured: true,
-          specialties: ['Custom Designs', 'Traditional', 'Realism', 'Japanese'],
-          services: ['Tattoos', 'Cover-ups', 'Touch-ups', 'Consultations'],
-          hours: {
-            monday: { open: '10:00 AM', close: '8:00 PM', closed: false },
-            tuesday: { open: '10:00 AM', close: '8:00 PM', closed: false },
-            wednesday: { open: '10:00 AM', close: '8:00 PM', closed: false },
-            thursday: { open: '10:00 AM', close: '8:00 PM', closed: false },
-            friday: { open: '10:00 AM', close: '8:00 PM', closed: false },
-            saturday: { open: '11:00 AM', close: '7:00 PM', closed: false },
-            sunday: { open: '12:00 PM', close: '6:00 PM', closed: false }
-          },
-          artists: [
-            {
-              id: 'artist1',
-              name: 'Sarah Chen',
-              avatar: '/api/placeholder/40/40',
-              role: 'owner',
-              status: 'active',
-              joinDate: '2020-01-15',
-              rating: 4.9,
-              reviewCount: 127,
-              appointmentCount: 45,
-              revenue: 12500,
-              specialties: ['Portraits', 'Realism', 'Fine Line']
-            },
-            {
-              id: 'artist2',
-              name: 'Mike Rodriguez',
-              avatar: '/api/placeholder/40/40',
-              role: 'artist',
-              status: 'active',
-              joinDate: '2021-03-20',
-              rating: 4.7,
-              reviewCount: 89,
-              appointmentCount: 38,
-              revenue: 9800,
-              specialties: ['Traditional', 'Japanese', 'Blackwork']
-            },
-            {
-              id: 'artist3',
-              name: 'Emma Thompson',
-              avatar: '/api/placeholder/40/40',
-              role: 'apprentice',
-              status: 'active',
-              joinDate: '2023-06-10',
-              rating: 4.5,
-              reviewCount: 23,
-              appointmentCount: 12,
-              revenue: 3200,
-              specialties: ['Watercolor', 'Minimalist']
-            }
-          ],
-          stats: {
-            totalArtists: 3,
-            totalAppointments: 95,
-            totalRevenue: 25500,
-            totalCustomers: 78,
-            averageRating: 4.8,
-            monthlyGrowth: 12.5,
-            topServices: [
-              { name: 'Custom Tattoos', count: 45, revenue: 13500 },
-              { name: 'Cover-ups', count: 18, revenue: 7200 },
-              { name: 'Touch-ups', count: 32, revenue: 4800 }
-            ],
-            customerRetention: 85.2
-          },
-          policies: {
-            cancellationPolicy: '24-hour notice required for cancellations',
-            depositPolicy: '50% deposit required for custom designs',
-            refundPolicy: 'No refunds on completed work',
-            ageRequirement: 18,
-            healthRequirements: ['Valid ID', 'No alcohol 24h before', 'Good health'],
-            covidProtocols: ['Masks required', 'Sanitization between clients', 'Limited capacity']
-          }
-        },
-        {
-          id: '2',
-          name: 'Urban Ink Collective',
-          description: 'Modern tattoo collective with diverse artist styles',
-          logo: '/api/placeholder/80/80',
-          coverImage: '/api/placeholder/400/200',
-          address: '456 Oak Avenue',
-          city: 'Oakland',
-          state: 'CA',
-          zipCode: '94601',
-          phone: '(510) 555-0456',
-          email: 'info@urbaninkcollective.com',
-          website: 'https://urbaninkcollective.com',
-          rating: 4.6,
-          reviewCount: 189,
-          isVerified: true,
-          isFeatured: false,
-          specialties: ['Neo-Traditional', 'Geometric', 'Minimalist', 'Color'],
-          services: ['Tattoos', 'Piercings', 'Consultations', 'Design Services'],
-          hours: {
-            monday: { open: '11:00 AM', close: '7:00 PM', closed: false },
-            tuesday: { open: '11:00 AM', close: '7:00 PM', closed: false },
-            wednesday: { open: '11:00 AM', close: '7:00 PM', closed: false },
-            thursday: { open: '11:00 AM', close: '7:00 PM', closed: false },
-            friday: { open: '11:00 AM', close: '8:00 PM', closed: false },
-            saturday: { open: '12:00 PM', close: '8:00 PM', closed: false },
-            sunday: { open: '12:00 PM', close: '6:00 PM', closed: false }
-          },
-          artists: [
-            {
-              id: 'artist4',
-              name: 'Alex Kim',
-              avatar: '/api/placeholder/40/40',
-              role: 'owner',
-              status: 'active',
-              joinDate: '2019-08-12',
-              rating: 4.6,
-              reviewCount: 73,
-              appointmentCount: 28,
-              revenue: 8400,
-              specialties: ['Geometric', 'Minimalist', 'Dotwork']
-            },
-            {
-              id: 'artist5',
-              name: 'Lisa Wang',
-              avatar: '/api/placeholder/40/40',
-              role: 'artist',
-              status: 'active',
-              joinDate: '2022-01-15',
-              rating: 4.5,
-              reviewCount: 67,
-              appointmentCount: 31,
-              revenue: 7200,
-              specialties: ['Neo-Traditional', 'Color', 'Lettering']
-            }
-          ],
-          stats: {
-            totalArtists: 2,
-            totalAppointments: 59,
-            totalRevenue: 15600,
-            totalCustomers: 42,
-            averageRating: 4.6,
-            monthlyGrowth: 8.3,
-            topServices: [
-              { name: 'Custom Tattoos', count: 28, revenue: 8400 },
-              { name: 'Geometric Designs', count: 18, revenue: 5400 },
-              { name: 'Minimalist Work', count: 13, revenue: 3900 }
-            ],
-            customerRetention: 78.9
-          },
-          policies: {
-            cancellationPolicy: '48-hour notice required for cancellations',
-            depositPolicy: '30% deposit required for all appointments',
-            refundPolicy: 'Partial refunds available within 7 days',
-            ageRequirement: 18,
-            healthRequirements: ['Valid ID', 'No recent illnesses', 'Clean skin'],
-            covidProtocols: ['Vaccination required', 'Masks optional', 'Enhanced cleaning']
-          }
-        }
-      ]
-
-      setShops(mockShops)
+      const response = await fetch('/api/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
+      }
+      
+      const data = await response.json()
+      const shops: Shop[] = data.map((shop: any) => ({
+        id: shop.id,
+        name: shop.name,
+        description: shop.description,
+        logo: shop.logo || '/api/placeholder/80/80',
+        coverImage: shop.coverImage || '/api/placeholder/400/200',
+        address: shop.address,
+        city: shop.city,
+        state: shop.state,
+        zipCode: shop.zipCode,
+        phone: shop.phone,
+        email: shop.email,
+        website: shop.website,
+        rating: shop.averageRating || 0,
+        reviewCount: shop.reviewCount || 0,
+        isVerified: shop.verified || false,
+        isFeatured: false, // TODO: Add featured field to API
+        specialties: [], // TODO: Add specialties to API
+        services: [], // TODO: Add services to API
+        hours: {}, // TODO: Add hours to API
+        artists: shop.artists || []
+      }))
+      
+      setShops(shops)
     } catch (error) {
       console.error('Error fetching shops:', error)
       toast.error('Failed to load shops')

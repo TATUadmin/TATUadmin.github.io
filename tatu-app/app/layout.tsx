@@ -3,9 +3,9 @@ import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import AuthProvider from './components/SessionProvider'
+import WebSocketProvider from './components/WebSocketProvider'
 import MobileNavigation from './components/MobileNavigation'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
-import MobilePerformanceMonitor from './components/MobilePerformanceMonitor'
 import './globals.css'
 import { Toaster as UiToaster } from "@/components/ui/toaster"
 
@@ -55,16 +55,17 @@ export default function RootLayout({
           className="fixed inset-0 z-0 bg-black"
         />
         <AuthProvider>
-          <div className="flex flex-col min-h-screen relative z-10">
-            <Navbar />
-            <MobileNavigation />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <PWAInstallPrompt />
-          <MobilePerformanceMonitor />
-          <Toaster />
-          <UiToaster />
+          <WebSocketProvider>
+            <div className="flex flex-col min-h-screen relative z-10">
+              <Navbar />
+              <MobileNavigation />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <PWAInstallPrompt />
+            <Toaster />
+            <UiToaster />
+          </WebSocketProvider>
         </AuthProvider>
       </body>
     </html>

@@ -2,430 +2,151 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import mobile-specific styles */
-@import './mobile.css';
+@import 'leaflet/dist/leaflet.css';
 
-/* Import Modern Typography - cleaner, more minimal selection */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
-:root {
-  /* Modern Monochrome Color System */
-  --background: #000000;
-  --surface: #0a0a0a;
-  --surface-2: #141414;
-  --surface-3: #1e1e1e;
-  --surface-4: #2a2a2a;
-  --foreground: #ffffff;
-  --foreground-muted: #e5e5e5;
-  --foreground-subtle: #a3a3a3;
-  --border: #262626;
-  --border-subtle: #171717;
-  
-  /* Minimal accent - single subtle color */
-  --accent: #f5f5f5;
-  --accent-hover: #ffffff;
-  
-  /* Clean shadows - very subtle */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
-  --shadow-md: 0 2px 4px 0 rgb(0 0 0 / 0.6);
-  --shadow-lg: 0 4px 8px 0 rgb(0 0 0 / 0.8);
-  
-  /* Minimal borders */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+/* Custom marker styles */
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+/* Remove white border and default styling from Leaflet popups */
+.leaflet-popup-content-wrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
 }
 
-html {
-  scroll-behavior: smooth;
+.leaflet-popup-content {
+  margin: 0 !important;
 }
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: var(--background);
-  color: var(--foreground);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  font-weight: 400;
+.leaflet-popup-tip {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
-/* Clean Typography System */
-.display {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+/* Hide the default close button (we removed our custom X button) */
+.leaflet-popup-close-button {
+  display: none !important;
 }
 
-.headline {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
+/* Hide zoom control buttons (+/-) */
+.leaflet-control-zoom {
+  display: none !important;
 }
 
-.body {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  line-height: 1.6;
+/* Custom slider styling */
+input[type="range"].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  outline: none;
 }
 
-.label {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.875rem;
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #20B2AA;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.tatu-minimal {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--foreground);
+input[type="range"].slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #20B2AA;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.tatu-dark-gradient-bg {
-  background: rgba(0, 0, 0, 0.3);
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
+/* Override Leaflet styles that might cause blue backgrounds */
+.leaflet-container {
+  background: #000000 !important;
 }
 
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+.leaflet-tile {
+  /* Brighten the lighter gray elements while keeping dark areas unchanged */
+  filter: brightness(2.6) !important;
 }
 
-@media (min-width: 640px) {
-  .container { padding: 0 1.5rem; }
+/* Ensure all sections have proper black background */
+section {
+  background-color: #000000 !important;
 }
 
-@media (min-width: 1024px) {
-  .container { padding: 0 2rem; }
-}
-
-/* Define custom utilities */
-@layer utilities {
-  .bg-surface {
-    background-color: var(--surface);
+/* Animation classes */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  .bg-surface-2 {
-    background-color: var(--surface-2);
-  }
-  
-  .bg-surface-3 {
-    background-color: var(--surface-3);
-  }
-  
-  .bg-section-alt {
-    background-color: #161616;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Clean Components */
-.btn {
-  @apply inline-flex items-center justify-center px-6 py-3 text-sm font-medium
-         transition-all duration-200 focus:outline-none;
-  border-radius: var(--radius-lg);
-  font-weight: 500;
-}
-
-.btn-primary {
-  @apply bg-white text-black hover:bg-gray-100;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-secondary {
-  @apply bg-transparent text-white border border-gray-300 hover:bg-white hover:text-black;
-}
-
-.btn-ghost {
-  @apply bg-transparent text-gray-300 border border-transparent
-         hover:bg-gray-900 hover:text-white hover:border-gray-700;
-}
-
-.input {
-  @apply w-full px-4 py-3 bg-transparent border border-gray-300 text-white 
-         placeholder-gray-500 focus:border-white focus:ring-0 focus:outline-none;
-  border-radius: var(--radius-lg);
-  transition: border-color 0.2s ease;
-}
-
-.card {
-  @apply bg-surface border;
-  border-color: #171717;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-}
-
-.card-hover {
-  @apply hover:bg-surface-2 transition-all duration-200;
-}
-
-.card-z {
-  z-index: 20;
-  position: relative;
-}
-
-.footer-z {
-  z-index: 30;
-  position: relative;
-}
-
-/* Minimal Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+  animation: fade-in 0.6s ease-out forwards;
 }
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
+.delay-100 {
+  animation-delay: 0.1s;
+}
 
+.delay-200 {
+  animation-delay: 0.2s;
+}
 
+.delay-300 {
+  animation-delay: 0.3s;
+}
 
-/* Clean scrollbar */
+/* Display font */
+.display {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .display {
+    font-size: 2rem;
+    line-height: 1.1;
+  }
+}
+
+/* Text shadow for better readability */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: #1a1a1a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: #4a4a4a;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--surface-3);
-}
-
-/* Clean backdrop */
-.backdrop-blur {
-  backdrop-filter: blur(8px);
-  background: rgba(0, 0, 0, 0.8);
-}
-
-/* Clean selection */
-::selection {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: var(--foreground);
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-.metallic-logo {
-  /* Slight grayscale, high contrast, and screen blend for metallic effect */
-  filter: brightness(1.2) contrast(1.3) grayscale(0.2) drop-shadow(2px 2px 4px rgba(0,0,0,0.35));
-  mix-blend-mode: screen;
-}
-
-@keyframes metallicShine {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.metallic-shine-overlay {
-  background: linear-gradient(120deg, rgba(30,58,138,0.22) 0%, rgba(168,85,247,0.22) 40%, rgba(253,230,138,0.18) 80%, rgba(30,58,138,0.10) 100%);
-  background-size: 200% 100%;
-  background-blend-mode: color-dodge, lighten;
-  animation: metallicShine 3.5s linear infinite;
-  opacity: 0.85;
-  border-radius: inherit;
-}
-
-@keyframes bgFlagWave {
-  0% {
-    transform: scale(1) skewY(0deg) skewX(0deg) translateY(0px) translateX(0px);
-    opacity: 0.13;
-  }
-  20% {
-    transform: scale(1.036) skewY(0.5deg) skewX(-0.375deg) translateY(-1.5px) translateX(0.75px);
-    opacity: 0.197;
-  }
-  40% {
-    transform: scale(1.072) skewY(1deg) skewX(-0.75deg) translateY(-3px) translateX(1.5px);
-    opacity: 0.264;
-  }
-  60% {
-    transform: scale(1.072) skewY(-1deg) skewX(0.75deg) translateY(3px) translateX(-1.5px);
-    opacity: 0.264;
-  }
-  80% {
-    transform: scale(1.036) skewY(-0.5deg) skewX(0.375deg) translateY(1.5px) translateX(-0.75px);
-    opacity: 0.197;
-  }
-  100% {
-    transform: scale(1) skewY(0deg) skewX(0deg) translateY(0px) translateX(0px);
-    opacity: 0.13;
-  }
-}
-.bg-flag-wave {
-  animation: bgFlagWave 21.25s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-
-@keyframes logoEdgeGlimmer {
-  0% {
-    --glimmer-angle: 0deg;
-  }
-  100% {
-    --glimmer-angle: 360deg;
-  }
-}
-.logo-edge-glimmer {
-  --glimmer-angle: 0deg;
-  background: conic-gradient(from var(--glimmer-angle), transparent 0deg, transparent 40deg, #fff 60deg, #fff 80deg, transparent 100deg, transparent 360deg);
-  opacity: 0.225;
-  mix-blend-mode: lighten;
-  animation: logoEdgeGlimmer 3.5s linear infinite;
-  border-radius: inherit;
-}
-
-.grainy-bg {
-  background-image: url('/grain.png');
-  background-repeat: repeat;
-  background-size: auto;
-  opacity: 0.50;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Tattoo Background Cycling Animations */
-@keyframes fadeInOut {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 0.3; }
-}
-
-/* Optimized background cycling */
-.tattoo-background-cycler {
-  will-change: opacity;
-  transform: translateZ(0); /* Force hardware acceleration */
-}
-
-.tattoo-background-image {
-  will-change: opacity;
-  transform: translateZ(0);
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-}
-
-/* Glimmering Effect for CTA Button */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes glimmerSweep {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.btn-glimmer {
-  position: relative;
-  background: linear-gradient(
-    90deg,
-    #9ca3af 0%,
-    #d1d5db 25%,
-    #f9fafb 50%,
-    #d1d5db 75%,
-    #9ca3af 100%
-  ) !important;
-  color: #111827 !important;
-  background-size: 200% 100%;
-  animation: shimmer 6s ease-in-out infinite;
-  overflow: hidden;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-}
-
-.btn-glimmer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.9) 50%,
-    transparent 100%
-  );
-  transform: translateX(-100%);
-  animation: glimmerSweep 6s ease-in-out infinite;
-  animation-delay: 0.3s;
-}
-
-.btn-glimmer:hover {
-  animation-play-state: paused;
-}
-
-.btn-glimmer:hover::before {
-  animation-play-state: paused;
-}
-
-/* Performance optimizations for reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .tattoo-background-cycler,
-  .tattoo-background-image {
-    animation: none !important;
-    transition: none !important;
-  }
-  
-  .btn-glimmer,
-  .btn-glimmer::before {
-    animation: none !important;
-  }
-}
-
-/* Custom search input placeholder colors */
-.search-input-brand::placeholder {
-  color: #9CA3AF !important;
-}
-
-.search-input-brand::placeholder::-webkit-input-placeholder {
-  color: #9CA3AF !important;
-}
-
-.search-input-brand::placeholder::-moz-placeholder {
-  color: #9CA3AF !important;
-}
-
-.search-input-brand::placeholder:-ms-input-placeholder {
-  color: #9CA3AF !important;
+  background: #6a6a6a;
 }

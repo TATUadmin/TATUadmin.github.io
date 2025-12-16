@@ -35,16 +35,16 @@ export default function Navbar() {
               About
             </Link>
             <Link 
-              href="/how-it-works" 
-              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
-            >
-              How it Works
-            </Link>
-            <Link 
               href="/explore" 
               className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
               Browse
+            </Link>
+            <Link 
+              href="/how-it-works" 
+              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
+            >
+              How it Works
             </Link>
           </div>
 
@@ -114,18 +114,18 @@ export default function Navbar() {
               About
             </Link>
             <Link 
-              href="/how-it-works" 
-              className="block text-gray-400 hover:text-white transition-colors font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              How it Works
-            </Link>
-            <Link 
               href="/explore" 
               className="block text-gray-400 hover:text-white transition-colors font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
               Browse
+            </Link>
+            <Link 
+              href="/how-it-works" 
+              className="block text-gray-400 hover:text-white transition-colors font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              How it Works
             </Link>
             
             <div className="border-t pt-4" style={{borderColor: '#171717'}}>

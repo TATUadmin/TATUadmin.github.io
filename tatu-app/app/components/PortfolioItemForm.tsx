@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { PortfolioCollection } from '@prisma/client'
 import ImageDropzone from './ImageDropzone'
+import { FileUploadService, FileTypes } from '@/lib/file-upload'
 
 interface PortfolioItemFormData {
   title: string
@@ -54,18 +55,22 @@ export default function PortfolioItemForm({
   })
   const [tagInput, setTagInput] = useState('')
 
-  const handleImageUpload = async (file: File) => {
+  const handleImageUpload = useCallback(async (file: File) => {
     setIsUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      if (!response.ok) throw new Error('Upload failed')
-      const data = await response.json()
-      setFormData((prev) => ({ ...prev, imageUrl: data.url }))
+      // Use the enterprise file upload service
+      const uploadService = FileUploadService.getInstance()
+      const result = await uploadService.uploadFile(
+        file,
+        FileTypes.PORTFOLIO,
+        'current-user-id', // TODO: Get from session
+        {
+          portfolioItem: true,
+          uploadedAt: new Date().toISOString()
+        }
+      )
+      
+      setFormData((prev) => ({ ...prev, imageUrl: result.url }))
       toast.success('Image uploaded successfully')
     } catch (error) {
       console.error('Error uploading image:', error)
@@ -73,7 +78,7 @@ export default function PortfolioItemForm({
     } finally {
       setIsUploading(false)
     }
-  }
+  }, [])
 
   const handleAddTag = () => {
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
@@ -94,10 +99,33 @@ export default function PortfolioItemForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.title || !formData.imageUrl || !formData.style) {
-      toast.error('Please fill in all required fields')
+    
+    // Enhanced validation
+    if (!formData.title.trim()) {
+      toast.error('Title is required')
       return
     }
+    if (!formData.imageUrl) {
+      toast.error('Image is required')
+      return
+    }
+    if (!formData.style) {
+      toast.error('Style is required')
+      return
+    }
+    if (formData.title.length < 3) {
+      toast.error('Title must be at least 3 characters long')
+      return
+    }
+    if (formData.title.length > 100) {
+      toast.error('Title must be less than 100 characters')
+      return
+    }
+    if (formData.description && formData.description.length > 500) {
+      toast.error('Description must be less than 500 characters')
+      return
+    }
+    
     try {
       await onSubmit(formData)
       toast.success('Portfolio item saved successfully')
@@ -109,54 +137,80 @@ export default function PortfolioItemForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Title *
-        </label>
-        <input
-          type="text"
-          id="title"
-          value={formData.title}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, title: e.target.value }))
-          }
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          required
-        />
-      </div>
+    <div className="max-w-2xl mx-auto">
+      <div className="bg-white shadow-sm rounded-lg border">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">
+            {initialData ? 'Edit Portfolio Item' : 'Add New Portfolio Item'}
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Showcase your work with detailed information and high-quality images
+          </p>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div>
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Title *
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors"
+              placeholder="Enter a descriptive title for your work"
+              maxLength={100}
+              required
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              {formData.title.length}/100 characters
+            </p>
+          </div>
 
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Description
-        </label>
-        <textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, description: e.target.value }))
-          }
-          rows={3}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-        />
-      </div>
+          <div>
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, description: e.target.value }))
+              }
+              rows={4}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors"
+              placeholder="Describe your work, techniques used, inspiration, etc."
+              maxLength={500}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              {formData.description.length}/500 characters
+            </p>
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Image *
-        </label>
-        <ImageDropzone
-          onImageUpload={handleImageUpload}
-          imageUrl={formData.imageUrl}
-          isUploading={isUploading}
-        />
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Image *
+            </label>
+            <div className="space-y-2">
+              <ImageDropzone
+                onImageUpload={handleImageUpload}
+                imageUrl={formData.imageUrl}
+                isUploading={isUploading}
+              />
+              <p className="text-xs text-gray-500">
+                Upload high-quality images (JPEG, PNG, WebP). Max 20MB. Recommended: 1920x1080 or higher.
+              </p>
+            </div>
+          </div>
 
       <div>
         <label
@@ -268,22 +322,34 @@ export default function PortfolioItemForm({
         </label>
       </div>
 
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="mr-3 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting || isUploading}
-          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-        >
-          {isSubmitting ? 'Saving...' : 'Save'}
-        </button>
+          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || isUploading}
+              className="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </>
+              ) : (
+                'Save Portfolio Item'
+              )}
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   )
 } 

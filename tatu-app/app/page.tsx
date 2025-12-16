@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { classifySearch } from '@/lib/smart-search'
 import TattooBackgroundCycler from './components/TattooBackgroundCycler'
 
 export default function Home() {
@@ -12,9 +13,17 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-transparent text-white">
       {/* Hero Section - Clean and Minimal */}
-      <section className="min-h-screen flex items-center justify-center relative">
-        {/* Cycling Tattoo Background */}
-        <TattooBackgroundCycler />
+      <section className="min-h-screen flex items-center justify-center relative pb-16 lg:pb-0">
+        {/* Cycling Tattoo Background - Desktop only */}
+        <div className="hidden lg:block absolute right-0 top-0 w-1/2 h-full">
+          <TattooBackgroundCycler />
+        </div>
+        
+        {/* Mobile Background Images - Positioned under text */}
+        <div className="lg:hidden absolute inset-0 w-full h-full">
+          <TattooBackgroundCycler />
+        </div>
+        
         
         {/* Subtle texture overlay */}
         <div 
@@ -27,19 +36,19 @@ export default function Home() {
         />
         
         <div className="container relative z-10">
-          {/* Main Content - Left Side */}
-          <div className="w-1/2 pt-16 text-left">
+          {/* Main Content - Full width on mobile, half width on desktop */}
+          <div className="w-full lg:w-1/2 pt-8 lg:pt-16 text-left px-4 lg:px-0">
             {/* Main Headline */}
-            <h1 className="display text-2xl md:text-4xl lg:text-5xl text-white mb-6 animate-fade-in delay-100">
+            <h1 className="display text-2xl md:text-3xl lg:text-5xl text-white mb-4 lg:mb-6 animate-fade-in delay-100 leading-tight" style={{textShadow: '0 2px 4px rgba(0,0,0,0.8)'}}>
               At last, every tattoo artist in one place. Browse portfolios & reviews. Book appointments with confidence.
             </h1>
             
-            {/* Search */}
-            <div className="max-w-lg mb-12 animate-fade-in delay-300">
+            {/* Search Bar */}
+            <div className="max-w-lg mb-6 lg:mb-12 animate-fade-in delay-300 mx-auto lg:mx-0 mt-16 lg:mt-24">
               <div className="relative">
                 {!searchTerm && (
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{zIndex: 1}}>
-                    <span className="text-gray-400 text-lg">
+                    <span className="text-gray-400 text-base" style={{textShadow: '0 1px 2px rgba(0,0,0,0.8)'}}>
                       Search by{' '}
                       <span style={{color: '#20B2AA'}}>artist</span>
                       ,{' '}
@@ -56,17 +65,37 @@ export default function Home() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && searchTerm.trim()) {
-                      router.push(`/explore?search=${encodeURIComponent(searchTerm.trim())}`)
+                      const q = searchTerm.trim()
+                      const cls = classifySearch(q)
+                      const params = new URLSearchParams()
+                      params.set('search', q)
+                      if (cls.location) params.set('location', cls.location)
+                      if (cls.style) params.set('style', cls.style)
+                      router.push(`/explore?${params.toString()}`)
                     }
                   }}
-                  className="input text-lg"
+                  className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200"
                   style={{
-                    fontSize: '1.125rem',
+                    fontSize: '0.875rem',
                     color: '#ffffff',
-                    paddingLeft: '16px'
+                    paddingLeft: '16px',
+                    paddingRight: '60px'
                   }}
                 />
-                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
+                <button 
+                  onClick={() => {
+                    if (searchTerm.trim()) {
+                      const q = searchTerm.trim()
+                      const cls = classifySearch(q)
+                      const params = new URLSearchParams()
+                      params.set('search', q)
+                      if (cls.location) params.set('location', cls.location)
+                      if (cls.style) params.set('style', cls.style)
+                      router.push(`/explore?${params.toString()}`)
+                    }
+                  }}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
@@ -74,35 +103,40 @@ export default function Home() {
               </div>
             </div>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in delay-300">
-              <Link href="/explore" className="btn btn-primary btn-glimmer">
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 animate-fade-in delay-300 justify-center lg:justify-start items-center mb-4 lg:mb-0">
+              <button
+                onClick={() => {
+                  if (searchTerm.trim()) {
+                    const q = searchTerm.trim()
+                    const cls = classifySearch(q)
+                    const params = new URLSearchParams()
+                    params.set('search', q)
+                    if (cls.location) params.set('location', cls.location)
+                    if (cls.style) params.set('style', cls.style)
+                    router.push(`/explore?${params.toString()}`)
+                  } else {
+                    router.push('/explore')
+                  }
+                }}
+                className="px-6 lg:px-8 py-2.5 lg:py-3 bg-white border-2 border-gray-400 text-black rounded-full font-semibold hover:bg-gray-100 transition-all duration-200 text-center min-w-[140px] lg:min-w-[160px] text-sm lg:text-base cursor-pointer"
+              >
                 Browse Artists
-              </Link>
-              <Link href="/register-artist" className="btn btn-secondary">
+              </button>
+              <Link 
+                href="/register-artist" 
+                className="px-6 lg:px-8 py-2.5 lg:py-3 bg-transparent border-2 border-gray-400 text-white rounded-full font-semibold hover:bg-gray-400 hover:text-black transition-all duration-200 text-center min-w-[140px] lg:min-w-[160px] text-sm lg:text-base"
+                style={{textShadow: '0 1px 2px rgba(0,0,0,0.5)'}}
+              >
                 Join as Artist
               </Link>
             </div>
 
-            {/* Quick Navigation */}
-            <div className="flex flex-wrap gap-4 mt-12 animate-fade-in delay-400">
-              <Link href="/how-it-works" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
-                How It Works
-              </Link>
-              <span className="text-gray-500">•</span>
-              <Link href="/about" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
-                About TATU
-              </Link>
-              <span className="text-gray-500">•</span>
-              <Link href="/styles" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
-                Tattoo Styles
-              </Link>
-            </div>
           </div>
         </div>
 
         {/* Logo - Bottom Center */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="absolute bottom-20 lg:bottom-8 left-1/2 transform -translate-x-1/2 z-20">
           <div className="relative mx-auto animate-fade-in text-center" style={{ maxWidth: '200px', width: '60%' }}>
             <img 
               src="/tatu-logo.png" 
@@ -112,6 +146,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+
 
       {/* Stats Section */}
       <section className="py-16 bg-transparent">

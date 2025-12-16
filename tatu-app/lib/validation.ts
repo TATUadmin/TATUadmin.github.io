@@ -1,440 +1,341 @@
-import { z } from 'zod'
-import { PrismaClient } from '@prisma/client'
+// Comprehensive validation utilities for the TATU application
 
-const prisma = new PrismaClient()
-
-// Base validation schemas
-export const BaseSchemas = {
-  id: z.string().cuid(),
-  email: z.string().email().max(255),
-  password: z.string().min(8).max(128),
-  phone: z.string().regex(/^\+?[\d\s\-\(\)]+$/).max(20),
-  url: z.string().url().max(500),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  datetime: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/),
-  time: z.string().regex(/^\d{2}:\d{2}$/),
-  positiveNumber: z.number().positive(),
-  nonNegativeNumber: z.number().min(0),
-  percentage: z.number().min(0).max(100),
-  rating: z.number().min(1).max(5),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING']),
-  role: z.enum(['CUSTOMER', 'ARTIST', 'SHOP_OWNER', 'ADMIN']),
-  appointmentStatus: z.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED', 'NO_SHOW']),
-  paymentStatus: z.enum(['PENDING', 'PAID', 'FAILED', 'REFUNDED', 'PARTIALLY_REFUNDED']),
-  fileType: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
-  tattooStyle: z.enum([
-    'TRADITIONAL', 'REALISTIC', 'WATERCOLOR', 'GEOMETRIC', 'MINIMALIST',
-    'BLACKWORK', 'COLOR', 'JAPANESE', 'TRIBAL', 'SURREAL', 'PORTRAIT',
-    'NATURE', 'ABSTRACT', 'LETTERING', 'MANDALA', 'OTHER'
-  ])
+export interface ValidationResult {
+  isValid: boolean
+  errors: { [key: string]: string }
 }
 
-// User validation schemas
-export const UserSchemas = {
-  create: z.object({
-    email: BaseSchemas.email,
-    password: BaseSchemas.password,
-    name: z.string().min(1).max(100),
-    role: BaseSchemas.role.optional().default('CUSTOMER')
-  }),
+export class Validator {
+  private errors: { [key: string]: string } = {}
 
-  update: z.object({
-    name: z.string().min(1).max(100).optional(),
-    email: BaseSchemas.email.optional(),
-    phone: BaseSchemas.phone.optional(),
-    bio: z.string().max(1000).optional(),
-    instagram: z.string().max(100).optional(),
-    website: BaseSchemas.url.optional(),
-    location: z.string().max(200).optional()
-  }),
+  // Email validation
+  static isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
 
-  changePassword: z.object({
-    currentPassword: z.string().min(1),
-    newPassword: BaseSchemas.password,
-    confirmPassword: z.string().min(1)
-  }).refine(data => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"]
-  })
-}
+  // Phone validation (supports international formats)
+  static isValidPhone(phone: string): boolean {
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '')
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
+    return phoneRegex.test(cleanPhone)
+  }
 
-// Profile validation schemas
-export const ProfileSchemas = {
-  create: z.object({
-    bio: z.string().max(1000).optional(),
-    phone: BaseSchemas.phone.optional(),
-    instagram: z.string().max(100).optional(),
-    website: BaseSchemas.url.optional(),
-    location: z.string().max(200).optional(),
-    specialties: z.array(BaseSchemas.tattooStyle).max(10).optional(),
-    experience: BaseSchemas.nonNegativeNumber.optional(),
-    hourlyRate: BaseSchemas.positiveNumber.optional(),
-    availability: z.object({
-      monday: z.array(z.string()).optional(),
-      tuesday: z.array(z.string()).optional(),
-      wednesday: z.array(z.string()).optional(),
-      thursday: z.array(z.string()).optional(),
-      friday: z.array(z.string()).optional(),
-      saturday: z.array(z.string()).optional(),
-      sunday: z.array(z.string()).optional()
-    }).optional()
-  }),
-
-  update: z.object({
-    bio: z.string().max(1000).optional(),
-    phone: BaseSchemas.phone.optional(),
-    instagram: z.string().max(100).optional(),
-    website: BaseSchemas.url.optional(),
-    location: z.string().max(200).optional(),
-    specialties: z.array(BaseSchemas.tattooStyle).max(10).optional(),
-    experience: BaseSchemas.nonNegativeNumber.optional(),
-    hourlyRate: BaseSchemas.positiveNumber.optional(),
-    availability: z.object({
-      monday: z.array(z.string()).optional(),
-      tuesday: z.array(z.string()).optional(),
-      wednesday: z.array(z.string()).optional(),
-      thursday: z.array(z.string()).optional(),
-      friday: z.array(z.string()).optional(),
-      saturday: z.array(z.string()).optional(),
-      sunday: z.array(z.string()).optional()
-    }).optional()
-  })
-}
-
-// Shop validation schemas
-export const ShopSchemas = {
-  create: z.object({
-    name: z.string().min(1).max(200),
-    address: z.string().max(500).optional(),
-    phone: BaseSchemas.phone.optional(),
-    website: BaseSchemas.url.optional(),
-    description: z.string().max(2000).optional(),
-    services: z.array(z.string()).max(20).optional(),
-    amenities: z.array(z.string()).max(20).optional(),
-    operatingHours: z.object({
-      monday: z.object({ open: z.string(), close: z.string() }).optional(),
-      tuesday: z.object({ open: z.string(), close: z.string() }).optional(),
-      wednesday: z.object({ open: z.string(), close: z.string() }).optional(),
-      thursday: z.object({ open: z.string(), close: z.string() }).optional(),
-      friday: z.object({ open: z.string(), close: z.string() }).optional(),
-      saturday: z.object({ open: z.string(), close: z.string() }).optional(),
-      sunday: z.object({ open: z.string(), close: z.string() }).optional()
-    }).optional()
-  }),
-
-  update: z.object({
-    name: z.string().min(1).max(200).optional(),
-    address: z.string().max(500).optional(),
-    phone: BaseSchemas.phone.optional(),
-    website: BaseSchemas.url.optional(),
-    description: z.string().max(2000).optional(),
-    services: z.array(z.string()).max(20).optional(),
-    amenities: z.array(z.string()).max(20).optional(),
-    operatingHours: z.object({
-      monday: z.object({ open: z.string(), close: z.string() }).optional(),
-      tuesday: z.object({ open: z.string(), close: z.string() }).optional(),
-      wednesday: z.object({ open: z.string(), close: z.string() }).optional(),
-      thursday: z.object({ open: z.string(), close: z.string() }).optional(),
-      friday: z.object({ open: z.string(), close: z.string() }).optional(),
-      saturday: z.object({ open: z.string(), close: z.string() }).optional(),
-      sunday: z.object({ open: z.string(), close: z.string() }).optional()
-    }).optional()
-  })
-}
-
-// Appointment validation schemas
-export const AppointmentSchemas = {
-  create: z.object({
-    artistId: BaseSchemas.id,
-    serviceType: z.string().min(1).max(100),
-    preferredDate: BaseSchemas.date,
-    preferredTime: BaseSchemas.time,
-    duration: z.number().min(30).max(480), // 30 minutes to 8 hours
-    budget: BaseSchemas.positiveNumber,
-    projectDescription: z.string().min(10).max(2000),
-    referenceImages: z.array(z.string().url()).max(10).optional(),
-    specialRequests: z.string().max(1000).optional(),
-    emergencyContact: z.object({
-      name: z.string().min(1).max(100),
-      phone: BaseSchemas.phone
-    }).optional()
-  }),
-
-  update: z.object({
-    serviceType: z.string().min(1).max(100).optional(),
-    preferredDate: BaseSchemas.date.optional(),
-    preferredTime: BaseSchemas.time.optional(),
-    duration: z.number().min(30).max(480).optional(),
-    budget: BaseSchemas.positiveNumber.optional(),
-    projectDescription: z.string().min(10).max(2000).optional(),
-    referenceImages: z.array(z.string().url()).max(10).optional(),
-    specialRequests: z.string().max(1000).optional(),
-    status: BaseSchemas.appointmentStatus.optional()
-  }),
-
-  reschedule: z.object({
-    newDate: BaseSchemas.date,
-    newTime: BaseSchemas.time,
-    reason: z.string().max(500).optional()
-  })
-}
-
-// Portfolio validation schemas
-export const PortfolioSchemas = {
-  create: z.object({
-    title: z.string().min(1).max(200),
-    description: z.string().max(2000).optional(),
-    images: z.array(z.string().url()).min(1).max(20),
-    style: BaseSchemas.tattooStyle,
-    size: z.string().max(100).optional(),
-    placement: z.string().max(100).optional(),
-    duration: z.number().min(30).max(480).optional(),
-    price: BaseSchemas.positiveNumber.optional(),
-    isPublic: z.boolean().default(true),
-    tags: z.array(z.string().max(50)).max(20).optional(),
-    collectionId: BaseSchemas.id.optional()
-  }),
-
-  update: z.object({
-    title: z.string().min(1).max(200).optional(),
-    description: z.string().max(2000).optional(),
-    images: z.array(z.string().url()).min(1).max(20).optional(),
-    style: BaseSchemas.tattooStyle.optional(),
-    size: z.string().max(100).optional(),
-    placement: z.string().max(100).optional(),
-    duration: z.number().min(30).max(480).optional(),
-    price: BaseSchemas.positiveNumber.optional(),
-    isPublic: z.boolean().optional(),
-    tags: z.array(z.string().max(50)).max(20).optional(),
-    collectionId: BaseSchemas.id.optional()
-  })
-}
-
-// Review validation schemas
-export const ReviewSchemas = {
-  create: z.object({
-    artistId: BaseSchemas.id,
-    appointmentId: BaseSchemas.id.optional(),
-    rating: BaseSchemas.rating,
-    content: z.string().min(10).max(2000),
-    images: z.array(z.string().url()).max(5).optional(),
-    categories: z.object({
-      cleanliness: BaseSchemas.rating.optional(),
-      professionalism: BaseSchemas.rating.optional(),
-      skill: BaseSchemas.rating.optional(),
-      communication: BaseSchemas.rating.optional(),
-      value: BaseSchemas.rating.optional()
-    }).optional()
-  }),
-
-  update: z.object({
-    rating: BaseSchemas.rating.optional(),
-    content: z.string().min(10).max(2000).optional(),
-    images: z.array(z.string().url()).max(5).optional(),
-    categories: z.object({
-      cleanliness: BaseSchemas.rating.optional(),
-      professionalism: BaseSchemas.rating.optional(),
-      skill: BaseSchemas.rating.optional(),
-      communication: BaseSchemas.rating.optional(),
-      value: BaseSchemas.rating.optional()
-    }).optional()
-  })
-}
-
-// Message validation schemas
-export const MessageSchemas = {
-  create: z.object({
-    recipientId: BaseSchemas.id,
-    subject: z.string().min(1).max(200),
-    content: z.string().min(1).max(5000),
-    attachments: z.array(z.string().url()).max(10).optional(),
-    priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']).default('NORMAL')
-  }),
-
-  reply: z.object({
-    content: z.string().min(1).max(5000),
-    attachments: z.array(z.string().url()).max(10).optional()
-  })
-}
-
-// Search validation schemas
-export const SearchSchemas = {
-  artists: z.object({
-    query: z.string().max(200).optional(),
-    location: z.string().max(200).optional(),
-    style: BaseSchemas.tattooStyle.optional(),
-    minPrice: BaseSchemas.nonNegativeNumber.optional(),
-    maxPrice: BaseSchemas.positiveNumber.optional(),
-    rating: BaseSchemas.rating.optional(),
-    availability: z.object({
-      date: BaseSchemas.date,
-      time: BaseSchemas.time
-    }).optional(),
-    limit: z.number().min(1).max(100).default(20),
-    offset: z.number().min(0).default(0),
-    sortBy: z.enum(['rating', 'price', 'distance', 'recent']).default('rating'),
-    sortOrder: z.enum(['asc', 'desc']).default('desc')
-  }),
-
-  portfolio: z.object({
-    query: z.string().max(200).optional(),
-    style: BaseSchemas.tattooStyle.optional(),
-    artistId: BaseSchemas.id.optional(),
-    minPrice: BaseSchemas.nonNegativeNumber.optional(),
-    maxPrice: BaseSchemas.positiveNumber.optional(),
-    tags: z.array(z.string().max(50)).max(10).optional(),
-    limit: z.number().min(1).max(100).default(20),
-    offset: z.number().min(0).default(0),
-    sortBy: z.enum(['recent', 'popular', 'price', 'rating']).default('recent'),
-    sortOrder: z.enum(['asc', 'desc']).default('desc')
-  })
-}
-
-// File upload validation schemas
-export const FileUploadSchemas = {
-  image: z.object({
-    file: z.any(), // File object
-    type: BaseSchemas.fileType,
-    size: z.number().max(10 * 1024 * 1024), // 10MB max
-    width: z.number().min(100).max(4000).optional(),
-    height: z.number().min(100).max(4000).optional()
-  }),
-
-  document: z.object({
-    file: z.any(),
-    type: z.enum(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
-    size: z.number().max(5 * 1024 * 1024) // 5MB max
-  })
-}
-
-// Payment validation schemas
-export const PaymentSchemas = {
-  create: z.object({
-    amount: BaseSchemas.positiveNumber,
-    currency: z.string().length(3).default('USD'),
-    appointmentId: BaseSchemas.id.optional(),
-    description: z.string().max(500).optional(),
-    metadata: z.record(z.string()).optional()
-  }),
-
-  refund: z.object({
-    amount: BaseSchemas.positiveNumber.optional(), // Partial refund
-    reason: z.string().max(500).optional()
-  })
-}
-
-// Admin validation schemas
-export const AdminSchemas = {
-  userUpdate: z.object({
-    status: BaseSchemas.status.optional(),
-    role: BaseSchemas.role.optional(),
-    verified: z.boolean().optional()
-  }),
-
-  shopUpdate: z.object({
-    verified: z.boolean().optional(),
-    featured: z.boolean().optional(),
-    status: BaseSchemas.status.optional()
-  })
-}
-
-// Custom validation functions
-export const CustomValidators = {
-  /**
-   * Validate that user exists
-   */
-  async userExists(userId: string): Promise<boolean> {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true }
-    })
-    return !!user
-  },
-
-  /**
-   * Validate that shop exists
-   */
-  async shopExists(shopId: string): Promise<boolean> {
-    const shop = await prisma.shop.findUnique({
-      where: { id: shopId },
-      select: { id: true }
-    })
-    return !!shop
-  },
-
-  /**
-   * Validate that appointment exists
-   */
-  async appointmentExists(appointmentId: string): Promise<boolean> {
-    const appointment = await prisma.appointment.findUnique({
-      where: { id: appointmentId },
-      select: { id: true }
-    })
-    return !!appointment
-  },
-
-  /**
-   * Validate email uniqueness
-   */
-  async emailUnique(email: string, excludeId?: string): Promise<boolean> {
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true }
-    })
-    return !user || user.id === excludeId
-  },
-
-  /**
-   * Validate phone number format
-   */
-  isValidPhone(phone: string): boolean {
-    const phoneRegex = /^\+?[\d\s\-\(\)]+$/
-    return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10
-  },
-
-  /**
-   * Validate URL format
-   */
-  isValidUrl(url: string): boolean {
+  // URL validation
+  static isValidUrl(url: string): boolean {
     try {
       new URL(url)
       return true
     } catch {
       return false
     }
-  },
+  }
 
-  /**
-   * Validate date is in the future
-   */
-  isFutureDate(date: string): boolean {
-    return new Date(date) > new Date()
-  },
+  // Password strength validation
+  static isStrongPassword(password: string): {
+    isValid: boolean
+    message?: string
+  } {
+    if (password.length < 8) {
+      return { isValid: false, message: 'Password must be at least 8 characters long' }
+    }
+    if (!/[a-z]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one lowercase letter' }
+    }
+    if (!/[A-Z]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one uppercase letter' }
+    }
+    if (!/[0-9]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one number' }
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      return { isValid: false, message: 'Password must contain at least one special character' }
+    }
+    return { isValid: true }
+  }
 
-  /**
-   * Validate time is within business hours
-   */
-  isBusinessHours(time: string, dayOfWeek: number): boolean {
-    const hour = parseInt(time.split(':')[0])
-    return hour >= 9 && hour <= 21 // 9 AM to 9 PM
+  // Date validation
+  static isValidDate(dateString: string): boolean {
+    const date = new Date(dateString)
+    return !isNaN(date.getTime())
+  }
+
+  static isFutureDate(dateString: string): boolean {
+    const date = new Date(dateString)
+    return date > new Date()
+  }
+
+  static isPastDate(dateString: string): boolean {
+    const date = new Date(dateString)
+    return date < new Date()
+  }
+
+  // Credit card validation (Luhn algorithm)
+  static isValidCreditCard(cardNumber: string): boolean {
+    const cleanNumber = cardNumber.replace(/\s/g, '')
+    if (!/^\d{13,19}$/.test(cleanNumber)) return false
+
+    let sum = 0
+    let isEven = false
+    
+    for (let i = cleanNumber.length - 1; i >= 0; i--) {
+      let digit = parseInt(cleanNumber[i])
+      
+      if (isEven) {
+        digit *= 2
+        if (digit > 9) digit -= 9
+      }
+      
+      sum += digit
+      isEven = !isEven
+    }
+    
+    return sum % 10 === 0
+  }
+
+  // CVV validation
+  static isValidCVV(cvv: string): boolean {
+    return /^\d{3,4}$/.test(cvv)
+  }
+
+  // Expiry date validation (MM/YY format)
+  static isValidExpiryDate(expiry: string): boolean {
+    const match = expiry.match(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/)
+    if (!match) return false
+
+    const month = parseInt(match[1])
+    const year = parseInt('20' + match[2])
+    const now = new Date()
+    const currentYear = now.getFullYear()
+    const currentMonth = now.getMonth() + 1
+
+    if (year < currentYear) return false
+    if (year === currentYear && month < currentMonth) return false
+
+    return true
+  }
+
+  // String validations
+  static isNotEmpty(value: string): boolean {
+    return value.trim().length > 0
+  }
+
+  static hasMinLength(value: string, min: number): boolean {
+    return value.trim().length >= min
+  }
+
+  static hasMaxLength(value: string, max: number): boolean {
+    return value.trim().length <= max
+  }
+
+  static isInRange(value: string, min: number, max: number): boolean {
+    const length = value.trim().length
+    return length >= min && length <= max
+  }
+
+  // Number validations
+  static isNumber(value: any): boolean {
+    return !isNaN(parseFloat(value)) && isFinite(value)
+  }
+
+  static isPositive(value: number): boolean {
+    return value > 0
+  }
+
+  static isInNumericRange(value: number, min: number, max: number): boolean {
+    return value >= min && value <= max
+  }
+
+  // File validations
+  static isValidFileType(file: File, allowedTypes: string[]): boolean {
+    return allowedTypes.some(type => {
+      if (type.includes('*')) {
+        const prefix = type.split('/')[0]
+        return file.type.startsWith(prefix)
+      }
+      return file.type === type
+    })
+  }
+
+  static isValidFileSize(file: File, maxSizeInBytes: number): boolean {
+    return file.size <= maxSizeInBytes
+  }
+
+  // Chaining validation methods
+  required(fieldName: string, value: any, message?: string): this {
+    if (!value || (typeof value === 'string' && !this.constructor.isNotEmpty(value))) {
+      this.errors[fieldName] = message || `${fieldName} is required`
+    }
+    return this
+  }
+
+  email(fieldName: string, value: string, message?: string): this {
+    if (value && !Validator.isValidEmail(value)) {
+      this.errors[fieldName] = message || 'Invalid email address'
+    }
+    return this
+  }
+
+  phone(fieldName: string, value: string, message?: string): this {
+    if (value && !Validator.isValidPhone(value)) {
+      this.errors[fieldName] = message || 'Invalid phone number'
+    }
+    return this
+  }
+
+  url(fieldName: string, value: string, message?: string): this {
+    if (value && !Validator.isValidUrl(value)) {
+      this.errors[fieldName] = message || 'Invalid URL'
+    }
+    return this
+  }
+
+  minLength(fieldName: string, value: string, min: number, message?: string): this {
+    if (value && !Validator.hasMinLength(value, min)) {
+      this.errors[fieldName] = message || `Must be at least ${min} characters`
+    }
+    return this
+  }
+
+  maxLength(fieldName: string, value: string, max: number, message?: string): this {
+    if (value && !Validator.hasMaxLength(value, max)) {
+      this.errors[fieldName] = message || `Must be at most ${max} characters`
+    }
+    return this
+  }
+
+  pattern(fieldName: string, value: string, pattern: RegExp, message?: string): this {
+    if (value && !pattern.test(value)) {
+      this.errors[fieldName] = message || 'Invalid format'
+    }
+    return this
+  }
+
+  custom(fieldName: string, isValid: boolean, message: string): this {
+    if (!isValid) {
+      this.errors[fieldName] = message
+    }
+    return this
+  }
+
+  getResult(): ValidationResult {
+    return {
+      isValid: Object.keys(this.errors).length === 0,
+      errors: this.errors
+    }
+  }
+
+  reset(): this {
+    this.errors = {}
+    return this
   }
 }
 
-// Export all schemas
+// Pre-built validation schemas
 export const ValidationSchemas = {
-  Base: BaseSchemas,
-  User: UserSchemas,
-  Profile: ProfileSchemas,
-  Shop: ShopSchemas,
-  Appointment: AppointmentSchemas,
-  Portfolio: PortfolioSchemas,
-  Review: ReviewSchemas,
-  Message: MessageSchemas,
-  Search: SearchSchemas,
-  FileUpload: FileUploadSchemas,
-  Payment: PaymentSchemas,
-  Admin: AdminSchemas,
-  Custom: CustomValidators
+  // User registration
+  registration: (data: any) => {
+    const validator = new Validator()
+    return validator
+      .required('name', data.name)
+      .minLength('name', data.name, 2)
+      .maxLength('name', data.name, 50)
+      .required('email', data.email)
+      .email('email', data.email)
+      .required('password', data.password)
+      .custom('password', Validator.isStrongPassword(data.password).isValid, 
+        Validator.isStrongPassword(data.password).message || '')
+      .getResult()
+  },
+
+  // Login
+  login: (data: any) => {
+    const validator = new Validator()
+    return validator
+      .required('email', data.email)
+      .email('email', data.email)
+      .required('password', data.password)
+      .getResult()
+  },
+
+  // Contact form
+  contact: (data: any) => {
+    const validator = new Validator()
+    return validator
+      .required('name', data.name)
+      .minLength('name', data.name, 2)
+      .required('email', data.email)
+      .email('email', data.email)
+      .required('subject', data.subject)
+      .minLength('subject', data.subject, 5)
+      .required('message', data.message)
+      .minLength('message', data.message, 20)
+      .maxLength('message', data.message, 1000)
+      .getResult()
+  },
+
+  // Appointment booking
+  appointment: (data: any) => {
+    const validator = new Validator()
+    return validator
+      .required('title', data.title)
+      .minLength('title', data.title, 3)
+      .maxLength('title', data.title, 100)
+      .required('clientName', data.clientName)
+      .minLength('clientName', data.clientName, 2)
+      .required('clientEmail', data.clientEmail)
+      .email('clientEmail', data.clientEmail)
+      .required('clientPhone', data.clientPhone)
+      .phone('clientPhone', data.clientPhone)
+      .required('startTime', data.startTime)
+      .custom('startTime', Validator.isFutureDate(data.startTime), 'Start time must be in the future')
+      .required('endTime', data.endTime)
+      .custom('endTime', new Date(data.endTime) > new Date(data.startTime), 'End time must be after start time')
+      .required('artistId', data.artistId)
+      .required('serviceId', data.serviceId)
+      .getResult()
+  },
+
+  // Review submission
+  review: (data: any) => {
+    const validator = new Validator()
+    return validator
+      .required('rating', data.rating)
+      .custom('rating', data.rating >= 1 && data.rating <= 5, 'Rating must be between 1 and 5')
+      .required('title', data.title)
+      .minLength('title', data.title, 5)
+      .maxLength('title', data.title, 100)
+      .required('comment', data.comment)
+      .minLength('comment', data.comment, 20)
+      .maxLength('comment', data.comment, 1000)
+      .getResult()
+  },
+
+  // Portfolio item
+  portfolioItem: (data: any) => {
+    const validator = new Validator()
+    return validator
+      .required('title', data.title)
+      .minLength('title', data.title, 3)
+      .maxLength('title', data.title, 100)
+      .required('imageUrl', data.imageUrl)
+      .required('style', data.style)
+      .maxLength('description', data.description, 500)
+      .getResult()
+  },
+
+  // Payment details
+  payment: (data: any) => {
+    const validator = new Validator()
+    return validator
+      .required('cardNumber', data.cardNumber)
+      .custom('cardNumber', Validator.isValidCreditCard(data.cardNumber), 'Invalid card number')
+      .required('cardExpiry', data.cardExpiry)
+      .custom('cardExpiry', Validator.isValidExpiryDate(data.cardExpiry), 'Invalid or expired date')
+      .required('cardCvc', data.cardCvc)
+      .custom('cardCvc', Validator.isValidCVV(data.cardCvc), 'Invalid CVC')
+      .getResult()
+  }
 }
 
-export default ValidationSchemas
+export default Validator
