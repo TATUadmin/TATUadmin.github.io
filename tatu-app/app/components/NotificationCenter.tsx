@@ -70,7 +70,8 @@ export default function NotificationCenter({
     filter === 'all' ? true : !n.read
   )
 
-  const unreadCount = notifications.filter(n => !n.read).length
+  // Use unreadCount from WebSocket context if available, otherwise calculate from notifications
+  const finalUnreadCount = unreadCount ?? notifications.filter(n => !n.read).length
 
   const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
@@ -157,15 +158,15 @@ export default function NotificationCenter({
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">Notifications</h1>
-              {unreadCount > 0 && (
-                <p className="text-sm text-gray-400">{unreadCount} unread</p>
+              {finalUnreadCount > 0 && (
+                <p className="text-sm text-gray-400">{finalUnreadCount} unread</p>
               )}
             </div>
           </div>
 
           {notifications.length > 0 && (
             <div className="flex items-center space-x-2">
-              {unreadCount > 0 && (
+              {finalUnreadCount > 0 && (
                 <button
                   onClick={() => {
                     // Use WebSocket method if available, otherwise fall back to prop method
@@ -210,7 +211,7 @@ export default function NotificationCenter({
                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
             }`}
           >
-            Unread ({unreadCount})
+            Unread ({finalUnreadCount})
           </button>
         </div>
 
