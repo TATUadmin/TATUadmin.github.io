@@ -20,17 +20,24 @@ export interface PaymentResult {
 }
 
 export class PaymentService {
-  private stripe: Stripe
+  private stripe: Stripe | null = null
 
   constructor() {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('STRIPE_SECRET_KEY is not configured')
+    if (process.env.STRIPE_SECRET_KEY) {
+      this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2024-12-18.acacia',
+        typescript: true,
+      })
+    } else {
+      console.warn('STRIPE_SECRET_KEY is not set. Payment functionality will be disabled.')
     }
-    
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-12-18.acacia',
-      typescript: true,
-    })
+  }
+
+  private ensureStripe(): Stripe {
+    if (!this.stripe) {
+      throw new Error('STRIPE_SECRET_KEY is not configured. Payment functionality is disabled.')
+    }
+    return this.stripe
   }
 
   /**
@@ -59,7 +66,7 @@ export class PaymentService {
       })
 
       // Create Stripe payment intent
-      const paymentIntent = await this.stripe.paymentIntents.create({
+      const paymentIntent = await this.ensureStripe().paymentIntents.create({
         amount: data.amount,
         currency: 'usd',
         metadata: {
@@ -123,7 +130,7 @@ export class PaymentService {
       })
 
       // Create Stripe checkout session
-      const session = await this.stripe.checkout.sessions.create({
+      const session = await this.ensureStripe().checkout.sessions.create({
         mode: 'payment',
         payment_method_types: ['card'],
         line_items: [
@@ -301,7 +308,7 @@ export class PaymentService {
       }
 
       // Create Stripe refund
-      const refund = await this.stripe.refunds.create({
+      const refund = await this.ensureStripe().refunds.create({
         payment_intent: payment.stripePaymentId,
         amount: amount || payment.amount,
         metadata: {
