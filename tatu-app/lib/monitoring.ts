@@ -206,7 +206,7 @@ export class Logger {
       userId: this.getUserId(request),
       sessionId: this.getSessionId(request),
       ip: this.getClientIP(request),
-      userAgent: request?.headers.get('user-agent'),
+      userAgent: request?.headers.get('user-agent') || undefined,
       url: request?.url,
       method: request?.method,
       metadata: this.sanitizeMetadata(metadata),
@@ -251,15 +251,106 @@ export class Logger {
    */
   private async sendToExternalService(entry: LogEntry): Promise<void> {
     try {
-      // In production, you would send to services like:
-      // - Datadog
-      // - New Relic
-      // - CloudWatch
-      // - Sentry
-      // - LogRocket
-      
-      // For now, we'll just log to console
-      console.log(JSON.stringify(entry))
+      // Use Sentry logger if available (server-side only)
+      if (typeof window === 'undefined') {
+        try {
+          const Sentry = await import('@sentry/nextjs')
+          const { logger: sentryLogger } = Sentry
+
+          // Use Sentry logger with appropriate level
+          if (sentryLogger) {
+            const logMessage = entry.metadata
+              ? `${entry.message} ${JSON.stringify(entry.metadata)}`
+              : entry.message
+
+            switch (entry.level) {
+              case LogLevel.ERROR:
+                sentryLogger.error(logMessage, {
+                  ...entry.metadata,
+                  requestId: entry.requestId,
+                  userId: entry.userId,
+                  ipAddress: entry.ip,
+                })
+                // Also capture as exception for errors
+                if (entry.error) {
+                  Sentry.captureException(new Error(entry.message), {
+                    level: 'error',
+                    tags: {
+                      ...entry.metadata?.tags,
+                      log_type: 'error',
+                    },
+                    extra: {
+                      ...entry.metadata,
+                      requestId: entry.requestId,
+                      userId: entry.userId,
+                      ipAddress: entry.ip,
+                      error_name: entry.error.name,
+                      error_code: entry.error.code,
+                    },
+                    contexts: {
+                      log: {
+                        timestamp: entry.timestamp,
+                        level: entry.level,
+                        message: entry.message,
+                      },
+                    },
+                  })
+                }
+                break
+              case LogLevel.WARN:
+                sentryLogger.warn(logMessage, {
+                  ...entry.metadata,
+                  requestId: entry.requestId,
+                  userId: entry.userId,
+                })
+                break
+              case LogLevel.INFO:
+                sentryLogger.info(logMessage, {
+                  ...entry.metadata,
+                  requestId: entry.requestId,
+                  userId: entry.userId,
+                })
+                break
+              case LogLevel.DEBUG:
+                sentryLogger.debug(logMessage, {
+                  ...entry.metadata,
+                  requestId: entry.requestId,
+                  userId: entry.userId,
+                })
+                break
+            }
+          } else {
+            // Fallback to captureException for errors if logger not available
+            if (entry.level === LogLevel.ERROR) {
+              Sentry.captureException(new Error(entry.message), {
+                level: 'error',
+                tags: entry.metadata?.tags || {},
+                extra: entry.metadata || {},
+                contexts: {
+                  log: {
+                    timestamp: entry.timestamp,
+                    level: entry.level,
+                    message: entry.message,
+                  },
+                },
+              })
+            }
+          }
+        } catch (sentryError) {
+          // Sentry not available, fall through to console
+        }
+      }
+
+      // Send to Datadog if configured (optional)
+      if (process.env.DATADOG_API_KEY && entry.level === LogLevel.ERROR) {
+        // Datadog integration would go here
+        // For now, just log to console
+      }
+
+      // Fallback to console in development
+      if (process.env.NODE_ENV !== 'production') {
+        this.logToConsole(entry)
+      }
     } catch (error) {
       console.error('Failed to send log to external service:', error)
     }
@@ -327,7 +418,7 @@ export class Logger {
    * Get tags for log entry
    */
   private getTags(level: LogLevel, metadata?: Record<string, any>): string[] {
-    const tags = [level]
+    const tags: string[] = [level]
 
     if (metadata?.error) {
       tags.push('error')

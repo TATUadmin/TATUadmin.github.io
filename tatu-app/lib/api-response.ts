@@ -383,10 +383,28 @@ export function withErrorHandling<T extends any[]>(
     try {
       return await handler(...args)
     } catch (error) {
+      // Log error
       logger.error('Unhandled API Error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
       })
+
+      // Capture exception in Sentry
+      if (typeof window === 'undefined') {
+        // Server-side: Use @sentry/nextjs
+        const Sentry = await import('@sentry/nextjs')
+        Sentry.captureException(error instanceof Error ? error : new Error(String(error)), {
+          level: 'error',
+          tags: {
+            error_type: 'unhandled_api_error',
+            handler: handler.name || 'unknown'
+          },
+          extra: {
+            error_message: error instanceof Error ? error.message : String(error),
+            error_stack: error instanceof Error ? error.stack : undefined
+          }
+        })
+      }
 
       return ApiResponse.internalError(
         'An unexpected error occurred',
