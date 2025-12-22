@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd tatu-app && npm run build",
+  "outputDirectory": "tatu-app/.next",
+  "installCommand": "cd tatu-app && npm install",
+  "framework": "nextjs",
+  "rootDirectory": "tatu-app"
+}
+
