@@ -665,63 +665,8 @@ export const createJobQueue = (redis: Redis): JobQueue => {
   return queue
 }
 
-// Convenience functions
-export const addEmailJob = async (
-  type: string,
-  email: string,
-  name: string,
-  data: any,
-  options: any = {}
-) => {
-  const queue = JobQueue.getInstance()
-  return await queue.addJob(JobType.SEND_EMAIL, {
-    type,
-    email,
-    name,
-    data
-  }, options)
-}
-
-export const addAppointmentReminderJob = async (
-  appointmentId: string,
-  delay: number = 24 * 60 * 60 * 1000 // 24 hours
-) => {
-  const queue = JobQueue.getInstance()
-  return await queue.addJob(JobType.SEND_APPOINTMENT_REMINDER, {
-    appointmentId
-  }, { delay })
-}
-
-export const addReviewRequestJob = async (
-  appointmentId: string,
-  delay: number = 24 * 60 * 60 * 1000 // 24 hours
-) => {
-  const queue = JobQueue.getInstance()
-  return await queue.addJob(JobType.SEND_REVIEW_REQUEST, {
-    appointmentId
-  }, { delay })
-}
-
-export const addImageProcessingJob = async (
-  fileId: string,
-  operations: any[],
-  options: any = {}
-) => {
-  const queue = JobQueue.getInstance()
-  return await queue.addJob(JobType.PROCESS_IMAGE, {
-    fileId,
-    operations
-  }, options)
-}
-
-export const addCleanupJob = async (
-  type: string,
-  options: any = {}
-) => {
-  const queue = JobQueue.getInstance()
-  return await queue.addJob(JobType.CLEANUP_EXPIRED_TOKENS, {
-    type
-  }, options)
-}
+// Note: Convenience functions are re-exported from './bullmq-jobs' at the top of this file
+// The old implementations below are kept for reference but should not be used
+// All job processing now happens in bullmq-jobs.ts
 
 export default JobQueue
