@@ -35,7 +35,7 @@ Connecting the world's most talented tattoo artists with clients seeking excepti
 ## 🛠 Tech Stack
 - **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS
 - **Backend:** Next.js API routes, NextAuth.js
-- **Database:** PlanetScale (MySQL)
+- **Database:** TimescaleDB (PostgreSQL)
 - **Payments:** Stripe Connect
 - **Hosting:** Vercel Pro
 - **Analytics:** Google Analytics, Mixpanel

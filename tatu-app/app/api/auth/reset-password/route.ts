@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { hashPassword, validatePasswordStrength } from '@/lib/security'
 
 export async function POST(req: Request) {
   try {
@@ -13,10 +13,14 @@ export async function POST(req: Request) {
       )
     }
 
-    // Validate password strength
-    if (password.length < 8) {
+    // Validate password strength using enterprise-grade validation
+    const passwordValidation = validatePasswordStrength(password)
+    if (!passwordValidation.valid) {
       return NextResponse.json(
-        { message: 'Password must be at least 8 characters long' },
+        { 
+          message: 'Password does not meet requirements',
+          errors: passwordValidation.errors
+        },
         { status: 400 }
       )
     }
@@ -44,8 +48,8 @@ export async function POST(req: Request) {
       )
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    // Hash new password using enterprise-grade security (configurable salt rounds)
+    const hashedPassword = await hashPassword(password)
 
     // Update user's password
     await prisma.user.update({

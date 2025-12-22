@@ -4,6 +4,11 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// ✅ DATABASE CONFIGURATION:
+// This schema is configured for PostgreSQL (TimescaleDB).
+// All Prisma features are optimized for PostgreSQL.
+// For enterprise scale recommendations, see ENTERPRISE_TECH_STACK_EVALUATION.md.
+
 generator client {
   provider = "prisma-client-js"
 }

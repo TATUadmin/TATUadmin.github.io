@@ -1,3 +1,6 @@
+// Import Sentry configuration
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -75,4 +78,18 @@ const nextConfig = {
   }
 }
 
-module.exports = nextConfig 
+// Export with Sentry configuration if DSN is provided
+module.exports = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? withSentryConfig(nextConfig, {
+      // Sentry configuration
+      silent: true,
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      widenClientFileUpload: true,
+      transpileClientSDK: true,
+      tunnelRoute: '/monitoring',
+      hideSourceMaps: true,
+      disableLogger: true,
+      automaticVercelMonitors: true,
+    })
+  : nextConfig 

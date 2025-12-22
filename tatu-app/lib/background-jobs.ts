@@ -1,3 +1,52 @@
+/**
+ * @deprecated This file is kept for backward compatibility.
+ * New code should import directly from '@/lib/bullmq-jobs'
+ * 
+ * This file re-exports BullMQ functions for backward compatibility.
+ * The old custom job queue has been replaced with enterprise-grade BullMQ.
+ */
+
+// Re-export from BullMQ for backward compatibility
+export {
+  addEmailJob,
+  addAppointmentReminderJob,
+  addReviewRequestJob,
+  addImageProcessingJob,
+  addCleanupJob,
+} from './bullmq-jobs'
+
+// Re-export job types for backward compatibility
+export enum JobType {
+  SEND_EMAIL = 'send_email',
+  SEND_APPOINTMENT_REMINDER = 'send_appointment_reminder',
+  SEND_REVIEW_REQUEST = 'send_review_request',
+  PROCESS_IMAGE = 'process_image',
+  GENERATE_THUMBNAIL = 'generate_thumbnail',
+  CLEANUP_EXPIRED_TOKENS = 'cleanup_expired_tokens',
+  SYNC_EXTERNAL_DATA = 'sync_external_data',
+  SEND_NOTIFICATION = 'send_notification',
+  UPDATE_ANALYTICS = 'update_analytics',
+  BACKUP_DATABASE = 'backup_database'
+}
+
+export enum JobPriority {
+  LOW = 0,
+  NORMAL = 1,
+  HIGH = 2,
+  URGENT = 3
+}
+
+export enum JobStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled'
+}
+
+// Legacy code below - kept for reference but not used
+// All job processing now happens in bullmq-jobs.ts
+
 import { Redis } from 'ioredis'
 import { logger } from './monitoring'
 import { emailService } from './email-service'

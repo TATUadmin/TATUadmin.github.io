@@ -4,7 +4,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from './prisma'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcrypt'
+import { comparePassword } from './security'
 import { UserRole } from '@prisma/client'
 
 declare module 'next-auth' {
@@ -53,7 +53,7 @@ export const config = {
           throw new Error('Invalid credentials')
         }
 
-        const isCorrectPassword = await bcrypt.compare(
+        const isCorrectPassword = await comparePassword(
           credentials.password,
           user.password
         )

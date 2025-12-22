@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { hashPassword, generateSecureToken } from '@/lib/security'
 import { sendWelcomeEmail } from '@/lib/email-service'
-import crypto from 'crypto'
 import { z } from 'zod'
 import { Prisma } from '@prisma/client'
 
@@ -45,8 +44,8 @@ export async function POST(req: Request) {
       )
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(validatedData.password, 10)
+    // Hash password using enterprise-grade security (configurable salt rounds)
+    const hashedPassword = await hashPassword(validatedData.password)
 
     // Create user
     const user = await prisma.user.create({
@@ -95,8 +94,8 @@ export async function POST(req: Request) {
       data: profileData,
     })
 
-    // Generate verification token
-    const token = crypto.randomBytes(32).toString('hex')
+    // Generate secure verification token
+    const token = generateSecureToken(32)
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
     // Save verification token
