@@ -1,5 +1,9 @@
 'use client'
 
+// Force dynamic rendering to prevent build-time errors
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
