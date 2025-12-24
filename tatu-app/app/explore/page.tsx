@@ -5,15 +5,23 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { MagnifyingGlassIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
-import LeafletMap from '../components/LeafletMap'
 import { classifySearch, formatSearchClassification } from '@/lib/smart-search'
 import { ALL_ARTISTS, Artist } from '@/lib/all-artists-data'
+
+// Dynamically import LeafletMap to prevent build-time window errors
+const LeafletMap = dynamic(() => import('../components/LeafletMap'), {
+  ssr: false, // Disable server-side rendering for the map component
+  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg flex items-center justify-center">
+    <p className="text-gray-500">Loading map...</p>
+  </div>
+})
 
 export default function ExplorePage() {
   const searchParams = useSearchParams()
