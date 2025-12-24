@@ -1,11 +1,7 @@
 'use client'
 
-// Force dynamic rendering to prevent build-time errors
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
 import { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
+import dynamicImport from 'next/dynamic'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -15,8 +11,12 @@ import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
 import { classifySearch, formatSearchClassification } from '@/lib/smart-search'
 import { ALL_ARTISTS, Artist } from '@/lib/all-artists-data'
 
+// Force dynamic rendering to prevent build-time errors
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // Dynamically import LeafletMap to prevent build-time window errors
-const LeafletMap = dynamic(() => import('../components/LeafletMap'), {
+const LeafletMap = dynamicImport(() => import('../components/LeafletMap'), {
   ssr: false, // Disable server-side rendering for the map component
   loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg flex items-center justify-center">
     <p className="text-gray-500">Loading map...</p>
