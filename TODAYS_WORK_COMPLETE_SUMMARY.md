@@ -46,6 +46,25 @@ These are already set in Vercel:
 - **Project:** tatu-app ✅ (correct project)
 - **Domain:** tatufortattoos.com (needs to be verified in Vercel)
 
+### 4. ✅ Google OAuth Setup (COMPLETED - Dec 25, 2025)
+
+Successfully configured Google authentication:
+- ✅ Google Cloud Project created
+- ✅ Google+ API enabled
+- ✅ OAuth consent screen configured
+- ✅ OAuth 2.0 credentials generated
+- ✅ Environment variables added to Vercel:
+  - `GOOGLE_CLIENT_ID`
+  - `GOOGLE_CLIENT_SECRET`
+  - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+- ✅ Authorized redirect URIs configured for both domains
+  - `https://tatufortattoos.com/api/auth/callback/google`
+  - `https://www.tatufortattoos.com/api/auth/callback/google`
+
+### 5. ✅ Security Environment Variables
+
+- ✅ `HASH_SALT_ROUNDS` added to Vercel (value: 10)
+
 ---
 
 ## ⚠️ Known Issues (Non-Blocking)
@@ -65,7 +84,6 @@ These are already set in Vercel:
 These will show warnings but won't break the app:
 - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` - For Redis caching (optional)
 - `STRIPE_SECRET_KEY` - For payments (can add when needed)
-- Google OAuth credentials (for social login)
 
 ---
 
@@ -108,11 +126,6 @@ These will show warnings but won't break the app:
    **For Redis Caching (Performance):**
    - `UPSTASH_REDIS_REST_URL`
    - `UPSTASH_REDIS_REST_TOKEN`
-   
-   **For Google OAuth:**
-   - `GOOGLE_CLIENT_ID`
-   - `GOOGLE_CLIENT_SECRET`
-   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 
 5. **Run Database Migrations**
    ```bash
@@ -239,12 +252,15 @@ All critical build issues have been resolved. The app should build successfully 
 
 **Next Action:** Monitor the current Vercel build and verify the domain setup.
 
-**Branch:** `merger-test-2` (all fixes are pushed)  
-**Commits Today:** 4 major fixes
+**Branch:** `main` (deployed to production)  
+**Work Completed:**
 - BullMQ lazy-loading
 - Dynamic import for LeafletMap
 - Naming conflict resolution
-- Documentation
+- Sentry integration (enterprise monitoring)
+- Google OAuth setup (social login)
+- Security hardening (HASH_SALT_ROUNDS)
+- Documentation updates
 
 ---
 
