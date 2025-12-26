@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import CredentialsProvider from "next-auth/providers/credentials"
+import GoogleProvider from "next-auth/providers/google"
 
 type UserRole = 'CUSTOMER' | 'ARTIST' | 'SHOP_OWNER' | 'ADMIN'
 
@@ -36,6 +37,10 @@ export const authOptions = {
     error: '/auth/error',
   },
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -81,9 +86,19 @@ export const authOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, account }: any) {
       if (user) {
-        token.role = user.role as UserRole
+        // For Google OAuth, set default role if not already set
+        if (account?.provider === 'google' && !user.role) {
+          // Update user with default CUSTOMER role
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: 'CUSTOMER' }
+          })
+          token.role = 'CUSTOMER'
+        } else {
+          token.role = user.role as UserRole
+        }
         token.id = user.id
       }
       return token
