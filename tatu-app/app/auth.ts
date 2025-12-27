@@ -86,6 +86,21 @@ export const authOptions = {
     })
   ],
   callbacks: {
+    async signIn({ user, account }: any) {
+      // Allow sign-in for all OAuth providers
+      if (account?.provider === 'google') {
+        // Ensure user has a role set
+        if (!user.role) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: 'CUSTOMER' }
+          })
+        }
+        return true
+      }
+      // For credentials provider
+      return true
+    },
     async jwt({ token, user, account }: any) {
       if (user) {
         // For Google OAuth, set default role if not already set
@@ -109,20 +124,21 @@ export const authOptions = {
         session.user.id = token.id
       }
       return session
+    },
+    async redirect({ url, baseUrl }: any) {
+      // After successful sign-in, redirect to home page
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     }
   }
 }
 
-// Simple auth function for server components
-// This will be used by server components to get the current session
-export async function auth() {
-  // Import NextAuth's auth function dynamically to avoid build issues
-  try {
-    const { auth: nextAuth } = await import('@/lib/auth')
-    return await nextAuth()
-  } catch (error) {
-    // If auth fails (e.g., missing env vars), return null instead of throwing
-    console.error('Auth error:', error)
-    return null
-  }
-} 
+// Export NextAuth instance for server components
+const nextAuthInstance = NextAuth(authOptions)
+
+// Export auth function for server components
+export const auth = nextAuthInstance.auth
+export const handlers = nextAuthInstance.handlers
+export const signIn = nextAuthInstance.signIn
+export const signOut = nextAuthInstance.signOut 
