@@ -134,11 +134,12 @@ export const authOptions = {
   }
 }
 
-// Export NextAuth instance for server components
-const nextAuthInstance = NextAuth(authOptions)
+// Export auth handlers for route
+export const handler = NextAuth(authOptions)
 
 // Export auth function for server components
-export const auth = nextAuthInstance.auth
-export const handlers = nextAuthInstance.handlers
-export const signIn = nextAuthInstance.signIn
-export const signOut = nextAuthInstance.signOut 
+import { getServerSession } from "next-auth"
+
+export async function auth() {
+  return await getServerSession(authOptions)
+} 
