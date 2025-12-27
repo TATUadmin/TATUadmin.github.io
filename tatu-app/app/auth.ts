@@ -86,42 +86,27 @@ export const authOptions = {
     })
   ],
   callbacks: {
-    async signIn({ user, account }: any) {
-      // Allow sign-in for all OAuth providers
-      if (account?.provider === 'google') {
-        // Ensure user has a role set
-        if (!user.role) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { role: 'CUSTOMER' }
-          })
-        }
-        return true
-      }
-      // For credentials provider
-      return true
-    },
-    async jwt({ token, user, account }: any) {
+    async jwt({ token, user }: any) {
       if (user) {
-        // For Google OAuth, set default role if not already set
-        if (account?.provider === 'google' && !user.role) {
-          // Update user with default CUSTOMER role
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { role: 'CUSTOMER' }
-          })
-          token.role = 'CUSTOMER'
-        } else {
-          token.role = user.role as UserRole
-        }
+        // Add role and id to JWT token
+        token.role = user.role as UserRole || 'CUSTOMER'
         token.id = user.id
+      } else if (!token.role) {
+        // If token doesn't have a role, fetch from database
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub as string },
+          select: { role: true }
+        })
+        if (dbUser) {
+          token.role = dbUser.role
+        }
       }
       return token
     },
     async session({ session, token }: any) {
       if (session?.user) {
-        session.user.role = token.role
-        session.user.id = token.id
+        session.user.role = token.role as UserRole
+        session.user.id = token.id || token.sub
       }
       return session
     },
