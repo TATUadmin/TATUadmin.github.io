@@ -11,24 +11,51 @@ export default function SignUpPage() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    terms: false
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [passwordStrength, setPasswordStrength] = useState({
+    hasMinLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+    hasSpecial: false
+  })
   const router = useRouter()
+
+  const validatePasswordStrength = (password: string) => {
+    setPasswordStrength({
+      hasMinLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecial: /[^A-Za-z0-9]/.test(password)
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Basic validation
+    // Enterprise-grade validation
+    if (!formData.terms) {
+      toast.error('You must accept the terms and conditions')
+      setIsLoading(false)
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match')
       setIsLoading(false)
       return
     }
 
-    if (formData.password.length < 8) {
-      toast.error('Password must be at least 8 characters long')
+    // Check all password requirements
+    if (!passwordStrength.hasMinLength || !passwordStrength.hasUppercase || 
+        !passwordStrength.hasLowercase || !passwordStrength.hasNumber || 
+        !passwordStrength.hasSpecial) {
+      toast.error('Password does not meet security requirements')
       setIsLoading(false)
       return
     }
@@ -43,6 +70,8 @@ export default function SignUpPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          terms: formData.terms,
+          role: 'CUSTOMER'
         }),
       })
 
@@ -52,7 +81,7 @@ export default function SignUpPage() {
         toast.success('Account created successfully! Please check your email to verify your account.')
         router.push('/login')
       } else {
-        toast.error(data.error || 'Failed to create account')
+        toast.error(data.message || data.error || 'Failed to create account')
       }
     } catch (error) {
       console.error('Sign up error:', error)
@@ -62,11 +91,16 @@ export default function SignUpPage() {
     }
   }
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }))
+    
+    // Update password strength indicator in real-time
+    if (field === 'password' && typeof value === 'string') {
+      validatePasswordStrength(value)
+    }
   }
 
   const handleGoogleSignUp = async () => {
@@ -151,6 +185,55 @@ export default function SignUpPage() {
                 className="input"
                 placeholder="Create a password"
               />
+              
+              {/* Password Strength Indicator */}
+              {formData.password && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs text-gray-400 font-medium">Password must contain:</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center text-xs">
+                      <span className={`mr-2 ${passwordStrength.hasMinLength ? 'text-green-500' : 'text-gray-500'}`}>
+                        {passwordStrength.hasMinLength ? '✓' : '○'}
+                      </span>
+                      <span className={passwordStrength.hasMinLength ? 'text-green-500' : 'text-gray-400'}>
+                        At least 8 characters
+                      </span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                      <span className={`mr-2 ${passwordStrength.hasUppercase ? 'text-green-500' : 'text-gray-500'}`}>
+                        {passwordStrength.hasUppercase ? '✓' : '○'}
+                      </span>
+                      <span className={passwordStrength.hasUppercase ? 'text-green-500' : 'text-gray-400'}>
+                        One uppercase letter (A-Z)
+                      </span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                      <span className={`mr-2 ${passwordStrength.hasLowercase ? 'text-green-500' : 'text-gray-500'}`}>
+                        {passwordStrength.hasLowercase ? '✓' : '○'}
+                      </span>
+                      <span className={passwordStrength.hasLowercase ? 'text-green-500' : 'text-gray-400'}>
+                        One lowercase letter (a-z)
+                      </span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                      <span className={`mr-2 ${passwordStrength.hasNumber ? 'text-green-500' : 'text-gray-500'}`}>
+                        {passwordStrength.hasNumber ? '✓' : '○'}
+                      </span>
+                      <span className={passwordStrength.hasNumber ? 'text-green-500' : 'text-gray-400'}>
+                        One number (0-9)
+                      </span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                      <span className={`mr-2 ${passwordStrength.hasSpecial ? 'text-green-500' : 'text-gray-500'}`}>
+                        {passwordStrength.hasSpecial ? '✓' : '○'}
+                      </span>
+                      <span className={passwordStrength.hasSpecial ? 'text-green-500' : 'text-gray-400'}>
+                        One special character (!@#$%^&*)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -165,6 +248,28 @@ export default function SignUpPage() {
                 className="input"
                 placeholder="Confirm your password"
               />
+            </div>
+
+            {/* Terms & Conditions Checkbox */}
+            <div className="flex items-start">
+              <input
+                id="terms"
+                type="checkbox"
+                checked={formData.terms}
+                onChange={(e) => handleInputChange('terms', e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-white cursor-pointer"
+                required
+              />
+              <label htmlFor="terms" className="ml-2 block text-sm text-gray-300">
+                I agree to the{' '}
+                <Link href="/terms" className="text-white hover:text-gray-300 underline" target="_blank">
+                  Terms of Service
+                </Link>
+                {' '}and{' '}
+                <Link href="/privacy" className="text-white hover:text-gray-300 underline" target="_blank">
+                  Privacy Policy
+                </Link>
+              </label>
             </div>
           </div>
 
