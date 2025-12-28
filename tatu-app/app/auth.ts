@@ -86,6 +86,24 @@ export const authOptions = {
     })
   ],
   callbacks: {
+    async signIn({ user, account }: any) {
+      if (account?.provider === 'google') {
+        // Ensure Google OAuth user has a role set, default to CUSTOMER
+        const existingUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { role: true }
+        })
+        
+        if (existingUser && !existingUser.role) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: 'CUSTOMER' }
+          })
+        }
+        return true
+      }
+      return true // Allow credentials provider sign-in
+    },
     async jwt({ token, user }: any) {
       if (user) {
         // Add role and id to JWT token
