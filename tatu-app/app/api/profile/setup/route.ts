@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { role, profileData } = await request.json()
+    const { role, profileData, subscriptionTier } = await request.json()
 
     if (!role || !['CUSTOMER', 'ARTIST', 'SHOP_OWNER'].includes(role)) {
       return NextResponse.json(
@@ -24,6 +24,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Validate subscription tier if provided
+    const validSubscriptionTier = subscriptionTier && ['FREE', 'PRO', 'STUDIO'].includes(subscriptionTier) 
+      ? subscriptionTier 
+      : 'FREE'
 
     // Find the user
     const user = await prisma.user.findUnique({
@@ -52,7 +57,9 @@ export async function POST(request: NextRequest) {
       website: profileData.website || null,
       location: profileData.location || null,
       specialties: profileData.specialties || [],
-      completedRegistration: true
+      completedRegistration: true,
+      subscriptionTier: validSubscriptionTier,
+      subscriptionStatus: 'ACTIVE'
     }
 
     if (user.profile) {
@@ -71,8 +78,26 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Create FREE subscription record for all users
+    if (validSubscriptionTier === 'FREE') {
+      await prisma.subscription.upsert({
+        where: { userId: user.id },
+        create: {
+          userId: user.id,
+          tier: 'FREE',
+          status: 'ACTIVE',
+          billingInterval: 'MONTHLY',
+          amount: 0
+        },
+        update: {
+          tier: 'FREE',
+          status: 'ACTIVE'
+        }
+      })
+    }
+
     return NextResponse.json({ 
-      success: true, 
+      success: true,
       user: {
         ...updatedUser,
         role

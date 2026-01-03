@@ -8,6 +8,7 @@ import MobileNavigation from './components/MobileNavigation'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
 import './globals.css'
 import { Toaster as UiToaster } from "@/components/ui/toaster"
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -67,6 +68,7 @@ export default function RootLayout({
             <UiToaster />
           </WebSocketProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   )

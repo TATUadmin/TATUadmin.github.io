@@ -27,6 +27,7 @@ export default function ProfileSetupPage() {
   const [profileData, setProfileData] = useState<ProfileData>({
     specialties: []
   })
+  const [selectedSubscription, setSelectedSubscription] = useState<'FREE' | 'PRO' | 'STUDIO'>('FREE')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const tattooStyles = [
@@ -77,7 +78,7 @@ export default function ProfileSetupPage() {
     setIsSubmitting(true)
     
     try {
-      // Update user role
+      // Update user role and profile
       const roleResponse = await fetch('/api/profile/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -86,12 +87,20 @@ export default function ProfileSetupPage() {
           profileData: {
             ...profileData,
             completedRegistration: true
-          }
+          },
+          subscriptionTier: selectedSubscription
         }),
       })
 
       if (!roleResponse.ok) {
         throw new Error('Failed to update profile')
+      }
+
+      // If artist selected paid tier, create subscription
+      if (selectedRole === 'ARTIST' && selectedSubscription !== 'FREE') {
+        // Redirect to subscription checkout
+        router.push(`/dashboard/subscription/checkout?tier=${selectedSubscription}&interval=MONTHLY&onboarding=true`)
+        return
       }
 
       // Update session
@@ -135,13 +144,13 @@ export default function ProfileSetupPage() {
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
-            <span>Step {step} of 2</span>
-            <span>{Math.round((step / 2) * 100)}% Complete</span>
+            <span>Step {step} of {selectedRole === 'ARTIST' ? 3 : 2}</span>
+            <span>{Math.round((step / (selectedRole === 'ARTIST' ? 3 : 2)) * 100)}% Complete</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-black h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(step / 2) * 100}%` }}
+              style={{ width: `${(step / (selectedRole === 'ARTIST' ? 3 : 2)) * 100}%` }}
             />
           </div>
         </div>
@@ -356,14 +365,227 @@ export default function ProfileSetupPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    onClick={() => {
+                      if (selectedRole === 'ARTIST') {
+                        setStep(3) // Go to subscription selection for artists
+                      } else {
+                        handleSubmit() // Complete setup for non-artists
+                      }
+                    }}
+                    className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
                   >
-                    {isSubmitting ? 'Setting up...' : 'Complete Setup'}
+                    {selectedRole === 'ARTIST' ? 'Continue' : 'Complete Setup'}
                   </button>
                 </div>
               </form>
+            </div>
+          )}
+
+          {/* Step 3: Subscription Selection (Artists Only) */}
+          {step === 3 && selectedRole === 'ARTIST' && (
+            <div>
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Choose Your Plan
+                </h2>
+                <p className="text-gray-600">
+                  Start with our free plan or unlock premium features
+                </p>
+              </div>
+
+              {/* Subscription Options */}
+              <div className="space-y-4 mb-8">
+                {/* FREE Tier */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedSubscription('FREE')}
+                  className={`w-full p-6 border-2 rounded-lg transition-all text-left ${
+                    selectedSubscription === 'FREE'
+                      ? 'border-black bg-gray-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Free</h3>
+                      <p className="text-3xl font-bold text-gray-900 mt-1">$0<span className="text-base font-normal text-gray-600">/month</span></p>
+                    </div>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      selectedSubscription === 'FREE' ? 'border-black bg-black' : 'border-gray-300'
+                    }`}>
+                      {selectedSubscription === 'FREE' && (
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <ul className="space-y-2 text-sm text-gray-700">
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      50 portfolio images
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      3 video consultations/month (unlimited duration)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Basic profile & booking
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Standard search listing
+                    </li>
+                  </ul>
+                </button>
+
+                {/* PRO Tier */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedSubscription('PRO')}
+                  className={`w-full p-6 border-2 rounded-lg transition-all text-left relative ${
+                    selectedSubscription === 'PRO'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="absolute -top-3 left-4 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    MOST POPULAR
+                  </div>
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Pro Artist</h3>
+                      <p className="text-3xl font-bold text-gray-900 mt-1">$39<span className="text-base font-normal text-gray-600">/month</span></p>
+                      <p className="text-sm text-gray-600">or $390/year (save $78)</p>
+                    </div>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      selectedSubscription === 'PRO' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                    }`}>
+                      {selectedSubscription === 'PRO' && (
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <ul className="space-y-2 text-sm text-gray-700">
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      <strong>Unlimited</strong> portfolio images
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      <strong>Unlimited</strong> video consultations (HD, recording)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      <strong>Boosted</strong> search ranking (2x visibility)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Advanced analytics & insights
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Instagram auto-posting
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Client management tools
+                    </li>
+                  </ul>
+                </button>
+
+                {/* STUDIO Tier */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedSubscription('STUDIO')}
+                  className={`w-full p-6 border-2 rounded-lg transition-all text-left ${
+                    selectedSubscription === 'STUDIO'
+                      ? 'border-yellow-500 bg-yellow-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Studio</h3>
+                      <p className="text-3xl font-bold text-gray-900 mt-1">$129<span className="text-base font-normal text-gray-600">/month</span></p>
+                      <p className="text-sm text-gray-600">or $1,290/year (save $258)</p>
+                    </div>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      selectedSubscription === 'STUDIO' ? 'border-yellow-500 bg-yellow-500' : 'border-gray-300'
+                    }`}>
+                      {selectedSubscription === 'STUDIO' && (
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <ul className="space-y-2 text-sm text-gray-700">
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Everything in Pro, plus:
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      <strong>Full HD</strong> video (1080p + custom branding)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      <strong>Premium</strong> search ranking (3x visibility)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Up to 10 artist accounts
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Custom branding & URL
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Studio-wide analytics
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      API access
+                    </li>
+                  </ul>
+                </button>
+              </div>
+
+              {/* Important Note */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-blue-900 mb-2">
+                  <strong>💡 No transaction fees.</strong> We don't process payments between you and clients. 
+                  Handle payments however you want (cash, Venmo, etc.). We only charge for tools that help you grow.
+                </p>
+                <p className="text-sm text-blue-900">
+                  <strong>⏱️ No time limits.</strong> All video consultations have unlimited duration on every tier. 
+                  Talk as long as you need - we trust you!
+                </p>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between pt-6">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSubmitting ? 'Setting up...' : selectedSubscription === 'FREE' ? 'Complete Setup' : 'Continue to Payment'}
+                </button>
+              </div>
             </div>
           )}
         </div>

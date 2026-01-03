@@ -94,6 +94,9 @@ model User {
   clientPayments    Payment[]        @relation("ClientPayments")
   artistDonations   Donation[]       @relation("ArtistDonations")
   clientDonations   Donation[]       @relation("ClientDonations")
+  
+  // Subscription relation
+  subscription      Subscription?
 }
 
 model Profile {
@@ -110,6 +113,13 @@ model Profile {
   // Visibility boost fields
   visibilityBoostActive Boolean @default(false)
   visibilityBoostEndDate DateTime?
+  
+  // Subscription cache fields (for quick access)
+  subscriptionTier SubscriptionTier @default(FREE)
+  subscriptionStatus SubscriptionStatus @default(ACTIVE)
+  portfolioImageCount Int @default(0) // Track portfolio image usage
+  featuredListingActive Boolean @default(false) // Paid featured placement
+  featuredListingEndDate DateTime?
   
   // Relations
   userId      String    @unique
@@ -552,6 +562,27 @@ enum DonationStatus {
   REFUNDED
 }
 
+// Subscription Enums
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  STUDIO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  PAUSED
+  TRIAL
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
 model Donation {
   id                    String          @id @default(cuid())
   appointmentId         String
@@ -575,4 +606,44 @@ model Donation {
   @@index([artistId])
   @@index([clientId])
   @@index([status])
+}
+
+// Subscription Model - Core Revenue Strategy
+
+model Subscription {
+  id                    String              @id @default(cuid())
+  userId                String              @unique
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Subscription Details
+  tier                  SubscriptionTier    @default(FREE)
+  status                SubscriptionStatus  @default(ACTIVE)
+  billingInterval       BillingInterval     @default(MONTHLY)
+  
+  // Pricing
+  amount                Int                 @default(0) // Amount in cents
+  currency              String              @default("usd")
+  
+  // Stripe Integration
+  stripeSubscriptionId  String?             @unique
+  stripeCustomerId      String?
+  stripePriceId         String?             // Stripe Price ID for the plan
+  
+  // Billing Dates
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  cancelAt              DateTime?           // Scheduled cancellation date
+  canceledAt            DateTime?           // Actual cancellation date
+  trialStart            DateTime?
+  trialEnd              DateTime?
+  
+  // Metadata
+  metadata              Json?               // Additional subscription data
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  @@index([userId])
+  @@index([tier])
+  @@index([status])
+  @@index([currentPeriodEnd])
 }
