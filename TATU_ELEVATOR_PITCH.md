@@ -2,17 +2,17 @@
 
 ## 🚀 30-Second Pitch (Investor)
 
-> **"TATU is a two-sided marketplace for the tattoo industry. For clients, we make finding and booking the perfect artist easy—search by style, location, and portfolio, then message or video chat before committing. For artists, we're their business operating system—unified inbox for all client messages, portfolio showcase, booking management, no transaction fees. Clients get confidence they'll find the right artist. Artists save 10+ hours/week and book more. We charge artists $39/month for premium features, not transactions. $3 billion market, zero dedicated software. Year 1: $314K ARR. Year 3: $2M ARR."**
+> **"TATU is a two-sided marketplace for the tattoo industry. For clients, we make finding and booking the perfect artist easy—search by style, location, and portfolio, then message or video chat before committing. For artists, we're their business operating system—unified inbox for all client messages (Instagram, email, Facebook, everything), unified calendar syncing all their bookings (Google, Square, etc.), portfolio showcase, no transaction fees. Clients get confidence they'll find the right artist. Artists save 12+ hours/week, prevent $500+ double bookings, and book more. We charge artists $39/month for premium features, not transactions. $3 billion market, zero dedicated software. Year 1: $361K ARR. Year 3: $2M+ ARR."**
 
 ---
 
 ## 💼 1-Minute Pitch (Investor - Detailed)
 
-> **"Getting a tattoo is a $500-5,000 decision, but finding the right artist is broken. Clients scroll through thousands of Instagram posts, DM multiple artists hoping for responses, and stress about whether their artist will actually see their message. Meanwhile, tattoo artists are overwhelmed—juggling messages across Instagram, email, Facebook, SMS, spending 2-3 hours daily checking platforms and missing 20-30% of inquiries.**
+> **"Getting a tattoo is a $500-5,000 decision, but finding the right artist is broken. Clients scroll through thousands of Instagram posts, DM multiple artists hoping for responses, and stress about whether their artist will actually see their message. Meanwhile, tattoo artists are overwhelmed—juggling messages across Instagram, email, Facebook, SMS, plus managing bookings across Google Calendar, Square, Calendly. They spend 3-4 hours daily checking platforms and miss 20-30% of inquiries. Double bookings cost $500+ each.**
 >
-> **TATU solves both sides. For clients: search by style, location, and portfolio quality. See artists' availability, book video consultations, and message with confidence knowing the artist will see it. For artists: unified inbox brings all platforms into one place—Instagram DMs, emails, Facebook messages, everything. AI prioritizes booking requests. Artists respond faster, miss nothing, and get back to tattooing.**
+> **TATU solves both sides. For clients: search by style, location, and portfolio quality. See artists' real-time availability, book video consultations, and message with confidence knowing the artist will see it. For artists: unified inbox brings all messaging platforms into one place—Instagram DMs, emails, Facebook messages, everything. Unified calendar syncs all booking sources—Google, Square, Instagram bookings, email confirmations—with AI-powered conflict detection. Artists respond faster, never double book, and get back to tattooing.**
 >
-> **But we're more than messaging. TATU is a complete two-sided marketplace: clients discover artists through search, artists showcase unlimited work, video consultations happen on-platform, bookings are managed end-to-end. Clients get confidence. Artists get efficiency and more bookings.**
+> **But we're more than messaging and calendars. TATU is a complete two-sided marketplace: clients discover artists through search, artists showcase unlimited work, video consultations happen on-platform, bookings are managed end-to-end with smart scheduling. Clients get confidence. Artists get efficiency and more bookings.**
 >
 > **Our revenue model is unique: we don't charge transaction fees like Booksy or Square. Artists handle payments however they want—cash, Venmo, whatever. We charge $39/month for premium features that help them grow. Artists love us because we're not taxing their income.**
 >
@@ -24,26 +24,29 @@
 
 ## 🎨 30-Second Pitch (Artist)
 
-> **"TATU helps you get found by serious clients and manage your business efficiently. Clients discover you through our search platform—by style, location, portfolio quality. When they message you (from Instagram, email, Facebook, anywhere), it all comes into one TATU inbox. No more juggling apps. Respond faster, book more clients, never miss an opportunity. Plus, clients can video chat with you before booking—builds trust, reduces no-shows. Start free with 50 portfolio images and 3 video consultations. Upgrade to Pro for $39/month when you're ready to grow. No transaction fees. Ever."**
+> **"TATU is your tattoo business command center. Clients discover you through our search platform—by style, location, portfolio quality. When they message you (Instagram, email, Facebook, anywhere), it all comes into one TATU inbox. All your bookings from Google Calendar, Square, Instagram—everything syncs into one calendar with automatic conflict detection. No more juggling apps, no more double bookings. Respond faster, book more clients, never miss an opportunity. Plus, video consultations before booking build trust. Start free with 50 portfolio images, 3 video calls, and 1 calendar sync. Upgrade to Pro for $39/month: unlimited everything, AI-powered. No transaction fees. Ever."**
 
 ---
 
 ## 👤 1-Minute Pitch (Artist - Detailed)
 
-> **"How many apps do you check every morning for client messages? Instagram, email, Facebook, texts... probably 5-7, right? And you still miss some, especially when you're busy tattooing.**
+> **"How many apps do you check every morning? Instagram, email, Facebook, texts... probably 5-7 for messages alone. Then Google Calendar, Square, maybe Calendly for bookings. And you still miss messages and double book. Sound familiar?**
 >
-> **TATU fixes that. We bring ALL your messages into one unified inbox. Instagram DM? We got it. Email inquiry? There too. Facebook message? Yep. You see everything in one place, prioritized by what matters—booking requests first, general inquiries after.**
+> **TATU fixes that chaos. We bring ALL your messages into one unified inbox. Instagram DM? We got it. Email inquiry? There too. Facebook message? Yep. Everything in one place, prioritized by what matters—booking requests first, general inquiries after.**
 >
-> **But that's just the start. TATU gives you:**
+> **But here's where it gets really powerful: we also sync ALL your calendars. Google Calendar, Square Appointments, Calendly, even Instagram booking requests—everything shows up in one unified calendar. Our AI detects conflicts before they happen, so no more $500 double booking disasters. You can edit any appointment from TATU and it updates everywhere automatically.**
+>
+> **Plus TATU gives you:**
 > - **Unlimited portfolio** to showcase your best work
 > - **Video consultations** with clients before they book
 > - **Booking management** so clients can book directly
 > - **Analytics** to see what work gets the most attention
 > - **Client history** so you remember everyone
+> - **AI-powered tools** that categorize messages and suggest replies
 >
 > **And here's the best part: we don't take a cut of your income. No transaction fees, no commissions. You handle payments however you want—cash, Venmo, whatever. We only charge for the premium tools: $39/month for Pro, or stay free forever with basic features.**
 >
-> **Artists using TATU save 10+ hours a week and book 3-5 extra clients per month because they never miss a message. That's $600-1,500 extra income for $39. Pretty good deal, right?**
+> **Artists using TATU save 12+ hours a week, prevent 2-3 double bookings per month, and book 3-5 extra clients because they never miss a message. That's $1,600-3,000 value for $39. Literally pays for itself 40x over.**
 >
 > **Start free today. No credit card needed. See if you like it."**
 

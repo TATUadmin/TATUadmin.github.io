@@ -42,6 +42,7 @@ TATU generates revenue through **subscription tiers and premium features**, NOT 
   - **50 portfolio images** (generous limit for complete portfolios)
   - 5 portfolio collections
   - **3 video consultations per month** (unlimited duration, 480p)
+  - **Unified Calendar:** View TATU bookings + connect 1 external calendar (Google, Apple, or Outlook)
   - Basic profile & booking
   - Client messaging
   - Standard search listing
@@ -53,6 +54,12 @@ TATU generates revenue through **subscription tiers and premium features**, NOT 
   - ✅ Unlimited portfolio images
   - ✅ Unlimited collections
   - ✅ **Unified Inbox** (connect 3 platforms - Instagram, Email, + 1 more)
+  - ✅ **Unified Calendar** (unlimited external calendar syncs + booking platform integrations)
+    - Connect Google, Apple, Outlook, Square, Calendly, etc.
+    - 2-way sync (edit from TATU → updates external calendars)
+    - Email confirmation auto-parsing (AI)
+    - Advanced conflict detection with smart suggestions
+    - Instagram booking integration
   - ✅ **Unlimited video consultations** (unlimited duration, 720p HD)
   - ✅ **Video recording & transcripts** (review consultations later)
   - ✅ **2x search ranking boost**
@@ -67,7 +74,7 @@ TATU generates revenue through **subscription tiers and premium features**, NOT 
   - Monthly: $39 ($468/year)
   - Yearly: $390 (save $78, 17% discount)
 - **Expected Adoption:** 60% of paid subscribers
-- **ROI for Artist:** Saves 10+ hours/week checking platforms, generates 3-5 extra bookings/month
+- **ROI for Artist:** Saves 12+ hours/week checking platforms & calendars, prevents $500+ double bookings, generates 3-5 extra bookings/month
 
 #### **STUDIO Tier** - $129/month or $1,290/year
 - **Target:** Tattoo studios with multiple artists
@@ -75,6 +82,12 @@ TATU generates revenue through **subscription tiers and premium features**, NOT 
   - ✅ Everything in Pro
   - ✅ **Unified Team Inbox** (unlimited platforms, shared inbox for all studio artists)
   - ✅ **Message assignment & routing** (distribute inquiries to specific artists)
+  - ✅ **Multi-Artist Calendar View** (see all studio artists' calendars in one view)
+    - Studio-level conflict prevention (no double booking studio resources)
+    - Smart scheduling assistant (AI suggests optimal artist/time slots)
+    - Waitlist management across all artists
+    - Block booking for conventions/events
+    - Custom booking rules per artist
   - ✅ **Unlimited video consultations** (unlimited duration, 1080p Full HD)
   - ✅ **White-label video calls** (custom branding on video interface)
   - ✅ **3x search ranking boost**
@@ -90,7 +103,7 @@ TATU generates revenue through **subscription tiers and premium features**, NOT 
   - Monthly: $129 ($1,548/year)
   - Yearly: $1,290 (save $258, 17% discount)
 - **Expected Adoption:** 40% of paid subscribers
-- **ROI for Studio:** Replaces receptionist ($2,000+/mo), centralizes communications, increases booking conversion
+- **ROI for Studio:** Replaces receptionist ($2,000+/mo), eliminates calendar chaos, prevents $1,000+/month in double booking losses, increases booking conversion
 
 ---
 
@@ -235,55 +248,202 @@ FREE users get taste of unified inbox (2 platform limit):
 
 ---
 
-## 📊 Revenue Projections
+## 📅 Strategic Feature #2: Unified Calendar
 
-### Conservative Scenario (Year 1) - WITH Unified Inbox Impact
+### **The Problem:**
+Tattoo artists juggle bookings across 5-8 platforms daily:
+- Google Calendar (personal appointments)
+- Square Appointments (booking system)
+- Instagram DMs ("Can I book for Thursday?")
+- Email confirmations from various sources
+- Physical notebook for walk-ins
+- Apple Calendar, Outlook, Calendly, etc.
 
-**Assumptions:**
-- 1,000 artists on platform
-- 65% on FREE tier (lower due to unified inbox conversion)
-- 25% on PRO tier ($39/month) - **+5% from unified inbox**
-- 10% on STUDIO tier ($129/month)
+**Result:** 2-3 double bookings per month (10-15%), costing $500+ each in lost revenue and reputation damage. Artists spend 1-2 hours daily cross-referencing calendars.
 
-**Monthly Recurring Revenue (MRR):**
-- FREE tier: 650 artists × $0 = $0
-- PRO tier: 250 artists × $39 = $9,750 (+$1,950 from unified inbox)
-- STUDIO tier: 100 artists × $129 = $12,900
-- **Total MRR: $22,650** (+9% from baseline)
-- **Annual Recurring Revenue (ARR): $271,800**
+### **TATU's Solution:**
+**Unified Calendar** - One calendar view that syncs ALL booking sources:
+- Native TATU bookings
+- Google Calendar, Apple Calendar, Outlook (2-way sync)
+- Square Appointments, Calendly, Acuity Scheduling
+- Instagram booking requests (auto-detected via Unified Inbox)
+- Email confirmation parsing (AI-powered)
+- Manual entries for any platform
 
-**Add-On Revenue (Estimated):**
-- Featured listings: 50 purchases/month × $50 avg = $2,500/month
-- Additional artist seats: 20 seats × $15 = $300/month
-- SMS credit packs: 30 purchases/month × $15 avg = $450/month
-- Extra platform connections: 50 × $5 = $250/month
-- **Total Add-On: $3,500/month ($42,000/year)**
+**Key Features:**
+- **Conflict Detection:** Real-time warnings for double bookings
+- **Smart Scheduling:** AI suggests optimal time slots based on patterns
+- **Multi-Artist View:** Studios see all artists' calendars in one view
+- **Buffer Time Management:** Automatic travel/prep time between appointments
+- **2-Way Sync:** Edit any calendar from TATU, updates everywhere
+- **Email Parsing:** AI extracts appointments from confirmation emails
 
-**Total Year 1 Revenue: ~$314,000** (+11% from unified inbox impact)
+### **Business Impact:**
+
+#### **1. Platform Lock-In (Combined with Unified Inbox)**
+When artist connects 4-5 calendars + 3-4 messaging platforms:
+- **Switching cost becomes MASSIVE**
+- TATU is now their business command center
+- Would need to recreate entire setup elsewhere (they won't)
+- **Churn drops: 2% → <1%**
+
+#### **2. Clear ROI for Artists**
+- **Time Saved:** 1-2 hours/day = 30-60 hours/month = $600-1,200 value
+- **Double Bookings Prevented:** 2-3/month × $500 = $1,000-1,500 value
+- **Mental Load Reduced:** Peace of mind = priceless
+- **Total Value:** $1,600-2,700/month for $39 PRO subscription
+- **ROI:** 41x to 69x return on investment
+
+#### **3. Conversion Driver**
+FREE users get 1 external calendar sync:
+- Connect Google Calendar ✅
+- Want to add Square Appointments → Hit limit
+- See: "Upgrade to PRO for unlimited calendar syncs + conflict detection"
+- **Conversion lift: +8-12%**
+
+#### **4. Studio Tier Driver**
+Multi-artist calendar view is killer feature for studios:
+- See all 5-10 artists' schedules in one place
+- Prevent studio-wide conflicts (two artists can't use same booth)
+- Smart scheduling distributes clients optimally
+- **STUDIO tier becomes no-brainer for shops**
+
+#### **5. Network Effects (Indirect)**
+- Artists who use TATU calendar book more TATU clients (easier scheduling)
+- Clients see professional calendar interface → trust increases
+- Reduces no-shows through automated reminders
+- More successful bookings → more word-of-mouth
+
+### **Implementation Roadmap:**
+
+**Phase 1 MVP (2-3 weeks):**
+- Basic calendar UI (FullCalendar.js)
+- Display TATU native bookings
+- Google Calendar integration (1-way sync)
+- Simple conflict detection
+- Manual event entry
+
+**Phase 2 Multi-Platform (3-4 weeks):**
+- Apple Calendar (CalDAV)
+- Microsoft Outlook / Office 365
+- Square Appointments API
+- 2-way sync (edit from TATU)
+- Advanced conflict detection
+
+**Phase 3 Smart Features (3-4 weeks):**
+- Email confirmation parsing (AI)
+- Instagram booking detection
+- Buffer time management
+- Smart scheduling suggestions
+- Calendar analytics
+
+**Phase 4 Studio Features (2-3 weeks):**
+- Multi-artist calendar view
+- Studio-level conflict prevention
+- Waitlist management
+- Team scheduling tools
+
+**Total Timeline:** 10-14 weeks for full implementation
+
+**Development Cost:** ~$120K (12 weeks @ $10K/week)
+**Ongoing Cost:** ~$1,000/month (API usage, AI parsing, infrastructure)
+
+### **Revenue Impact (Year 1):**
+
+**Direct Conversion Lift:**
+- 500 FREE users
+- +10% conversion from calendar feature
+- 50 additional PRO conversions
+- Revenue: 50 × $39 × 12 = **$23,400/year**
+
+**Churn Reduction:**
+- 100 PRO users
+- Churn improvement: 2% → 0.5%
+- 1.5% × 100 = ~2 users/month retained
+- Revenue saved: 24 users × $39 × 6 months avg = **$5,616/year**
+
+**STUDIO Tier Adoption:**
+- Calendar + Inbox = compelling studio package
+- 20 studios likely to upgrade
+- Revenue: 20 × $129 × 12 = **$30,960/year**
+
+**Total Year 1 Impact: ~$60,000**
+
+**Combined Impact (Inbox + Calendar):**
+- Users with BOTH features have <1% churn (vs. 5% baseline)
+- Conversion rate: 25% (vs. 15% baseline)
+- TATU becomes indispensable business tool
+- **These two features together could drive $150K+ additional ARR in Year 1**
+
+**ROI Calculation:**
+- Dev Cost: $120K (one-time)
+- Year 1 Revenue: $60K (calendar alone)
+- Break-even: Month 24
+- Year 2-3: Pure profit as user base grows
+- **Lifetime Value:** Potentially $500K+ over 5 years
+
+**Strategic Value:**
+Beyond direct revenue, Unified Calendar:
+- Creates nearly total platform lock-in (with Inbox)
+- Establishes TATU as "command center" for tattoo business
+- Provides moat against competitors (requires significant dev investment)
+- Enables future AI/automation features
+- Positions TATU as SaaS business tool, not just marketplace
+
+**Cost:** $120K dev + $1K/month ongoing (APIs, AI, infrastructure)
+**Impact:** Essential complement to Unified Inbox. Together, these features create a $2M+ ARR opportunity.
 
 ---
 
-### Growth Scenario (Year 3)
+## 📊 Revenue Projections
+
+### Conservative Scenario (Year 1) - WITH Unified Inbox + Calendar Impact
+
+**Assumptions:**
+- 1,000 artists on platform
+- 60% on FREE tier (lower due to unified inbox + calendar conversion)
+- 28% on PRO tier ($39/month) - **+8% from inbox, +5% from calendar**
+- 12% on STUDIO tier ($129/month) - **+2% from calendar's multi-artist features**
+
+**Monthly Recurring Revenue (MRR):**
+- FREE tier: 600 artists × $0 = $0
+- PRO tier: 280 artists × $39 = $10,920 (+$3,120 from inbox & calendar)
+- STUDIO tier: 120 artists × $129 = $15,480 (+$2,580 from calendar features)
+- **Total MRR: $26,400** (+24% from baseline with inbox + calendar)
+- **Annual Recurring Revenue (ARR): $316,800**
+
+**Add-On Revenue (Estimated):**
+- Featured listings: 50 purchases/month × $50 avg = $2,500/month
+- Additional artist seats: 25 seats × $15 = $375/month (more studios = more seats)
+- SMS credit packs: 35 purchases/month × $15 avg = $525/month
+- Extra platform connections: 60 × $5 = $300/month
+- **Total Add-On: $3,700/month ($44,400/year)**
+
+**Total Year 1 Revenue: ~$361,200** (+35% from inbox + calendar impact)
+
+---
+
+### Growth Scenario (Year 3) - WITH Unified Inbox + Calendar Impact
 
 **Assumptions:**
 - 5,000 artists on platform
-- 55% on FREE tier (unified inbox drives more conversions)
-- 30% on PRO tier (+5% from unified inbox retention)
-- 15% on STUDIO tier
+- 50% on FREE tier (inbox + calendar drive strong conversions)
+- 33% on PRO tier (+8% from inbox + calendar retention)
+- 17% on STUDIO tier (calendar's multi-artist view drives studio adoption)
 
 **Monthly Recurring Revenue:**
-- FREE tier: 2,750 artists × $0 = $0
-- PRO tier: 1,500 artists × $39 = $58,500 (+$9,750 from unified inbox)
-- STUDIO tier: 750 artists × $129 = $96,750
-- **Total MRR: $155,250** (+7% from baseline)
-- **Annual Recurring Revenue: $1,863,000**
+- FREE tier: 2,500 artists × $0 = $0
+- PRO tier: 1,650 artists × $39 = $64,350 (+$14,625 from inbox & calendar)
+- STUDIO tier: 850 artists × $129 = $109,650 (+$12,900 from calendar features)
+- **Total MRR: $174,000** (+13% from baseline with inbox + calendar)
+- **Annual Recurring Revenue: $2,088,000**
 
 **Add-On Revenue:**
 - Featured listings: 200 purchases/month × $50 = $10,000/month
-- Additional seats: 100 seats × $15 = $1,500/month
-- SMS credit packs: 150 purchases/month × $20 avg = $3,000/month
-- Extra platform connections: 100 × $5 = $500/month
-- **Total Add-On: $15,000/month ($180,000/year)**
+- Additional seats: 130 seats × $15 = $1,950/month (more studios = more seats)
+- SMS credit packs: 175 purchases/month × $20 avg = $3,500/month
+- Extra platform connections: 120 × $5 = $600/month
+- **Total Add-On: $16,050/month ($192,600/year)**
 
 **Total Year 3 Revenue: ~$2,043,000** (+8% from unified inbox impact)
 

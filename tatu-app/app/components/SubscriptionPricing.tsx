@@ -195,6 +195,96 @@ export default function SubscriptionPricing({
                   </li>
                 )}
 
+                {/* Unified Calendar */}
+                {tier.features.unifiedCalendar && (
+                  <li className="flex items-start gap-3">
+                    <Check className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                    <span className="text-gray-700">
+                      📅 Unified Calendar
+                      {tier.features.externalCalendarSyncs === -1 && (
+                        <span className="text-sm text-gray-500 block ml-0">
+                          Connect unlimited calendars (Google, Apple, Outlook, Square, Calendly, etc.)
+                        </span>
+                      )}
+                      {tier.features.externalCalendarSyncs === 1 && (
+                        <span className="text-sm text-gray-500 block ml-0">
+                          View TATU bookings + connect 1 external calendar
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                )}
+
+                {/* Two-Way Calendar Sync */}
+                {tier.features.calendarTwoWaySync && (
+                  <li className="flex items-start gap-3">
+                    <Check className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                    <span className="text-gray-700">
+                      🔄 Two-way calendar sync (edit from TATU → updates everywhere)
+                    </span>
+                  </li>
+                )}
+
+                {/* Calendar Email Parsing */}
+                {tier.features.calendarEmailParsing && (
+                  <li className="flex items-start gap-3">
+                    <Check className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                    <span className="text-gray-700">
+                      🤖 AI email confirmation parsing (auto-add appointments)
+                    </span>
+                  </li>
+                )}
+
+                {/* Multi-Artist Calendar */}
+                {tier.features.calendarMultiArtistView && (
+                  <li className="flex items-start gap-3">
+                    <Check className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                    <span className="text-gray-700">
+                      👥 Multi-artist calendar view (studio-wide scheduling)
+                    </span>
+                  </li>
+                )}
+
+                {/* Unified Inbox */}
+                {tier.features.unifiedInbox && (
+                  <li className="flex items-start gap-3">
+                    <Check className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                    <span className="text-gray-700">
+                      📨 Unified Inbox
+                      {tier.features.inboxPlatformConnections === -1 && (
+                        <span className="text-sm text-gray-500 block ml-0">
+                          Connect unlimited platforms (Instagram, Email, Facebook, SMS, WhatsApp, etc.)
+                        </span>
+                      )}
+                      {tier.features.inboxPlatformConnections === 3 && (
+                        <span className="text-sm text-gray-500 block ml-0">
+                          Connect Instagram, Email, + 1 more platform
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                )}
+
+                {/* AI Message Features */}
+                {tier.features.inboxAiCategorization && (
+                  <li className="flex items-start gap-3">
+                    <Check className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                    <span className="text-gray-700">
+                      🧠 AI message categorization & smart replies
+                    </span>
+                  </li>
+                )}
+
+                {/* Team Inbox */}
+                {tier.features.inboxTeamInbox && (
+                  <li className="flex items-start gap-3">
+                    <Check className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+                    <span className="text-gray-700">
+                      👥 Team inbox with message routing & assignment
+                    </span>
+                  </li>
+                )}
+
                 {/* Search Ranking */}
                 <li className="flex items-start gap-3">
                   <Check className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
@@ -265,6 +355,11 @@ export default function SubscriptionPricing({
           <strong>No transaction fees.</strong> We don't process payments between you and your clients. 
           Handle payments however you want (cash, Venmo, Zelle, etc.). We only charge for the tools 
           that help you grow your business.
+        </p>
+        <p className="text-gray-600 max-w-3xl mx-auto">
+          <strong>Unified Calendar + Inbox = Your Business Command Center.</strong> Manage all your bookings 
+          and messages from every platform in one place. No more double bookings, missed messages, or juggling 
+          5+ apps. Save 12+ hours per week and prevent $500+ double booking losses.
         </p>
         <p className="text-gray-600 max-w-3xl mx-auto">
           <strong>Unlimited duration video consultations.</strong> All tiers include video consultations with no time limits. 

@@ -48,6 +48,18 @@ export const SUBSCRIPTION_TIERS = {
       apiAccess: false,
       prioritySupport: false,
       multipleArtists: false,
+      // Unified Calendar features
+      unifiedCalendar: true, // Can view TATU bookings in calendar
+      externalCalendarSyncs: 1, // Can connect 1 external calendar (Google, Apple, or Outlook)
+      calendarTwoWaySync: false, // Can't edit external calendars from TATU
+      calendarConflictDetection: true, // Basic conflict warnings
+      calendarEmailParsing: false, // No AI email confirmation parsing
+      calendarBookingPlatforms: 0, // No Square/Calendly/etc. integrations
+      // Unified Inbox features
+      unifiedInbox: false, // No unified inbox on free tier
+      inboxPlatformConnections: 0, // Can't connect messaging platforms
+      inboxAiCategorization: false, // No AI message categorization
+      inboxSmartReplies: false, // No AI-powered reply suggestions
     },
     description: 'Perfect for artists just starting out',
     cta: 'Get Started Free',
@@ -87,6 +99,22 @@ export const SUBSCRIPTION_TIERS = {
       apiAccess: false,
       prioritySupport: true,
       multipleArtists: false,
+      // Unified Calendar features
+      unifiedCalendar: true,
+      externalCalendarSyncs: -1, // Unlimited external calendar connections
+      calendarTwoWaySync: true, // Can edit external calendars from TATU
+      calendarConflictDetection: true, // Advanced conflict warnings with smart suggestions
+      calendarEmailParsing: true, // AI-powered email confirmation parsing
+      calendarBookingPlatforms: -1, // All booking platforms (Square, Calendly, Acuity, etc.)
+      calendarBufferTime: true, // Automatic buffer time management
+      calendarSmartScheduling: false, // AI scheduling suggestions (Studio only)
+      calendarAnalytics: true, // Booking pattern analysis
+      // Unified Inbox features
+      unifiedInbox: true,
+      inboxPlatformConnections: 3, // Connect Instagram, Email, + 1 more platform
+      inboxAiCategorization: true, // AI categorizes messages (booking vs. inquiry)
+      inboxSmartReplies: true, // AI-powered reply suggestions
+      inboxMessageRouting: false, // Team routing (Studio only)
     },
     savings: {
       monthly: 0,
@@ -135,6 +163,28 @@ export const SUBSCRIPTION_TIERS = {
       studioAnalytics: true, // Studio-wide insights
       teamManagement: true, // Artist permissions, schedules
       industryBenchmarking: true, // Compare to other studios
+      // Unified Calendar features
+      unifiedCalendar: true,
+      externalCalendarSyncs: -1, // Unlimited external calendar connections
+      calendarTwoWaySync: true, // Can edit external calendars from TATU
+      calendarConflictDetection: true, // Advanced conflict warnings
+      calendarEmailParsing: true, // AI-powered email confirmation parsing
+      calendarBookingPlatforms: -1, // All booking platforms
+      calendarBufferTime: true, // Automatic buffer time management
+      calendarSmartScheduling: true, // AI suggests optimal time slots for bookings
+      calendarAnalytics: true, // Advanced booking analytics
+      calendarMultiArtistView: true, // See all studio artists' calendars in one view
+      calendarStudioConflictPrevention: true, // Prevent studio-wide resource conflicts
+      calendarWaitlistManagement: true, // Manage waitlists across all artists
+      calendarBlockBooking: true, // Block booking for conventions/events
+      // Unified Inbox features
+      unifiedInbox: true,
+      inboxPlatformConnections: -1, // Unlimited platform connections
+      inboxAiCategorization: true, // AI categorizes messages
+      inboxSmartReplies: true, // AI-powered reply suggestions
+      inboxMessageRouting: true, // Route messages to specific artists
+      inboxTeamInbox: true, // Shared inbox for all studio artists
+      inboxSmsCredits: 100, // 100 SMS credits/month included
     },
     savings: {
       monthly: 0,
@@ -252,6 +302,79 @@ export function calculateSavingsPercentage(monthlyPrice: number, yearlyPrice: nu
   const yearlyMonthly = yearlyPrice / 12
   const savings = ((monthlyPrice - yearlyMonthly) / monthlyPrice) * 100
   return Math.round(savings)
+}
+
+/**
+ * Get the external calendar sync limit for a tier
+ */
+export function getCalendarSyncLimit(tier: keyof typeof SUBSCRIPTION_TIERS): number {
+  const limit = SUBSCRIPTION_TIERS[tier]?.features.externalCalendarSyncs
+  return limit === -1 ? Infinity : (limit || 0)
+}
+
+/**
+ * Check if user has reached their calendar sync limit
+ */
+export function hasReachedCalendarSyncLimit(
+  tier: keyof typeof SUBSCRIPTION_TIERS,
+  currentCount: number
+): boolean {
+  const limit = getCalendarSyncLimit(tier)
+  return limit !== Infinity && currentCount >= limit
+}
+
+/**
+ * Get the inbox platform connection limit for a tier
+ */
+export function getInboxConnectionLimit(tier: keyof typeof SUBSCRIPTION_TIERS): number {
+  const limit = SUBSCRIPTION_TIERS[tier]?.features.inboxPlatformConnections
+  return limit === -1 ? Infinity : (limit || 0)
+}
+
+/**
+ * Check if user has reached their inbox connection limit
+ */
+export function hasReachedInboxConnectionLimit(
+  tier: keyof typeof SUBSCRIPTION_TIERS,
+  currentCount: number
+): boolean {
+  const limit = getInboxConnectionLimit(tier)
+  return limit !== Infinity && currentCount >= limit
+}
+
+/**
+ * Check if user has access to unified inbox
+ */
+export function hasUnifiedInboxAccess(tier: keyof typeof SUBSCRIPTION_TIERS): boolean {
+  return SUBSCRIPTION_TIERS[tier]?.features.unifiedInbox === true
+}
+
+/**
+ * Check if user has access to unified calendar
+ */
+export function hasUnifiedCalendarAccess(tier: keyof typeof SUBSCRIPTION_TIERS): boolean {
+  return SUBSCRIPTION_TIERS[tier]?.features.unifiedCalendar === true
+}
+
+/**
+ * Check if user can use two-way calendar sync
+ */
+export function hasTwoWayCalendarSync(tier: keyof typeof SUBSCRIPTION_TIERS): boolean {
+  return SUBSCRIPTION_TIERS[tier]?.features.calendarTwoWaySync === true
+}
+
+/**
+ * Check if user has access to AI email parsing for calendar
+ */
+export function hasCalendarEmailParsing(tier: keyof typeof SUBSCRIPTION_TIERS): boolean {
+  return SUBSCRIPTION_TIERS[tier]?.features.calendarEmailParsing === true
+}
+
+/**
+ * Check if user has access to multi-artist calendar view
+ */
+export function hasMultiArtistCalendarView(tier: keyof typeof SUBSCRIPTION_TIERS): boolean {
+  return SUBSCRIPTION_TIERS[tier]?.features.calendarMultiArtistView === true
 }
 
 export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS
