@@ -13,6 +13,7 @@ import DraggablePortfolioItem from '@/app/components/DraggablePortfolioItem'
 import { PortfolioItem, Collection, FilterOptions } from '@/app/types/portfolio'
 import PortfolioFilters from '@/app/components/PortfolioFilters'
 import PortfolioAnalytics from '@/app/components/PortfolioAnalytics'
+import DashboardLayout from '../../components/DashboardLayout'
 import Link from 'next/link'
 import { 
   PlusIcon, 
@@ -571,22 +572,27 @@ export default function PortfolioPage() {
 
   if (!session?.user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Please sign in to manage your portfolio.</p>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-gray-500">Please sign in to manage your portfolio.</p>
+        </div>
+      </DashboardLayout>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
+      </DashboardLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <DashboardLayout userRole="artist">
+      <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <div className="bg-gray-950 shadow-sm border-b border-gray-900">
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -984,6 +990,7 @@ export default function PortfolioPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   )
 } 

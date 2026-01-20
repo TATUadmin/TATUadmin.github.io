@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
 import Image from 'next/image'
 import Link from 'next/link'
+import DashboardLayout from '../../components/DashboardLayout'
 import {
   BuildingStorefrontIcon,
   PlusIcon,
@@ -183,22 +184,27 @@ export default function ShopsPage() {
 
   if (!session?.user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Please sign in to access shop management.</p>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-gray-500">Please sign in to access shop management.</p>
+        </div>
+      </DashboardLayout>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+        </div>
+      </DashboardLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardLayout userRole="artist">
+      <div className="min-h-screen bg-black">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -595,6 +601,7 @@ export default function ShopsPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   )
 } 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SubscriptionPricing from '@/app/components/SubscriptionPricing'
+import DashboardLayout from '../../components/DashboardLayout'
 import { CreditCard, Calendar, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 
 interface Subscription {
@@ -81,9 +82,11 @@ export default function SubscriptionPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
+      </DashboardLayout>
     )
   }
 
@@ -120,8 +123,9 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+    <DashboardLayout userRole="artist">
+      <div className="min-h-screen bg-black py-12 px-4">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -296,8 +300,9 @@ export default function SubscriptionPage() {
             </li>
           </ul>
         </div>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }
 

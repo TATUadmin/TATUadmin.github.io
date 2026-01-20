@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import DashboardLayout from '../../components/DashboardLayout'
 import { 
   BuildingStorefrontIcon,
   UserGroupIcon,
@@ -138,32 +139,37 @@ export default function ShopDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+        </div>
+      </DashboardLayout>
     )
   }
 
   if (!shop) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <BuildingStorefrontIcon className="h-24 w-24 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Shop Found</h2>
-          <p className="text-gray-600 mb-6">Create your shop profile to get started</p>
-          <button
-            onClick={() => setShowEditModal(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-md font-medium transition-colors"
-          >
-            Create Shop Profile
-          </button>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <BuildingStorefrontIcon className="h-24 w-24 text-gray-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">No Shop Found</h2>
+            <p className="text-gray-400 mb-6">Create your shop profile to get started</p>
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="bg-white hover:bg-gray-200 text-black px-6 py-3 rounded-md font-medium transition-colors"
+            >
+              Create Shop Profile
+            </button>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardLayout userRole="artist">
+      <div className="min-h-screen bg-black">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -484,6 +490,7 @@ export default function ShopDashboard() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   )
 } 

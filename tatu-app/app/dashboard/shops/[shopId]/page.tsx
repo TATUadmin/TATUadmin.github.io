@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { Tab } from '@headlessui/react'
 import { MapPinIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
 import { sendShopStatusUpdateNotification } from '@/lib/email'
+import DashboardLayout from '../../../components/DashboardLayout'
 
 interface ShopWithDetails extends Shop {
   owner: {
@@ -159,25 +160,30 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
+      </DashboardLayout>
     )
   }
 
   if (!shop) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Shop not found</h2>
-          <p className="mt-2 text-gray-600">The shop you're looking for doesn't exist or you don't have permission to view it.</p>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white">Shop not found</h2>
+            <p className="mt-2 text-gray-400">The shop you're looking for doesn't exist or you don't have permission to view it.</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <DashboardLayout userRole="artist">
+      <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <div className="flex justify-between items-start">
           <div>
@@ -586,6 +592,7 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
-    </div>
+      </div>
+    </DashboardLayout>
   )
 } 
