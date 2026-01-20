@@ -191,18 +191,60 @@ model PortfolioItem {
   @@index([userId])
 }
 
-model Profile {
+model ArtistProfile {
+  id                     String    @id
+  bio                    String?
+  avatar                 String?
+  phone                  String?
+  instagram              String?
+  website                String?
+  location               String?
+  specialties            String[]
+  userId                 String    @unique
+  completedRegistration  Boolean   @default(false)
+  // Subscription fields (artists only)
+  subscriptionTier       String? // FREE, PRO, STUDIO
+  subscriptionStatus     String? // ACTIVE, CANCELLED, EXPIRED
+  portfolioImageCount    Int       @default(0)
+  featuredListingActive  Boolean   @default(false)
+  visibilityBoostActive  Boolean   @default(false)
+  visibilityBoostEndDate DateTime?
+  User                   User      @relation("ArtistProfile", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CustomerProfile {
   id                    String   @id
-  bio                   String?
   avatar                String?
   phone                 String?
-  instagram             String?
-  website               String?
-  location              String?
-  specialties           String[]
   userId                String   @unique
   completedRegistration Boolean  @default(false)
-  User                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Customer preferences
+  preferredStyles       String[] // Tattoo styles they're interested in
+  locationPreferences   String? // Preferred location/city
+  User                  User     @relation("CustomerProfile", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                   String    @id
+  userId               String    @unique
+  tier                 String // FREE, PRO, STUDIO
+  status               String // ACTIVE, CANCELLED, EXPIRED, TRIAL
+  billingInterval      String // MONTHLY, YEARLY
+  amount               Float
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripePriceId        String?
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  trialStart           DateTime?
+  trialEnd             DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  User                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
 }
 
 model Review {
@@ -334,7 +376,9 @@ model User {
   MessageThread                          MessageThread[]
   PortfolioCollection                    PortfolioCollection[]
   PortfolioItem                          PortfolioItem[]
-  Profile                                Profile?
+  ArtistProfile                          ArtistProfile?        @relation("ArtistProfile")
+  CustomerProfile                        CustomerProfile?      @relation("CustomerProfile")
+  subscription                           Subscription?
   Review                                 Review[]
   Service                                Service[]
   Session                                Session[]

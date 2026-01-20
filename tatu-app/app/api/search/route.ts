@@ -74,29 +74,28 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       const artistWhere: any = {
         role: 'ARTIST',
         status: 'ACTIVE',
-        profile: {
-          completedRegistration: true,
-          verified: true
+        artistProfile: {
+          completedRegistration: true
         }
       }
 
       if (query) {
         artistWhere.OR = [
           { name: { contains: query, mode: 'insensitive' } },
-          { profile: { bio: { contains: query, mode: 'insensitive' } } }
+          { artistProfile: { bio: { contains: query, mode: 'insensitive' } } }
         ]
       }
 
       if (location) {
-        artistWhere.profile = {
-          ...artistWhere.profile,
+        artistWhere.artistProfile = {
+          ...artistWhere.artistProfile,
           location: { contains: location, mode: 'insensitive' }
         }
       }
 
       if (style) {
-        artistWhere.profile = {
-          ...artistWhere.profile,
+        artistWhere.artistProfile = {
+          ...artistWhere.artistProfile,
           specialties: { has: style }
         }
       }
@@ -105,17 +104,14 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         prisma.user.findMany({
           where: artistWhere,
           include: {
-            profile: {
+            artistProfile: {
               select: {
                 bio: true,
                 avatar: true,
                 location: true,
                 specialties: true,
                 instagram: true,
-                website: true,
-                hourlyRate: true,
-                experience: true,
-                verified: true
+                website: true
               }
             },
             shop: {
@@ -161,18 +157,18 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         return {
           id: artist.id,
           name: artist.name || 'Unknown Artist',
-          bio: artist.profile?.bio || '',
-          avatar: artist.profile?.avatar || '',
-          location: artist.profile?.location || '',
-          specialties: artist.profile?.specialties || [],
-          instagram: artist.profile?.instagram || '',
-          website: artist.profile?.website || '',
+          bio: artist.artistProfile?.bio || '',
+          avatar: artist.artistProfile?.avatar || '',
+          location: artist.artistProfile?.location || '',
+          specialties: artist.artistProfile?.specialties || [],
+          instagram: artist.artistProfile?.instagram || '',
+          website: artist.artistProfile?.website || '',
           portfolioCount: artist._count.portfolioItems,
           rating: Math.round(avgRating * 10) / 10,
           reviewCount: artist._count.reviews,
-          hourlyRate: artist.profile?.hourlyRate || 0,
-          experience: artist.profile?.experience || 0,
-          verified: artist.profile?.verified || false,
+          hourlyRate: 0, // Not in ArtistProfile schema
+          experience: 0, // Not in ArtistProfile schema
+          verified: false, // Not in ArtistProfile schema
           shop: artist.shop,
           recentWork: artist.portfolioItems
         }
@@ -201,7 +197,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
       if (location) {
         portfolioWhere.user = {
-          profile: {
+          artistProfile: {
             location: { contains: location, mode: 'insensitive' }
           }
         }
@@ -215,7 +211,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
               select: {
                 id: true,
                 name: true,
-                profile: {
+                artistProfile: {
                   select: {
                     avatar: true,
                     location: true,
@@ -254,9 +250,9 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         artist: {
           id: item.user.id,
           name: item.user.name || 'Unknown Artist',
-          avatar: item.user.profile?.avatar || '',
-          location: item.user.profile?.location || '',
-          specialties: item.user.profile?.specialties || []
+          avatar: item.user.artistProfile?.avatar || '',
+          location: item.user.artistProfile?.location || '',
+          specialties: item.user.artistProfile?.specialties || []
         },
         stats: {
           likes: item._count.likes,

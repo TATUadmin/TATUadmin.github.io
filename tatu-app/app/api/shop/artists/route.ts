@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       include: {
         artist: {
           include: {
-            profile: true,
+            artistProfile: true,
             portfolioItems: true,
             reviews: true
           }
@@ -42,8 +42,8 @@ export async function GET(request: NextRequest) {
       return {
         id: artist.id,
         name: artist.name || 'Unknown Artist',
-        avatar: artist.profile?.avatar || '',
-        specialties: artist.profile?.specialties || [],
+        avatar: artist.artistProfile?.avatar || '',
+        specialties: artist.artistProfile?.specialties || [],
         portfolioCount,
         rating: Math.round(rating * 10) / 10
       }

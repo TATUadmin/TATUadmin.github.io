@@ -18,7 +18,12 @@ export async function GET(
           select: {
             id: true,
             name: true,
-            profile: {
+            artistProfile: {
+              select: {
+                avatar: true
+              }
+            },
+            customerProfile: {
               select: {
                 avatar: true
               }
@@ -31,7 +36,12 @@ export async function GET(
               select: {
                 id: true,
                 name: true,
-                profile: {
+                artistProfile: {
+                  select: {
+                    avatar: true
+                  }
+                },
+                customerProfile: {
                   select: {
                     avatar: true
                   }
@@ -89,7 +99,12 @@ export async function POST(
           select: {
             id: true,
             name: true,
-            profile: {
+            artistProfile: {
+              select: {
+                avatar: true
+              }
+            },
+            customerProfile: {
               select: {
                 avatar: true
               }

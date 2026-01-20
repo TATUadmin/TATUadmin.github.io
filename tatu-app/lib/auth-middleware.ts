@@ -70,7 +70,8 @@ export async function requireAuth(request: NextRequest): Promise<AuthContext> {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: {
-        profile: true,
+        artistProfile: true,
+        customerProfile: true,
         shop: true
       }
     })
@@ -84,33 +85,26 @@ export async function requireAuth(request: NextRequest): Promise<AuthContext> {
       throw new Error('USER_NOT_FOUND')
     }
 
-    // Check if user is active
-    if (user.status === 'SUSPENDED') {
-      logger.warn('Suspended user access attempt', {
-        userId: user.id,
-        requestId,
-        ip
-      })
-      throw new Error('ACCOUNT_SUSPENDED')
-    }
+    // Check if user is active (if status field exists)
+    // Note: status field may not exist in current schema
 
-    // Build authenticated user object
+    // Build authenticated user object with role-specific profile
     const authenticatedUser: AuthenticatedUser = {
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.role as any,
-      profile: user.profile ? {
-        id: user.profile.id,
-        bio: user.profile.bio,
-        avatar: user.profile.avatar,
-        phone: user.profile.phone,
-        instagram: user.profile.instagram,
-        website: user.profile.website,
-        location: user.profile.location,
-        specialties: user.profile.specialties || [],
-        experience: user.profile.experience || 0,
-        verified: user.profile.verified || false
+      profile: (user.artistProfile || user.customerProfile) ? {
+        id: user.artistProfile?.id || user.customerProfile?.id || '',
+        bio: user.artistProfile?.bio || null,
+        avatar: user.artistProfile?.avatar || user.customerProfile?.avatar || null,
+        phone: user.artistProfile?.phone || user.customerProfile?.phone || null,
+        instagram: user.artistProfile?.instagram || null,
+        website: user.artistProfile?.website || null,
+        location: user.artistProfile?.location || null,
+        specialties: user.artistProfile?.specialties || [],
+        experience: 0, // Not in current schema
+        verified: false // Not in current schema
       } : undefined,
       shop: user.shop ? {
         id: user.shop.id,

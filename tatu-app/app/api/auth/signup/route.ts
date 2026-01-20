@@ -62,21 +62,23 @@ export async function POST(req: Request) {
       },
     })
 
-    // Create profile with role-specific data
-    const profileData: any = {
-      userId: user.id,
-    }
+    // Create role-specific profile
+    if (validatedData.role === 'ARTIST' || validatedData.role === 'SHOP_OWNER') {
+      // Create ArtistProfile
+      const artistProfileId = crypto.randomUUID()
+      await prisma.artistProfile.create({
+        data: {
+          id: artistProfileId,
+          userId: user.id,
+          specialties: validatedData.artistSpecialties || [],
+          subscriptionTier: 'FREE',
+          subscriptionStatus: 'ACTIVE',
+        },
+      })
 
-    if (validatedData.role === 'ARTIST' && validatedData.artistSpecialties) {
-      profileData.specialties = validatedData.artistSpecialties
-    }
-
-    if (validatedData.role === 'SHOP_OWNER') {
-      if (validatedData.shopName) {
-        // Generate shop ID
+      // Create shop for shop owner
+      if (validatedData.role === 'SHOP_OWNER' && validatedData.shopName) {
         const shopId = crypto.randomUUID()
-        
-        // Create shop for shop owner
         await prisma.shop.create({
           data: {
             id: shopId,
@@ -90,17 +92,17 @@ export async function POST(req: Request) {
           }
         })
       }
+    } else if (validatedData.role === 'CUSTOMER') {
+      // Create CustomerProfile
+      const customerProfileId = crypto.randomUUID()
+      await prisma.customerProfile.create({
+        data: {
+          id: customerProfileId,
+          userId: user.id,
+          preferredStyles: [],
+        },
+      })
     }
-
-    // Generate profile ID
-    const profileId = crypto.randomUUID()
-    
-    await prisma.profile.create({
-      data: {
-        id: profileId,
-        ...profileData,
-      },
-    })
 
     // Generate secure verification token
     const token = generateSecureToken(32)
@@ -150,7 +152,11 @@ export async function POST(req: Request) {
       
       // If email fails, we should rollback the user creation
       // Delete the user and profile that were just created
-      await prisma.profile.deleteMany({ where: { userId: user.id } })
+      if (validatedData.role === 'ARTIST' || validatedData.role === 'SHOP_OWNER') {
+        await prisma.artistProfile.deleteMany({ where: { userId: user.id } })
+      } else if (validatedData.role === 'CUSTOMER') {
+        await prisma.customerProfile.deleteMany({ where: { userId: user.id } })
+      }
       await prisma.verificationToken.deleteMany({ where: { email: user.email } })
       await prisma.user.delete({ where: { id: user.id } })
       

@@ -87,7 +87,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
           select: {
             id: true,
             name: true,
-            profile: {
+            artistProfile: {
               select: {
                 avatar: true,
                 specialties: true

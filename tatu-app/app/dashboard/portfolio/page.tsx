@@ -783,12 +783,12 @@ export default function PortfolioPage() {
           <div className="space-y-6">
             {items.length === 0 ? (
               <div className="text-center py-12">
-                <PhotoIcon className="h-24 w-24 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-medium text-gray-900 mb-2">No portfolio items yet</h3>
-                <p className="text-gray-600 mb-6">Start building your portfolio by uploading your best work</p>
+                <PhotoIcon className="h-24 w-24 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-white mb-2">No portfolio items yet</h3>
+                <p className="text-gray-400 mb-6">Start building your portfolio by uploading your best work</p>
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                  className="bg-white hover:bg-gray-200 text-black px-6 py-3 rounded-lg font-medium transition-colors"
                 >
                   Upload Your First Piece
                 </button>
@@ -796,7 +796,7 @@ export default function PortfolioPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {items.map((item) => (
-                  <div key={item.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group">
+                  <div key={item.id} className="bg-gray-950 border border-gray-900 rounded-lg overflow-hidden group">
                     <div className="relative aspect-square">
                       <Image
                         src={item.imageUrl}
@@ -804,33 +804,33 @@ export default function PortfolioPage() {
                         fill
                         className="object-cover"
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                         <div className="flex space-x-2">
-                          <button className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors">
-                            <EyeIcon className="h-4 w-4 text-gray-700" />
+                          <button className="p-2 bg-white rounded-full hover:bg-gray-200 transition-colors">
+                            <EyeIcon className="h-4 w-4 text-black" />
                           </button>
-                          <button className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors">
-                            <PencilIcon className="h-4 w-4 text-gray-700" />
+                          <button className="p-2 bg-white rounded-full hover:bg-gray-200 transition-colors">
+                            <PencilIcon className="h-4 w-4 text-black" />
                           </button>
                           <button 
                             onClick={() => handleDelete(item.id)}
-                            className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+                            className="p-2 bg-white rounded-full hover:bg-gray-200 transition-colors"
                           >
-                            <TrashIcon className="h-4 w-4 text-red-600" />
+                            <TrashIcon className="h-4 w-4 text-black" />
                           </button>
                         </div>
                       </div>
                     </div>
                     <div className="p-4">
-                      <h3 className="font-medium text-gray-900 mb-1">{item.title}</h3>
-                      <div className="flex items-center text-sm text-gray-500 mb-2">
+                      <h3 className="font-medium text-white mb-1">{item.title}</h3>
+                      <div className="flex items-center text-sm text-gray-400 mb-2">
                         <TagIcon className="h-4 w-4 mr-1" />
                         {item.style}
                       </div>
                       {item.description && (
-                        <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+                        <p className="text-sm text-gray-400 line-clamp-2">{item.description}</p>
                       )}
-                      <p className="text-xs text-gray-400 mt-2">
+                      <p className="text-xs text-gray-500 mt-2">
                         {new Date(item.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -845,10 +845,10 @@ export default function PortfolioPage() {
         {activeTab === 'collections' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Portfolio Collections</h2>
+              <h2 className="text-2xl font-bold text-white">Portfolio Collections</h2>
               <button
                 onClick={() => setIsAddingCollection(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="bg-white hover:bg-gray-200 text-black px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 <PlusIcon className="h-4 w-4 mr-2" />
                 New Collection
@@ -857,22 +857,22 @@ export default function PortfolioPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {collections.map((collection) => (
-                <div key={collection.id} className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow">
+                <div key={collection.id} className="bg-gray-950 border border-gray-900 rounded-xl p-6 hover:border-gray-800 transition-colors">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                      <FolderIcon className="h-6 w-6 text-indigo-600" />
+                    <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center border border-gray-800">
+                      <FolderIcon className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-sm text-gray-500">{collection.itemCount} items</span>
+                    <span className="text-sm text-gray-400">{collection.itemCount} items</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{collection.name}</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">{collection.name}</h3>
                   {collection.description && (
-                    <p className="text-gray-600 text-sm mb-4">{collection.description}</p>
+                    <p className="text-gray-400 text-sm mb-4">{collection.description}</p>
                   )}
                   <div className="flex items-center gap-2">
-                    <button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                    <button className="text-white hover:text-gray-300 text-sm font-medium">
                       View Items
                     </button>
-                    <button className="text-gray-600 hover:text-gray-700 text-sm font-medium">
+                    <button className="text-gray-400 hover:text-gray-300 text-sm font-medium">
                       Edit
                     </button>
                   </div>
@@ -885,9 +885,9 @@ export default function PortfolioPage() {
         {/* Analytics Tab */}
         {activeTab === 'analytics' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Portfolio Analytics</h2>
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <p className="text-gray-600">Analytics dashboard coming soon...</p>
+            <h2 className="text-2xl font-bold text-white">Portfolio Analytics</h2>
+            <div className="bg-gray-950 border border-gray-900 rounded-xl p-6">
+              <p className="text-gray-400">Analytics dashboard coming soon...</p>
             </div>
           </div>
         )}
@@ -895,32 +895,32 @@ export default function PortfolioPage() {
 
       {/* Upload Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Add New Portfolio Item</h2>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-950 border border-gray-900 rounded-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-bold text-white mb-4">Add New Portfolio Item</h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2">
                   Title *
                 </label>
                 <input
                   type="text"
                   value={uploadData.title}
                   onChange={(e) => setUploadData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 bg-black border border-gray-800 rounded-md text-white placeholder-gray-600 focus:ring-2 focus:ring-white focus:border-white transition-colors"
                   placeholder="Enter piece title"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2">
                   Style *
                 </label>
                 <select
                   value={uploadData.style}
                   onChange={(e) => setUploadData(prev => ({ ...prev, style: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 bg-black border border-gray-800 rounded-md text-white focus:ring-2 focus:ring-white focus:border-white transition-colors"
                 >
                   <option value="">Select style</option>
                   {TATTOO_STYLES.map(style => (
@@ -930,20 +930,20 @@ export default function PortfolioPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2">
                   Description
                 </label>
                 <textarea
                   value={uploadData.description}
                   onChange={(e) => setUploadData(prev => ({ ...prev, description: e.target.value }))}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 bg-black border border-gray-800 rounded-md text-white placeholder-gray-600 focus:ring-2 focus:ring-white focus:border-white transition-colors"
                   placeholder="Describe this piece..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2">
                   Image *
                 </label>
                 <input
@@ -953,10 +953,10 @@ export default function PortfolioPage() {
                     const file = e.target.files?.[0]
                     if (file) setUploadData(prev => ({ ...prev, image: file }))
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 bg-black border border-gray-800 rounded-md text-white focus:ring-2 focus:ring-white focus:border-white transition-colors"
                 />
                 {uploadData.image && (
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-400 mt-1">
                     Selected: {uploadData.image.name}
                   </p>
                 )}
@@ -969,14 +969,14 @@ export default function PortfolioPage() {
                   setShowUploadModal(false)
                   setUploadData({ title: '', description: '', style: '', image: null })
                 }}
-                className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                className="px-4 py-2 text-gray-400 bg-gray-900 border border-gray-800 rounded-md hover:bg-gray-800 hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={uploadPortfolioItem}
                 disabled={isUploading}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 bg-white text-black rounded-md hover:bg-gray-200 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {isUploading ? 'Uploading...' : 'Upload'}
               </button>

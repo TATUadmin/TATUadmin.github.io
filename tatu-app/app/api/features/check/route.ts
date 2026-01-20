@@ -39,8 +39,8 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     return ApiResponse.validationError(validationResult.error.errors, { requestId })
   }
 
-  // Get user's subscription context
-  const profile = await prisma.profile.findUnique({
+  // Get user's subscription context (artists only have subscriptions)
+  const profile = await prisma.artistProfile.findUnique({
     where: { userId: user.id },
     select: {
       subscriptionTier: true,
@@ -51,7 +51,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   })
 
   if (!profile) {
-    return ApiResponse.error('Profile not found', 404, { requestId })
+    return ApiResponse.error('Artist profile not found. Features are only available for artists.', 404, { requestId })
   }
 
   const context = {
@@ -107,8 +107,8 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   const authContext = await requireAuth(request)
   const { user, requestId } = authContext
 
-  // Get user's subscription context
-  const profile = await prisma.profile.findUnique({
+  // Get user's subscription context (artists only have subscriptions)
+  const profile = await prisma.artistProfile.findUnique({
     where: { userId: user.id },
     select: {
       subscriptionTier: true,
@@ -119,7 +119,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   })
 
   if (!profile) {
-    return ApiResponse.error('Profile not found', 404, { requestId })
+    return ApiResponse.error('Artist profile not found. Features are only available for artists.', 404, { requestId })
   }
 
   const context = {

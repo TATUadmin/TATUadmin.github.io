@@ -44,7 +44,7 @@ export async function GET(
                 id: true,
                 name: true,
                 email: true,
-                profile: {
+                artistProfile: {
                   select: {
                     avatar: true,
                     specialties: true,
@@ -60,7 +60,12 @@ export async function GET(
               select: {
                 id: true,
                 name: true,
-                profile: {
+                artistProfile: {
+                  select: {
+                    avatar: true,
+                  },
+                },
+                customerProfile: {
                   select: {
                     avatar: true,
                   },
@@ -189,7 +194,7 @@ export async function PUT(
                 id: true,
                 name: true,
                 email: true,
-                profile: {
+                artistProfile: {
                   select: {
                     avatar: true,
                     specialties: true,
@@ -205,7 +210,12 @@ export async function PUT(
               select: {
                 id: true,
                 name: true,
-                profile: {
+                artistProfile: {
+                  select: {
+                    avatar: true,
+                  },
+                },
+                customerProfile: {
                   select: {
                     avatar: true,
                   },

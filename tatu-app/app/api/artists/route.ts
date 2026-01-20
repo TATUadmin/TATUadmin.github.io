@@ -161,9 +161,8 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     const whereConditions: any = {
       role: 'ARTIST',
       status: 'ACTIVE',
-      profile: {
-        completedRegistration: true,
-        verified: true
+      artistProfile: {
+        completedRegistration: true
       }
     }
 
@@ -171,36 +170,28 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     if (query) {
       whereConditions.OR = [
         { name: { contains: query, mode: 'insensitive' } },
-        { profile: { bio: { contains: query, mode: 'insensitive' } } }
+        { artistProfile: { bio: { contains: query, mode: 'insensitive' } } }
       ]
     }
 
     // Location filter
     if (location) {
-      whereConditions.profile = {
-        ...whereConditions.profile,
+      whereConditions.artistProfile = {
+        ...whereConditions.artistProfile,
         location: { contains: location, mode: 'insensitive' }
       }
     }
 
     // Style/specialty filter
     if (style) {
-      whereConditions.profile = {
-        ...whereConditions.profile,
+      whereConditions.artistProfile = {
+        ...whereConditions.artistProfile,
         specialties: { has: style }
       }
     }
 
-    // Price range filter
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      whereConditions.profile = {
-        ...whereConditions.profile,
-        hourlyRate: {
-          ...(minPrice !== undefined && { gte: minPrice }),
-          ...(maxPrice !== undefined && { lte: maxPrice })
-        }
-      }
-    }
+    // Note: hourlyRate and experience are not in ArtistProfile schema
+    // These filters would need to be added to the schema if needed
 
     // Rating filter
     if (rating !== undefined) {
@@ -224,7 +215,8 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         orderBy = [{ portfolioItems: { _count: 'desc' } }]
         break
       case 'price':
-        orderBy = [{ profile: { hourlyRate: sortOrder === 'asc' ? 'asc' : 'desc' } }]
+        // Note: hourlyRate not in ArtistProfile schema - would need to add if needed
+        orderBy = [{ createdAt: 'desc' }]
         break
       case 'newest':
         orderBy = [{ createdAt: 'desc' }]
@@ -237,7 +229,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       prisma.user.findMany({
         where: whereConditions,
         include: {
-          profile: true,
+          artistProfile: true,
           shop: {
             select: {
               id: true,
@@ -283,19 +275,19 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       return {
         id: artist.id,
         name: artist.name || 'Unknown Artist',
-        bio: artist.profile?.bio || '',
-        avatar: artist.profile?.avatar || '',
-        location: artist.profile?.location || '',
-        specialties: artist.profile?.specialties || [],
-        instagram: artist.profile?.instagram || '',
-        website: artist.profile?.website || '',
+        bio: artist.artistProfile?.bio || '',
+        avatar: artist.artistProfile?.avatar || '',
+        location: artist.artistProfile?.location || '',
+        specialties: artist.artistProfile?.specialties || [],
+        instagram: artist.artistProfile?.instagram || '',
+        website: artist.artistProfile?.website || '',
         portfolioCount: artist._count.portfolioItems,
         rating: Math.round(avgRating * 10) / 10,
         reviewCount: artist._count.reviews,
-        hourlyRate: artist.profile?.hourlyRate || 0,
-        experience: artist.profile?.experience || 0,
-        verified: artist.profile?.verified || false,
-        featured: false, // TODO: Add featured logic
+        hourlyRate: 0, // Not in ArtistProfile schema - would need to add if needed
+        experience: 0, // Not in ArtistProfile schema - would need to add if needed
+        verified: false, // Not in ArtistProfile schema - would need to add if needed
+        featured: artist.artistProfile?.featuredListingActive || false,
         shop: artist.shop,
         recentWork: artist.portfolioItems
       }

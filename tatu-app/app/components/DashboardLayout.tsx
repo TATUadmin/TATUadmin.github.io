@@ -99,8 +99,12 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-900">
-          <Link href="/" className="text-2xl font-bold text-white">
-            TATU
+          <Link href="/" className="flex items-center">
+            <img 
+              src="/tatu-logo.png" 
+              alt="TATU Logo" 
+              className="h-8 w-auto"
+            />
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -192,7 +196,9 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
 
         {/* Page Content */}
         <main className="p-4 lg:p-8">
-          {children}
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

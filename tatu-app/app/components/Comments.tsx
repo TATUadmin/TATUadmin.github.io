@@ -6,7 +6,10 @@ import { toast } from 'react-hot-toast'
 interface User {
   id: string
   name: string | null
-  profile: {
+  artistProfile: {
+    avatar: string | null
+  } | null
+  customerProfile: {
     avatar: string | null
   } | null
 }
@@ -164,9 +167,9 @@ export default function Comments({ itemId, onCommentAdded }: Props) {
           <div key={comment.id} className="space-y-4">
             <div className="flex space-x-3">
               <div className="flex-shrink-0">
-                {comment.user.profile?.avatar ? (
+                {(comment.user.artistProfile?.avatar || comment.user.customerProfile?.avatar) ? (
                   <Image
-                    src={comment.user.profile.avatar}
+                    src={comment.user.artistProfile?.avatar || comment.user.customerProfile?.avatar || ''}
                     alt={comment.user.name || 'User'}
                     width={40}
                     height={40}
@@ -202,9 +205,9 @@ export default function Comments({ itemId, onCommentAdded }: Props) {
               {comment.replies.map(reply => (
                 <div key={reply.id} className="flex space-x-3">
                   <div className="flex-shrink-0">
-                    {reply.user.profile?.avatar ? (
+                    {(reply.user.artistProfile?.avatar || reply.user.customerProfile?.avatar) ? (
                       <Image
-                        src={reply.user.profile.avatar}
+                        src={reply.user.artistProfile?.avatar || reply.user.customerProfile?.avatar || ''}
                         alt={reply.user.name || 'User'}
                         width={32}
                         height={32}
