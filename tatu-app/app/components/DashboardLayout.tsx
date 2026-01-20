@@ -16,7 +16,6 @@ import {
   Bars3Icon,
   XMarkIcon,
   BellIcon,
-  MagnifyingGlassIcon,
   UserCircleIcon,
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline'
@@ -70,7 +69,6 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
   const pathname = usePathname()
   const { data: session } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
 
   const filteredNavigation = navigation.filter(item => item.roles.includes(userRole))
@@ -170,19 +168,8 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
             <Bars3Icon className="w-6 h-6 text-gray-400" />
           </button>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-2xl mx-4">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-black border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:border-white focus:ring-1 focus:ring-white transition-colors"
-              />
-            </div>
-          </div>
+          {/* Spacer */}
+          <div className="flex-1" />
 
           {/* Right Actions */}
           <div className="flex items-center space-x-2">
