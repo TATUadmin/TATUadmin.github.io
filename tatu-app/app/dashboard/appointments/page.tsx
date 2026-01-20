@@ -356,7 +356,7 @@ export default function AppointmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black pt-16">
       {/* Header */}
       <div className="bg-gray-950 border-b border-gray-900">
         <div className="max-w-7xl mx-auto px-4 py-6">
