@@ -191,28 +191,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-transparent">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="display text-3xl md:text-4xl text-white mb-6">
-              Ready to Get Started?
-            </h2>
-            <p className="body text-lg text-gray-400 mb-8">
-              Join thousands of satisfied clients and professional artists on TATU.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/explore" className="btn btn-primary">
-                Find Your Artist
-              </Link>
-              <Link href="/register-artist" className="btn btn-secondary">
-                Apply as Artist
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Join Modal */}
       {showJoinModal && (
         <div 
