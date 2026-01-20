@@ -3,6 +3,7 @@
 import { ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import {
   HomeIcon,
   CalendarIcon,
@@ -67,11 +68,13 @@ const mockNotifications: Notification[] = [
 
 export default function DashboardLayout({ children, userRole = 'artist' }: DashboardLayoutProps) {
   const pathname = usePathname()
+  const { data: session } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
 
   const filteredNavigation = navigation.filter(item => item.roles.includes(userRole))
+  const userName = session?.user?.name || 'User'
 
   const handleMarkAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
@@ -141,11 +144,14 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
           <div className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-900 rounded-lg transition-colors cursor-pointer">
             <UserCircleIcon className="w-8 h-8 text-gray-400" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">Alex Rodriguez</p>
+              <p className="text-sm font-medium text-white truncate">{userName}</p>
               <p className="text-xs text-gray-500 truncate capitalize">{userRole}</p>
             </div>
           </div>
-          <button className="w-full mt-2 flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 rounded-lg transition-colors">
+          <button 
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="w-full mt-2 flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 rounded-lg transition-colors"
+          >
             <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2" />
             Sign Out
           </button>
