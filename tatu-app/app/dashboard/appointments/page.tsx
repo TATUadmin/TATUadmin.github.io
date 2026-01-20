@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
+import DashboardLayout from '../../components/DashboardLayout'
 import { 
   CalendarIcon,
   ClockIcon,
@@ -341,22 +342,27 @@ export default function AppointmentsPage() {
 
   if (!session?.user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <p className="text-gray-400">Please sign in to manage your appointments.</p>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-gray-400">Please sign in to manage your appointments.</p>
+        </div>
+      </DashboardLayout>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
+      </DashboardLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <DashboardLayout userRole="artist">
+      <div className="min-h-screen bg-black">
       {/* Header */}
       <div className="bg-gray-950 border-b border-gray-900">
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -824,6 +830,7 @@ export default function AppointmentsPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   )
 }
