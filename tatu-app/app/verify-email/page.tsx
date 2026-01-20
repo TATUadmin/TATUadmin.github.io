@@ -1,26 +1,40 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [error, setError] = useState<string | null>(null)
+  const hasVerified = useRef(false) // Track if verification has been attempted
 
   useEffect(() => {
+    // Prevent multiple verification attempts
+    if (hasVerified.current) {
+      return
+    }
+
     const verifyEmail = async () => {
+      // Mark as attempted immediately to prevent re-runs
+      hasVerified.current = true
+
       try {
-        const token = searchParams.get('token')
+        // Get token from URL params, handling both encoded and unencoded
+        const tokenParam = searchParams.get('token')
+        const token = tokenParam ? decodeURIComponent(tokenParam) : null
+        
         if (!token) {
           setStatus('error')
-          setError('Missing verification token')
+          setError('Missing verification token. Please check your email for the complete verification link.')
           return
         }
 
-        const response = await fetch(`/api/auth/verify-email?token=${token}`)
+        console.log('Verifying email with token:', token.substring(0, 10) + '...')
+
+        const response = await fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`)
         const data = await response.json()
 
         if (!response.ok) {
@@ -30,17 +44,20 @@ export default function VerifyEmailPage() {
         }
 
         setStatus('success')
+        // Redirect after a short delay to show success message
         setTimeout(() => {
           router.push('/login?verified=true')
-        }, 3000)
+        }, 2000)
       } catch (error) {
+        console.error('Email verification error:', error)
         setStatus('error')
-        setError('An error occurred while verifying your email')
+        setError('An error occurred while verifying your email. Please try again or contact support.')
       }
     }
 
     verifyEmail()
-  }, [router, searchParams])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty dependency array - only run once on mount
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -107,5 +124,20 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   )
 } 

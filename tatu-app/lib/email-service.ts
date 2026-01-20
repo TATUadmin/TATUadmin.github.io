@@ -3,6 +3,16 @@ import { render } from '@react-email/render'
 import { logger } from './monitoring'
 import { ApiResponse, ErrorCodes, HttpStatus } from './api-response'
 
+/**
+ * Get the base URL for the application, ensuring it's properly formatted
+ * Removes trailing slashes and ensures proper protocol
+ */
+function getBaseUrl(): string {
+  const url = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  // Remove trailing slash if present
+  return url.replace(/\/+$/, '')
+}
+
 // Email configuration
 export interface EmailConfig {
   from: string
@@ -74,8 +84,22 @@ export class EmailService {
     template: EmailTemplate,
     config?: Partial<EmailConfig>
   ): Promise<EmailResult> {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY is not set')
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_dummy_key_for_build_time_only') {
+      const errorMessage = 'RESEND_API_KEY is not set or invalid'
+      logger.error('Email sending failed', {
+        error: errorMessage,
+        recipient: Array.isArray(to) ? to[0]?.email : to.email,
+        subject: template.subject
+      })
+      
+      return {
+        id: 'failed',
+        success: false,
+        error: errorMessage,
+        recipient: Array.isArray(to) ? to[0]?.email || 'unknown' : to.email,
+        subject: template.subject,
+        sentAt: new Date().toISOString()
+      }
     }
     try {
       const recipients = Array.isArray(to) ? to : [to]
@@ -105,7 +129,9 @@ export class EmailService {
       const result = await this.resend.emails.send(emailData)
 
       if (result.error) {
-        throw new Error(result.error.message)
+        // Log full error details for debugging
+        console.error('Resend API Error:', JSON.stringify(result.error, null, 2))
+        throw new Error(result.error.message || JSON.stringify(result.error))
       }
 
       const emailResult: EmailResult = {
@@ -126,6 +152,15 @@ export class EmailService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
+      // Log full error details for debugging
+      console.error('Email sending error details:', {
+        error: errorMessage,
+        errorObject: error,
+        recipient: Array.isArray(to) ? to[0]?.email : to.email,
+        subject: template.subject,
+        from: emailConfig.from
+      })
       
       logger.error('Email sending failed', {
         error: errorMessage,
@@ -198,16 +233,22 @@ export class EmailService {
           <p>Thank you for joining our tattoo community. We're excited to have you on board!</p>
           ${verificationToken ? `
             <p>Please verify your email address by clicking the link below:</p>
-            <a href="${process.env.NEXTAUTH_URL}/verify-email?token=${verificationToken}" 
+            <a href="${getBaseUrl()}/verify-email?token=${encodeURIComponent(verificationToken)}" 
                style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
               Verify Email Address
             </a>
+            <p style="margin-top: 20px; font-size: 12px; color: #666;">
+              If the button doesn't work, copy and paste this link into your browser:<br>
+              ${getBaseUrl()}/verify-email?token=${encodeURIComponent(verificationToken)}
+            </p>
           ` : ''}
           <p>If you have any questions, feel free to reach out to our support team.</p>
           <p>Best regards,<br>The TATU Team</p>
         </div>
       `,
-      text: `Welcome to TATU, ${name}! Thank you for joining our tattoo community.`
+      text: verificationToken 
+        ? `Welcome to TATU, ${name}! Thank you for joining our tattoo community. Please verify your email by visiting: ${getBaseUrl()}/verify-email?token=${encodeURIComponent(verificationToken)}`
+        : `Welcome to TATU, ${name}! Thank you for joining our tattoo community.`
     }
 
     return this.sendEmail(

@@ -8,6 +8,7 @@ import TattooBackgroundCycler from './components/TattooBackgroundCycler'
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [showJoinModal, setShowJoinModal] = useState(false)
   const router = useRouter()
 
   return (
@@ -123,13 +124,13 @@ export default function Home() {
               >
                 Browse Artists
               </button>
-              <Link 
-                href="/register-artist" 
+              <button
+                onClick={() => setShowJoinModal(true)}
                 className="px-6 lg:px-8 py-2.5 lg:py-3 bg-transparent border-2 border-gray-400 text-white rounded-full font-semibold hover:bg-gray-400 hover:text-black transition-all duration-200 text-center min-w-[140px] lg:min-w-[160px] text-sm lg:text-base"
                 style={{textShadow: '0 1px 2px rgba(0,0,0,0.5)'}}
               >
-                Join as Artist
-              </Link>
+                Join
+              </button>
             </div>
 
           </div>
@@ -241,6 +242,52 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Join Modal */}
+      {showJoinModal && (
+        <div 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowJoinModal(false)}
+        >
+          <div 
+            className="bg-black border-2 border-gray-400 rounded-lg p-8 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">Join TATU</h2>
+              <button
+                onClick={() => setShowJoinModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <p className="text-gray-400 mb-6">
+              Choose how you'd like to join the TATU community
+            </p>
+
+            <div className="space-y-4">
+              <Link
+                href="/signup?role=client"
+                className="block w-full bg-white text-black px-6 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-center"
+                onClick={() => setShowJoinModal(false)}
+              >
+                Join as Client
+              </Link>
+              <Link
+                href="/register-artist"
+                className="block w-full bg-transparent border-2 border-gray-400 text-white px-6 py-4 rounded-lg font-semibold hover:bg-gray-400 hover:text-black transition-colors text-center"
+                onClick={() => setShowJoinModal(false)}
+              >
+                Join as Artist
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

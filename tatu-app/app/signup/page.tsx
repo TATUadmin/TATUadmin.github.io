@@ -1,66 +1,89 @@
 'use client'
 
-import { useState } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
 
 export default function SignUpPage() {
+  const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    terms: false
+    confirmPassword: ''
   })
   const [isLoading, setIsLoading] = useState(false)
-  const [passwordStrength, setPasswordStrength] = useState({
-    hasMinLength: false,
-    hasUppercase: false,
-    hasLowercase: false,
-    hasNumber: false,
-    hasSpecial: false
-  })
+  const [passwordFocused, setPasswordFocused] = useState(false)
   const router = useRouter()
+  const role = searchParams.get('role') || 'CUSTOMER' // Default to CUSTOMER if no role specified
 
-  const validatePasswordStrength = (password: string) => {
-    setPasswordStrength({
-      hasMinLength: password.length >= 8,
-      hasUppercase: /[A-Z]/.test(password),
-      hasLowercase: /[a-z]/.test(password),
-      hasNumber: /[0-9]/.test(password),
-      hasSpecial: /[^A-Za-z0-9]/.test(password)
-    })
+  // Password validation checks
+  const passwordChecks = {
+    length: formData.password.length >= 8,
+    uppercase: /[A-Z]/.test(formData.password),
+    lowercase: /[a-z]/.test(formData.password),
+    number: /[0-9]/.test(formData.password),
+    special: /[^A-Za-z0-9]/.test(formData.password),
   }
+
+  const passwordStrength = Object.values(passwordChecks).filter(Boolean).length
+  const showPasswordIndicator = passwordFocused || formData.password.length > 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Enterprise-grade validation
-    if (!formData.terms) {
-      toast.error('You must accept the terms and conditions')
-      setIsLoading(false)
-      return
-    }
-
+    // Basic validation
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match')
       setIsLoading(false)
       return
     }
 
-    // Check all password requirements
-    if (!passwordStrength.hasMinLength || !passwordStrength.hasUppercase || 
-        !passwordStrength.hasLowercase || !passwordStrength.hasNumber || 
-        !passwordStrength.hasSpecial) {
-      toast.error('Password does not meet security requirements')
+    if (formData.password.length < 8) {
+      toast.error('Password must be at least 8 characters long')
+      setIsLoading(false)
+      return
+    }
+
+    // Validate password requirements
+    const passwordRegex = {
+      uppercase: /[A-Z]/,
+      lowercase: /[a-z]/,
+      number: /[0-9]/,
+      special: /[^A-Za-z0-9]/
+    }
+
+    if (!passwordRegex.uppercase.test(formData.password)) {
+      toast.error('Password must contain at least one uppercase letter')
+      setIsLoading(false)
+      return
+    }
+
+    if (!passwordRegex.lowercase.test(formData.password)) {
+      toast.error('Password must contain at least one lowercase letter')
+      setIsLoading(false)
+      return
+    }
+
+    if (!passwordRegex.number.test(formData.password)) {
+      toast.error('Password must contain at least one number')
+      setIsLoading(false)
+      return
+    }
+
+    if (!passwordRegex.special.test(formData.password)) {
+      toast.error('Password must contain at least one special character')
       setIsLoading(false)
       return
     }
 
     try {
+      // Add timeout to prevent hanging
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -70,51 +93,59 @@ export default function SignUpPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          terms: formData.terms,
-          role: 'CUSTOMER'
+          role: role === 'client' ? 'CUSTOMER' : 'CUSTOMER', // Ensure it's CUSTOMER for client signup
+          terms: true,
         }),
+        signal: controller.signal,
       })
 
-      const data = await response.json()
+      clearTimeout(timeoutId)
+
+      let data
+      try {
+        data = await response.json()
+      } catch (jsonError) {
+        console.error('Error parsing JSON response:', jsonError)
+        const text = await response.text()
+        console.error('Response text:', text)
+        throw new Error('Invalid response from server')
+      }
 
       if (response.ok) {
         toast.success('Account created successfully! Please check your email to verify your account.')
         router.push('/login')
       } else {
-        toast.error(data.message || data.error || 'Failed to create account')
+        // Show more specific error messages
+        if (data.errors && Array.isArray(data.errors)) {
+          // Zod validation errors
+          const errorMessages = data.errors.map((err: any) => err.message).join(', ')
+          toast.error(errorMessages || 'Validation failed')
+        } else if (data.message) {
+          toast.error(data.message)
+        } else {
+          toast.error(data.error || 'Failed to create account')
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign up error:', error)
-      toast.error('An error occurred. Please try again.')
+      
+      if (error.name === 'AbortError') {
+        toast.error('Request timed out. Please try again.')
+      } else if (error.message) {
+        toast.error(error.message)
+      } else {
+        toast.error('An error occurred. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }))
-    
-    // Update password strength indicator in real-time
-    if (field === 'password' && typeof value === 'string') {
-      validatePasswordStrength(value)
-    }
-  }
-
-  const handleGoogleSignUp = async () => {
-    try {
-      setIsLoading(true)
-      await signIn('google', {
-        callbackUrl: '/profile-setup',
-        redirect: true
-      })
-    } catch (error) {
-      console.error('Google sign up error:', error)
-      toast.error('Failed to sign up with Google')
-      setIsLoading(false)
-    }
   }
 
   return (
@@ -135,12 +166,6 @@ export default function SignUpPage() {
           <p className="body text-gray-400">
             Create your account to get started
           </p>
-        </div>
-
-        {/* Authentication Status */}
-        <div className="bg-surface border border-gray-600 rounded-lg p-4 text-center">
-          <p className="text-white text-sm font-medium">🔐 Secure Registration</p>
-          <p className="text-gray-400 text-xs mt-1">Create your TATU account</p>
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -182,56 +207,74 @@ export default function SignUpPage() {
                 type="password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
                 className="input"
                 placeholder="Create a password"
               />
-              
-              {/* Password Strength Indicator */}
-              {formData.password && (
-                <div className="mt-3 space-y-2">
-                  <p className="text-xs text-gray-400 font-medium">Password must contain:</p>
-                  <div className="space-y-1">
-                    <div className="flex items-center text-xs">
-                      <span className={`mr-2 ${passwordStrength.hasMinLength ? 'text-green-500' : 'text-gray-500'}`}>
-                        {passwordStrength.hasMinLength ? '✓' : '○'}
+              {showPasswordIndicator && (
+                <div className="mt-3 p-4 bg-gray-900/50 border border-gray-700 rounded-lg">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm">
+                      <span className={`mr-2 ${passwordChecks.length ? 'text-green-400' : 'text-gray-500'}`}>
+                        {passwordChecks.length ? '✓' : '○'}
                       </span>
-                      <span className={passwordStrength.hasMinLength ? 'text-green-500' : 'text-gray-400'}>
+                      <span className={passwordChecks.length ? 'text-gray-300' : 'text-gray-500'}>
                         At least 8 characters
                       </span>
                     </div>
-                    <div className="flex items-center text-xs">
-                      <span className={`mr-2 ${passwordStrength.hasUppercase ? 'text-green-500' : 'text-gray-500'}`}>
-                        {passwordStrength.hasUppercase ? '✓' : '○'}
+                    <div className="flex items-center text-sm">
+                      <span className={`mr-2 ${passwordChecks.uppercase ? 'text-green-400' : 'text-gray-500'}`}>
+                        {passwordChecks.uppercase ? '✓' : '○'}
                       </span>
-                      <span className={passwordStrength.hasUppercase ? 'text-green-500' : 'text-gray-400'}>
-                        One uppercase letter (A-Z)
-                      </span>
-                    </div>
-                    <div className="flex items-center text-xs">
-                      <span className={`mr-2 ${passwordStrength.hasLowercase ? 'text-green-500' : 'text-gray-500'}`}>
-                        {passwordStrength.hasLowercase ? '✓' : '○'}
-                      </span>
-                      <span className={passwordStrength.hasLowercase ? 'text-green-500' : 'text-gray-400'}>
-                        One lowercase letter (a-z)
+                      <span className={passwordChecks.uppercase ? 'text-gray-300' : 'text-gray-500'}>
+                        One uppercase letter
                       </span>
                     </div>
-                    <div className="flex items-center text-xs">
-                      <span className={`mr-2 ${passwordStrength.hasNumber ? 'text-green-500' : 'text-gray-500'}`}>
-                        {passwordStrength.hasNumber ? '✓' : '○'}
+                    <div className="flex items-center text-sm">
+                      <span className={`mr-2 ${passwordChecks.lowercase ? 'text-green-400' : 'text-gray-500'}`}>
+                        {passwordChecks.lowercase ? '✓' : '○'}
                       </span>
-                      <span className={passwordStrength.hasNumber ? 'text-green-500' : 'text-gray-400'}>
-                        One number (0-9)
+                      <span className={passwordChecks.lowercase ? 'text-gray-300' : 'text-gray-500'}>
+                        One lowercase letter
                       </span>
                     </div>
-                    <div className="flex items-center text-xs">
-                      <span className={`mr-2 ${passwordStrength.hasSpecial ? 'text-green-500' : 'text-gray-500'}`}>
-                        {passwordStrength.hasSpecial ? '✓' : '○'}
+                    <div className="flex items-center text-sm">
+                      <span className={`mr-2 ${passwordChecks.number ? 'text-green-400' : 'text-gray-500'}`}>
+                        {passwordChecks.number ? '✓' : '○'}
                       </span>
-                      <span className={passwordStrength.hasSpecial ? 'text-green-500' : 'text-gray-400'}>
-                        One special character (!@#$%^&*)
+                      <span className={passwordChecks.number ? 'text-gray-300' : 'text-gray-500'}>
+                        One number
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <span className={`mr-2 ${passwordChecks.special ? 'text-green-400' : 'text-gray-500'}`}>
+                        {passwordChecks.special ? '✓' : '○'}
+                      </span>
+                      <span className={passwordChecks.special ? 'text-gray-300' : 'text-gray-500'}>
+                        One special character
                       </span>
                     </div>
                   </div>
+                  {formData.password.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-gray-700">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-gray-400">Password strength</span>
+                        <span className="text-xs text-gray-400">{passwordStrength}/5</span>
+                      </div>
+                      <div className="w-full bg-gray-800 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            passwordStrength <= 2 ? 'bg-red-500' :
+                            passwordStrength <= 3 ? 'bg-yellow-500' :
+                            passwordStrength <= 4 ? 'bg-blue-500' :
+                            'bg-green-500'
+                          }`}
+                          style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -248,28 +291,6 @@ export default function SignUpPage() {
                 className="input"
                 placeholder="Confirm your password"
               />
-            </div>
-
-            {/* Terms & Conditions Checkbox */}
-            <div className="flex items-start">
-              <input
-                id="terms"
-                type="checkbox"
-                checked={formData.terms}
-                onChange={(e) => handleInputChange('terms', e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-white cursor-pointer"
-                required
-              />
-              <label htmlFor="terms" className="ml-2 block text-sm text-gray-300">
-                I agree to the{' '}
-                <Link href="/terms" className="text-white hover:text-gray-300 underline" target="_blank">
-                  Terms of Service
-                </Link>
-                {' '}and{' '}
-                <Link href="/privacy" className="text-white hover:text-gray-300 underline" target="_blank">
-                  Privacy Policy
-                </Link>
-              </label>
             </div>
           </div>
 
@@ -301,9 +322,8 @@ export default function SignUpPage() {
 
           <button
             type="button"
-            onClick={handleGoogleSignUp}
-            disabled={isLoading}
-            className="btn btn-secondary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => alert('Google sign up coming soon!')}
+            className="btn btn-secondary w-full flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

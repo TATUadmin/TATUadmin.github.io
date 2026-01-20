@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
 
-export default function LoginPage() {
+function LoginContent() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -15,6 +15,15 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+
+  // Show success message if redirected from email verification
+  useEffect(() => {
+    if (searchParams.get('verified') === 'true') {
+      toast.success('Email verified successfully! You can now sign in.')
+      // Clean up the URL
+      router.replace('/login', { scroll: false })
+    }
+  }, [searchParams, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,18 +83,9 @@ export default function LoginPage() {
               className="h-12 w-auto mx-auto"
             />
           </Link>
-          <h2 className="display text-3xl text-white mb-2">
-            Welcome Back
-          </h2>
           <p className="body text-gray-400">
             Sign in to your TATU account
           </p>
-        </div>
-
-        {/* Authentication Status */}
-        <div className="bg-surface border border-gray-600 rounded-lg p-4 text-center">
-          <p className="text-white text-sm font-medium">🔐 Secure Authentication</p>
-          <p className="text-gray-400 text-xs mt-1">Sign in with your TATU account</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -179,5 +179,20 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 } 

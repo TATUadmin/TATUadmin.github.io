@@ -284,11 +284,11 @@ export default function ArtistPortfolioPage() {
                 </div>
 
                 <Link
-                  href={`/artist/${artist.id}/book`}
+                  href={`/artist/${artist.id}/availability`}
                   className="flex items-center justify-center w-full bg-white text-black px-6 py-3 rounded-lg font-semibold border-2 border-gray-400 hover:bg-gray-100 transition-colors mb-3"
                 >
                   <CalendarIcon className="w-5 h-5 mr-2" />
-                  Book Appointment
+                  Check Artist Availability
                 </Link>
                 
                 <Link

@@ -30,9 +30,13 @@ export async function POST(req: Request) {
     const token = crypto.randomBytes(32).toString('hex')
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
+    // Generate verification token ID
+    const verificationTokenId = crypto.randomUUID()
+
     // Save reset token
     await prisma.verificationToken.create({
       data: {
+        id: verificationTokenId,
         token,
         email: user.email,
         expires,

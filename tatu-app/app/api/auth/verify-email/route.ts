@@ -14,16 +14,41 @@ export async function GET(request: Request) {
     }
 
     // Find and validate the verification token
-    const verificationToken = await prisma.verificationToken.findUnique({
+    console.log('=== EMAIL VERIFICATION ===')
+    console.log('Token received:', token ? token.substring(0, 10) + '...' : 'null')
+    
+    let verificationToken = await prisma.verificationToken.findUnique({
       where: { token },
     })
 
     if (!verificationToken) {
+      // Log for debugging
+      console.error('Token not found. Checking database...')
+      const allTokens = await prisma.verificationToken.findMany({
+        take: 10,
+        select: { 
+          token: true, 
+          email: true, 
+          expires: true,
+          createdAt: true 
+        },
+        orderBy: { createdAt: 'desc' }
+      })
+      console.log('Total tokens in database:', allTokens.length)
+      console.log('Recent tokens:', allTokens.map(t => ({
+        email: t.email,
+        expires: t.expires,
+        tokenPreview: t.token.substring(0, 10) + '...'
+      })))
+      
       return NextResponse.json(
-        { error: 'Invalid verification token' },
+        { error: 'Invalid verification token. The token may have expired or already been used.' },
         { status: 400 }
       )
     }
+    
+    console.log('Token found for email:', verificationToken.email)
+    console.log('Token expires:', verificationToken.expires)
 
     if (verificationToken.expires < new Date()) {
       // Delete expired token

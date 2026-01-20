@@ -168,7 +168,7 @@ export default function RegisterArtist() {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="input"
+                    className="w-full px-4 py-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600/50 focus:border-gray-600 transition-all duration-200"
                     placeholder="(555) 123-4567"
                   />
                 </div>
@@ -182,7 +182,7 @@ export default function RegisterArtist() {
                     required
                     value={formData.city}
                     onChange={(e) => setFormData({...formData, city: e.target.value})}
-                    className="input"
+                    className="w-full px-4 py-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600/50 focus:border-gray-600 transition-all duration-200"
                     placeholder="New York, NY"
                   />
                 </div>
@@ -244,7 +244,7 @@ export default function RegisterArtist() {
                     type="text"
                     value={formData.instagram}
                     onChange={(e) => setFormData({...formData, instagram: e.target.value})}
-                    className="input"
+                    className="w-full px-4 py-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600/50 focus:border-gray-600 transition-all duration-200"
                     placeholder="@yourhandle"
                   />
                 </div>
@@ -257,7 +257,7 @@ export default function RegisterArtist() {
                     type="url"
                     value={formData.portfolio}
                     onChange={(e) => setFormData({...formData, portfolio: e.target.value})}
-                    className="input"
+                    className="w-full px-4 py-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600/50 focus:border-gray-600 transition-all duration-200"
                     placeholder="https://yourportfolio.com"
                   />
                 </div>
@@ -271,7 +271,7 @@ export default function RegisterArtist() {
                   type="text"
                   value={formData.shopName}
                   onChange={(e) => setFormData({...formData, shopName: e.target.value})}
-                  className="input"
+                  className="w-full px-4 py-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600/50 focus:border-gray-600 transition-all duration-200"
                   placeholder="Studio/Shop name (if applicable)"
                 />
               </div>
@@ -285,7 +285,7 @@ export default function RegisterArtist() {
                   value={formData.aboutMe}
                   onChange={(e) => setFormData({...formData, aboutMe: e.target.value})}
                   rows={4}
-                  className="input resize-none"
+                  className="w-full px-4 py-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600/50 focus:border-gray-600 transition-all duration-200 resize-none"
                   placeholder="Describe your artistic style, approach, and what makes your work unique..."
                 />
               </div>

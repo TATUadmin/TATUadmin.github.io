@@ -155,14 +155,14 @@ export default function ProfileSetupPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-8">
+        <div className="bg-black border-2 border-gray-400 rounded-lg p-8">
           {step === 1 && (
             <div>
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                <h1 className="text-3xl font-bold text-white mb-4">
                   Welcome to TATU!
                 </h1>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-gray-400">
                   Let's set up your profile. What best describes you?
                 </p>
               </div>
@@ -171,17 +171,17 @@ export default function ProfileSetupPage() {
                 {/* Customer Option */}
                 <button
                   onClick={() => handleRoleSelection('CUSTOMER')}
-                  className="w-full p-6 border-2 border-gray-200 rounded-lg hover:border-black hover:bg-gray-50 transition-all group"
+                  className="w-full p-6 border-2 border-gray-600 rounded-lg hover:border-white hover:bg-gray-900 transition-all group"
                 >
                   <div className="flex items-center">
                     <div className="flex-shrink-0 mr-4">
-                      <UserIcon className="h-8 w-8 text-gray-400 group-hover:text-black" />
+                      <UserIcon className="h-8 w-8 text-gray-400 group-hover:text-white" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-black">
+                      <h3 className="text-lg font-semibold text-white group-hover:text-white">
                         I'm looking for tattoo artists
                       </h3>
-                      <p className="text-gray-600 group-hover:text-gray-800">
+                      <p className="text-gray-400 group-hover:text-gray-300">
                         Browse portfolios, book appointments, and find the perfect artist for your tattoo
                       </p>
                     </div>
@@ -191,17 +191,17 @@ export default function ProfileSetupPage() {
                 {/* Artist Option */}
                 <button
                   onClick={() => handleRoleSelection('ARTIST')}
-                  className="w-full p-6 border-2 border-gray-200 rounded-lg hover:border-black hover:bg-gray-50 transition-all group"
+                  className="w-full p-6 border-2 border-gray-600 rounded-lg hover:border-white hover:bg-gray-900 transition-all group"
                 >
                   <div className="flex items-center">
                     <div className="flex-shrink-0 mr-4">
-                      <PaintBrushIcon className="h-8 w-8 text-gray-400 group-hover:text-black" />
+                      <PaintBrushIcon className="h-8 w-8 text-gray-400 group-hover:text-white" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-black">
+                      <h3 className="text-lg font-semibold text-white group-hover:text-white">
                         I'm a tattoo artist
                       </h3>
-                      <p className="text-gray-600 group-hover:text-gray-800">
+                      <p className="text-gray-400 group-hover:text-gray-300">
                         Showcase your portfolio, manage bookings, and connect with clients
                       </p>
                     </div>
@@ -211,17 +211,17 @@ export default function ProfileSetupPage() {
                 {/* Shop Owner Option */}
                 <button
                   onClick={() => handleRoleSelection('SHOP_OWNER')}
-                  className="w-full p-6 border-2 border-gray-200 rounded-lg hover:border-black hover:bg-gray-50 transition-all group"
+                  className="w-full p-6 border-2 border-gray-600 rounded-lg hover:border-white hover:bg-gray-900 transition-all group"
                 >
                   <div className="flex items-center">
                     <div className="flex-shrink-0 mr-4">
-                      <BuildingStorefrontIcon className="h-8 w-8 text-gray-400 group-hover:text-black" />
+                      <BuildingStorefrontIcon className="h-8 w-8 text-gray-400 group-hover:text-white" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-black">
+                      <h3 className="text-lg font-semibold text-white group-hover:text-white">
                         I own a tattoo shop
                       </h3>
-                      <p className="text-gray-600 group-hover:text-gray-800">
+                      <p className="text-gray-400 group-hover:text-gray-300">
                         Manage your shop, artists, and showcase your business
                       </p>
                     </div>
@@ -234,10 +234,10 @@ export default function ProfileSetupPage() {
           {step === 2 && (
             <div>
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-white mb-2">
                   Complete Your Profile
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-400">
                   {selectedRole === 'ARTIST' 
                     ? 'Tell us about your artistic style and experience'
                     : selectedRole === 'SHOP_OWNER'
@@ -250,14 +250,14 @@ export default function ProfileSetupPage() {
               <form className="space-y-6">
                 {/* Bio */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Bio {selectedRole === 'ARTIST' && '(Tell clients about your experience and style)'}
                   </label>
                   <textarea
                     value={profileData.bio || ''}
                     onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-black"
+                    className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:ring-2 focus:ring-white focus:border-white"
                     placeholder={selectedRole === 'ARTIST' 
                       ? 'I\'ve been tattooing for 5 years, specializing in...'
                       : 'Tell us a bit about yourself...'
@@ -267,35 +267,35 @@ export default function ProfileSetupPage() {
 
                 {/* Location */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Location
                   </label>
                   <input
                     type="text"
                     value={profileData.location || ''}
                     onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-black"
+                    className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:ring-2 focus:ring-white focus:border-white"
                     placeholder="City, State"
                   />
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Phone Number
                   </label>
                   <input
                     type="tel"
                     value={profileData.phone || ''}
                     onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-black"
+                    className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:ring-2 focus:ring-white focus:border-white"
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
 
                 {/* Instagram */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Instagram Handle
                   </label>
                   <div className="relative">
@@ -304,7 +304,7 @@ export default function ProfileSetupPage() {
                       type="text"
                       value={profileData.instagram || ''}
                       onChange={(e) => setProfileData(prev => ({ ...prev, instagram: e.target.value }))}
-                      className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-black"
+                      className="w-full pl-8 pr-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:ring-2 focus:ring-white focus:border-white"
                       placeholder="yourusername"
                     />
                   </div>
@@ -313,14 +313,14 @@ export default function ProfileSetupPage() {
                 {/* Website (for artists/shop owners) */}
                 {(selectedRole === 'ARTIST' || selectedRole === 'SHOP_OWNER') && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-white mb-2">
                       Website
                     </label>
                     <input
                       type="url"
                       value={profileData.website || ''}
                       onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-black"
+                      className="w-full px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:ring-2 focus:ring-white focus:border-white"
                       placeholder="https://yourwebsite.com"
                     />
                   </div>
@@ -329,7 +329,7 @@ export default function ProfileSetupPage() {
                 {/* Specialties (for artists) */}
                 {selectedRole === 'ARTIST' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-white mb-2">
                       Tattoo Styles & Specialties
                     </label>
                     <p className="text-sm text-gray-500 mb-3">
@@ -344,7 +344,7 @@ export default function ProfileSetupPage() {
                           className={`px-3 py-2 text-sm rounded-md border transition-colors ${
                             profileData.specialties?.includes(style)
                               ? 'bg-black text-white border-black'
-                              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                              : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800'
                           }`}
                         >
                           {style}
@@ -359,7 +359,7 @@ export default function ProfileSetupPage() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                    className="px-6 py-2 border border-gray-600 text-white rounded-md hover:bg-gray-900 transition-colors"
                   >
                     Back
                   </button>

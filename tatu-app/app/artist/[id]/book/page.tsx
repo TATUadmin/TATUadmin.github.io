@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { 
   CalendarIcon, 
@@ -25,14 +25,15 @@ interface BookingForm {
 export default function BookAppointmentPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const artistId = params.id as string
   
   const [formData, setFormData] = useState<BookingForm>({
     name: '',
     email: '',
     phone: '',
-    date: '',
-    time: '',
+    date: searchParams.get('date') || '',
+    time: searchParams.get('time') || '',
     description: '',
     size: '',
     style: ''

@@ -1,26 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import dynamicImport from 'next/dynamic'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { MagnifyingGlassIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
 import { classifySearch, formatSearchClassification } from '@/lib/smart-search'
 import { ALL_ARTISTS, Artist } from '@/lib/all-artists-data'
 
-// Force dynamic rendering to prevent build-time errors
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
-// Dynamically import LeafletMap to prevent build-time window errors
-const LeafletMap = dynamicImport(() => import('../components/LeafletMap'), {
-  ssr: false, // Disable server-side rendering for the map component
-  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg flex items-center justify-center">
-    <p className="text-gray-500">Loading map...</p>
-  </div>
+// Lazy load the map component to improve initial page load
+const LeafletMap = dynamic(() => import('../components/LeafletMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[600px] bg-gray-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+        <p className="text-white text-sm">Loading map...</p>
+      </div>
+    </div>
+  )
 })
 
 export default function ExplorePage() {
@@ -149,9 +150,7 @@ export default function ExplorePage() {
   const fetchArtists = async () => {
     setIsLoading(true)
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
+      // Removed artificial delay for faster loading
       let filteredArtists = [...mockArtists]
       
       // Enhanced search by name, bio, specialties, or location
@@ -290,10 +289,8 @@ export default function ExplorePage() {
     setManualLocationEdit(false)
     setManualStyleEdit(false)
 
-    // Small delay to ensure state updates are applied, then fetch
-    setTimeout(() => {
-      fetchArtists()
-    }, 50)
+    // Fetch immediately without delay
+    fetchArtists()
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

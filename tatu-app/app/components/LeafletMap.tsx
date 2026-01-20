@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Link from 'next/link'
@@ -404,25 +404,23 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
   useEffect(() => {
     if (hasShownInitialDefault) return
     
-    const timer = setTimeout(() => {
-      if (!searchLocation || searchLocation.trim() === '') {
-        const showDefaultNYC = () => {
-          if (!mapInstanceRef.current) {
-            setTimeout(showDefaultNYC, 300)
-            return
-          }
-          mapInstanceRef.current.setView([40.7128, -74.0060], 12)
-          setMapReady(true)
-          setHasShownInitialDefault(true)
+    // Removed artificial delay - show map immediately
+    if (!searchLocation || searchLocation.trim() === '') {
+      const showDefaultNYC = () => {
+        if (!mapInstanceRef.current) {
+          // Use requestAnimationFrame for smoother initialization
+          requestAnimationFrame(showDefaultNYC)
+          return
         }
-        showDefaultNYC()
-      } else {
+        mapInstanceRef.current.setView([40.7128, -74.0060], 12)
+        setMapReady(true)
         setHasShownInitialDefault(true)
       }
-    }, 1500)
-    
-    return () => clearTimeout(timer)
-  }, [searchLocation])
+      showDefaultNYC()
+    } else {
+      setHasShownInitialDefault(true)
+    }
+  }, [searchLocation, hasShownInitialDefault])
 
   // Handle search location changes with geocoding
   useEffect(() => {
@@ -445,11 +443,13 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
     const isInitialLoad = !initialLocationSet
     if (!initialLocationSet) setInitialLocationSet(true)
     
-    const debounceDelay = isInitialLoad ? 0 : 800
+    // Reduced debounce delay for faster response
+    const debounceDelay = isInitialLoad ? 0 : 200
     const debounceTimer = setTimeout(() => {
       const panToLocation = () => {
         if (!mapInstanceRef.current) {
-          setTimeout(panToLocation, 300)
+          // Use requestAnimationFrame for smoother updates
+          requestAnimationFrame(panToLocation)
           return
         }
         
@@ -534,7 +534,7 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
       
       // Start the panning process
       panToLocation()
-    }, debounceDelay) // No delay on initial load, 800ms for subsequent searches
+    }, debounceDelay) // No delay on initial load, 200ms for subsequent searches (reduced from 800ms)
     
     // Cleanup function to cancel pending geocode requests
     return () => clearTimeout(debounceTimer)
@@ -574,28 +574,9 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
     }
   }, []) // Empty deps - only run once on mount
 
-  // Separate effect to manage markers based on styleFilter and minReviews
-  useEffect(() => {
-    if (!mapInstanceRef.current) return
-
-    console.log('🗺️ Updating markers with styleFilter:', styleFilter, 'minReviews:', minReviews)
-
-    // Remove all existing markers
-    markersRef.current.forEach(marker => {
-      marker.remove()
-    })
-    markersRef.current = []
-
-    // Create custom markers for each artist
-    mockArtists.forEach(artist => {
-      let color = specialtyColors[artist.specialty] || specialtyColors['Other']
-      
-      // Get artist initials (first letter of first and last name)
-      const nameParts = artist.name.trim().split(' ')
-      const initials = nameParts.length >= 2 
-        ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
-        : nameParts[0].substring(0, 2).toUpperCase()
-      
+  // Memoize filtered artists to avoid recalculating on every render
+  const filteredArtists = useMemo(() => {
+    return mockArtists.filter(artist => {
       // Check if artist matches the style filter
       const matchesStyle = !styleFilter || (artist.specialty && (
         artist.specialty.toLowerCase().includes(styleFilter.toLowerCase()) ||
@@ -605,20 +586,33 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
       // Check if artist meets minimum review count
       const meetsMinReviews = artist.reviewCount >= minReviews
       
-      // Debug logging
-      if (styleFilter || minReviews > 0) {
-        console.log(`🎨 Artist ${artist.name} - Style: ${matchesStyle ? '✅' : '❌'}, Reviews (${artist.reviewCount}): ${meetsMinReviews ? '✅' : '❌'}`)
-      }
+      return matchesStyle && meetsMinReviews
+    })
+  }, [styleFilter, minReviews])
+
+  // Separate effect to manage markers based on styleFilter and minReviews
+  useEffect(() => {
+    if (!mapInstanceRef.current) return
+
+    // Remove all existing markers
+    markersRef.current.forEach(marker => {
+      marker.remove()
+    })
+    markersRef.current = []
+
+    // Create custom markers for each artist (only filtered ones)
+    filteredArtists.forEach(artist => {
+      let color = specialtyColors[artist.specialty] || specialtyColors['Other']
       
-      // Gray out artists who don't match filters
-      const shouldGrayOut = (styleFilter && !matchesStyle) || (minReviews > 0 && !meetsMinReviews)
-      if (shouldGrayOut) {
-        color = '#6B7280' // Gray-500
-      }
+      // Get artist initials (first letter of first and last name)
+      const nameParts = artist.name.trim().split(' ')
+      const initials = nameParts.length >= 2 
+        ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
+        : nameParts[0].substring(0, 2).toUpperCase()
       
       const iconSize = 24
       const fontSize = 10
-      const opacity = shouldGrayOut ? 0.4 : 1.0
+      const opacity = 1.0 // All filtered artists are visible
       
       // Create custom icon (grayed out for non-matching artists)
       const customIcon = L.divIcon({
@@ -634,7 +628,7 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
               width: ${iconSize}px;
               height: ${iconSize}px;
               border-radius: 50% 50% 50% 0;
-              border: 3px solid ${shouldGrayOut ? '#9CA3AF' : 'white'};
+              border: 3px solid white;
               box-shadow: 0 3px 6px rgba(0,0,0,0.4);
               transform: rotate(-45deg);
               display: flex;
@@ -643,7 +637,7 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
             ">
               <div style="
                 transform: rotate(45deg);
-                color: ${shouldGrayOut ? '#D1D5DB' : 'white'};
+                color: white;
                 font-weight: bold;
                 font-size: ${fontSize}px;
                 line-height: 1;
@@ -751,7 +745,7 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
       
       markersRef.current.push(marker)
     })
-  }, [styleFilter, minReviews]) // Re-run when styleFilter or minReviews changes
+  }, [filteredArtists]) // Re-run when filtered artists change
 
 
   return (
