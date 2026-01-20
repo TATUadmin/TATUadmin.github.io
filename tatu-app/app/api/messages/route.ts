@@ -1,487 +1,219 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import { requireAuth } from '@/lib/auth-middleware'
-import { ValidationSchemas } from '@/lib/validation'
-import { ApiResponse, withErrorHandling } from '@/lib/api-response'
-import { rateLimiters } from '@/lib/rate-limit'
-import { logger } from '@/lib/monitoring'
-import { cacheService } from '@/lib/cache'
-import { CacheTags, CacheKeyGenerators } from '@/lib/cache'
-import { addEmailJob } from '@/lib/background-jobs'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
-const prisma = new PrismaClient()
-
-export const GET = withErrorHandling(async (request: NextRequest) => {
-  // Rate limiting
-  const rateLimitResult = await rateLimiters.messaging.check(request)
-  if (!rateLimitResult.allowed) {
-    return ApiResponse.rateLimited('Too many requests', rateLimitResult.retryAfter)
-  }
-
-  // Authentication
-  const authContext = await requireAuth(request)
-  const { user, requestId } = authContext
-  const { searchParams } = new URL(request.url)
-  
-  const conversationId = searchParams.get('conversationId')
-  const recipientId = searchParams.get('recipientId')
-  const page = parseInt(searchParams.get('page') || '1')
-  const limit = parseInt(searchParams.get('limit') || '50')
-  const unreadOnly = searchParams.get('unreadOnly') === 'true'
-
-  // Generate cache key
-  const cacheKey = CacheKeyGenerators.search('messages', {
-    userId: user.id,
-    conversationId,
-    recipientId,
-    page,
-    limit,
-    unreadOnly
-  })
-
-  // Try to get from cache
-  if (cacheService) {
-    const cached = await cacheService.get(cacheKey)
-    if (cached) {
-      return ApiResponse.success(cached, 200, { requestId })
-    }
-  }
-
+// GET /api/messages - Get messages for the authenticated user
+export async function GET(request: NextRequest) {
   try {
-    let messages: any[] = []
-    let total = 0
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (conversationId) {
-      // Get messages for specific conversation
-      const where: any = {
-        conversationId: conversationId,
-        OR: [
-          { senderId: user.id },
-          { recipientId: user.id }
-        ]
-      }
+    const { searchParams } = new URL(request.url)
+    const platform = searchParams.get('platform')
+    const status = searchParams.get('status')
+    const category = searchParams.get('category')
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const offset = parseInt(searchParams.get('offset') || '0')
 
-      if (unreadOnly) {
-        where.readAt = null
-        where.recipientId = user.id
-      }
+    const where: any = {
+      userId: session.user.id,
+    }
 
-      [messages, total] = await Promise.all([
-        prisma.message.findMany({
-          where,
-          include: {
-            sender: {
-              select: {
-                id: true,
-                name: true,
-                profile: {
-                  select: {
-                    avatar: true
-                  }
-                }
-              }
-            },
-            recipient: {
-              select: {
-                id: true,
-                name: true,
-                profile: {
-                  select: {
-                    avatar: true
-                  }
-                }
-              }
-            },
-            conversation: {
-              select: {
-                id: true,
-                subject: true,
-                participants: {
-                  select: {
-                    id: true,
-                    name: true,
-                    profile: {
-                      select: {
-                        avatar: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          orderBy: { createdAt: 'desc' },
-          take: limit,
-          skip: (page - 1) * limit
-        }),
-        prisma.message.count({ where })
-      ])
+    if (platform) {
+      where.platform = platform
+    }
 
-    } else if (recipientId) {
-      // Get conversation between two users
-      const conversation = await prisma.conversation.findFirst({
-        where: {
-          participants: {
-            every: {
-              id: {
-                in: [user.id, recipientId]
-              }
-            }
-          }
-        }
-      })
+    if (status) {
+      where.status = status
+    }
 
-      if (conversation) {
-        const where: any = {
-          conversationId: conversation.id
-        }
+    if (category) {
+      where.category = category
+    }
 
-        if (unreadOnly) {
-          where.readAt = null
-          where.recipientId = user.id
-        }
-
-        [messages, total] = await Promise.all([
-          prisma.message.findMany({
-            where,
-            include: {
-              sender: {
-                select: {
-                  id: true,
-                  name: true,
-                  profile: {
-                    select: {
-                      avatar: true
-                    }
-                  }
-                }
-              },
-              recipient: {
-                select: {
-                  id: true,
-                  name: true,
-                  profile: {
-                    select: {
-                      avatar: true
-                    }
-                  }
-                }
-              },
-              conversation: {
-                select: {
-                  id: true,
-                  subject: true,
-                  participants: {
-                    select: {
-                      id: true,
-                      name: true,
-                      profile: {
-                        select: {
-                          avatar: true
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            orderBy: { createdAt: 'desc' },
-            take: limit,
-            skip: (page - 1) * limit
-          }),
-          prisma.message.count({ where })
-        ])
-      }
-
-    } else {
-      // Get all conversations for user
-      const conversations = await prisma.conversation.findMany({
-        where: {
-          participants: {
-            some: {
-              id: user.id
-            }
-          }
-        },
+    const [messages, total] = await Promise.all([
+      prisma.unifiedMessage.findMany({
+        where,
         include: {
-          participants: {
+          attachments: true,
+          thread: {
             select: {
               id: true,
-              name: true,
-              profile: {
-                select: {
-                  avatar: true
-                }
-              }
-            }
+              subject: true,
+              participants: true,
+            },
           },
-          messages: {
-            take: 1,
-            orderBy: { createdAt: 'desc' },
-            include: {
-              sender: {
-                select: {
-                  id: true,
-                  name: true,
-                  profile: {
-                    select: {
-                      avatar: true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          _count: {
-            select: {
-              messages: true
-            }
-          }
         },
-        orderBy: { updatedAt: 'desc' },
+        orderBy: {
+          receivedAt: 'desc',
+        },
         take: limit,
-        skip: (page - 1) * limit
-      })
+        skip: offset,
+      }),
+      prisma.unifiedMessage.count({ where }),
+    ])
 
-      messages = conversations.map(conv => ({
-        id: conv.id,
-        subject: conv.subject,
-        participants: conv.participants,
-        lastMessage: conv.messages[0] || null,
-        messageCount: conv._count.messages,
-        updatedAt: conv.updatedAt,
-        createdAt: conv.createdAt
-      }))
-
-      total = await prisma.conversation.count({
-        where: {
-          participants: {
-            some: {
-              id: user.id
-            }
-          }
-        }
-      })
-    }
-
-    const result = {
+    return NextResponse.json({
       messages,
       pagination: {
-        page,
-        limit,
         total,
-        totalPages: Math.ceil(total / limit),
-        hasNext: page < Math.ceil(total / limit),
-        hasPrev: page > 1
-      }
-    }
-
-    // Cache the result
-    if (cacheService) {
-      await cacheService.set(cacheKey, result, 60, [CacheTags.MESSAGE]) // 1 minute
-    }
-
-    return ApiResponse.paginated(messages, {
-      page,
-      limit,
-      total
-    }, { requestId })
-
-  } catch (error) {
-    logger.error('Messages fetch error', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      userId: user.id,
-      conversationId,
-      recipientId
+        limit,
+        offset,
+        hasMore: offset + limit < total,
+      },
     })
-
-    return ApiResponse.internalError(
-      'Failed to fetch messages',
-      process.env.NODE_ENV === 'development' ? error : undefined,
-      { requestId }
+  } catch (error) {
+    console.error('Error fetching messages:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch messages' },
+      { status: 500 }
     )
   }
-})
+}
 
-export const POST = withErrorHandling(async (request: NextRequest) => {
-  // Rate limiting
-  const rateLimitResult = await rateLimiters.messaging.check(request)
-  if (!rateLimitResult.allowed) {
-    return ApiResponse.rateLimited('Too many requests', rateLimitResult.retryAfter)
-  }
-
-  // Authentication
-  const authContext = await requireAuth(request)
-  const { user, requestId } = authContext
-
-  // Validate request data
-  const body = await request.json()
-  const validationResult = ValidationSchemas.Message.create.safeParse(body)
-  
-  if (!validationResult.success) {
-    return ApiResponse.validationError(validationResult.error.errors, { requestId })
-  }
-
-  const {
-    recipientId,
-    subject,
-    content,
-    attachments,
-    priority
-  } = validationResult.data
-
-  // Verify recipient exists
-  const recipient = await prisma.user.findUnique({
-    where: { id: recipientId },
-    include: {
-      profile: true
+// POST /api/messages - Send a message or reply
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-  })
 
-  if (!recipient) {
-    return ApiResponse.notFound('Recipient', { requestId })
-  }
+    const body = await request.json()
+    const { platform, recipient, content, threadId, replyToId } = body
 
-  // Find or create conversation
-  let conversation = await prisma.conversation.findFirst({
-    where: {
-      participants: {
-        every: {
-          id: {
-            in: [user.id, recipientId]
-          }
-        }
-      }
-    },
-    include: {
-      participants: true
+    if (!platform || !recipient || !content) {
+      return NextResponse.json(
+        { error: 'Platform, recipient, and content are required' },
+        { status: 400 }
+      )
     }
-  })
 
-  if (!conversation) {
-    conversation = await prisma.conversation.create({
+    // TODO: Send message via appropriate platform integration
+    // For now, just save as INTERNAL message
+    
+    const message = await prisma.unifiedMessage.create({
       data: {
-        subject: subject || 'New Conversation',
-        participants: {
-          connect: [
-            { id: user.id },
-            { id: recipientId }
-          ]
-        }
+        userId: session.user.id,
+        platform,
+        sender: session.user.email || 'you',
+        senderName: session.user.name || 'You',
+        content,
+        status: 'READ', // Sent messages are automatically read
+        receivedAt: new Date(),
+        threadId,
       },
       include: {
-        participants: true
-      }
-    })
-  }
-
-  // Create message
-  const message = await prisma.message.create({
-    data: {
-      conversationId: conversation.id,
-      senderId: user.id,
-      recipientId: recipientId,
-      subject: subject || conversation.subject,
-      content,
-      attachments: attachments || [],
-      priority: priority || 'NORMAL',
-      status: 'SENT'
-    },
-    include: {
-      sender: {
-        select: {
-          id: true,
-          name: true,
-          profile: {
-            select: {
-              avatar: true
-            }
-          }
-        }
+        attachments: true,
       },
-      recipient: {
-        select: {
-          id: true,
-          name: true,
-          profile: {
-            select: {
-              avatar: true
-            }
-          }
-        }
-      },
-      conversation: {
-        select: {
-          id: true,
-          subject: true,
-          participants: {
-            select: {
-              id: true,
-              name: true,
-              profile: {
-                select: {
-                  avatar: true
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  })
-
-  // Update conversation timestamp
-  await prisma.conversation.update({
-    where: { id: conversation.id },
-    data: { updatedAt: new Date() }
-  })
-
-  // Invalidate cache
-  if (cacheService) {
-    await cacheService.invalidateByTags([CacheTags.MESSAGE])
-  }
-
-  // Send email notification if recipient has email notifications enabled
-  if (recipient.profile?.emailNotifications !== false) {
-    await addEmailJob('notification', recipient.email, recipient.name || 'User', {
-      title: `New message from ${user.name || 'Someone'}`,
-      message: content,
-      actionUrl: `${process.env.NEXTAUTH_URL}/inbox?conversation=${conversation.id}`,
-      actionText: 'View Message'
     })
+
+    return NextResponse.json({ message }, { status: 201 })
+  } catch (error) {
+    console.error('Error sending message:', error)
+    return NextResponse.json(
+      { error: 'Failed to send message' },
+      { status: 500 }
+    )
   }
+}
 
-  // Log business event
-  logger.logBusinessEvent('message_sent', {
-    messageId: message.id,
-    senderId: user.id,
-    recipientId: recipientId,
-    conversationId: conversation.id,
-    priority: message.priority
-  }, request)
-
-  return ApiResponse.success({
-    id: message.id,
-    subject: message.subject,
-    content: message.content,
-    attachments: message.attachments,
-    priority: message.priority,
-    status: message.status,
-    createdAt: message.createdAt,
-    sender: {
-      id: message.sender.id,
-      name: message.sender.name || 'Unknown',
-      avatar: message.sender.profile?.avatar || ''
-    },
-    recipient: {
-      id: message.recipient.id,
-      name: message.recipient.name || 'Unknown',
-      avatar: message.recipient.profile?.avatar || ''
-    },
-    conversation: {
-      id: message.conversation.id,
-      subject: message.conversation.subject,
-      participants: message.conversation.participants
+// PATCH /api/messages - Update message (mark as read, archive, etc.)
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-  }, 201, { requestId })
-})
+
+    const body = await request.json()
+    const { messageId, status, labels } = body
+
+    if (!messageId) {
+      return NextResponse.json(
+        { error: 'Message ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Verify message ownership
+    const message = await prisma.unifiedMessage.findUnique({
+      where: { id: messageId },
+    })
+
+    if (!message || message.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Message not found' },
+        { status: 404 }
+      )
+    }
+
+    const updates: any = {}
+    if (status) updates.status = status
+    if (labels) updates.labels = labels
+
+    const updatedMessage = await prisma.unifiedMessage.update({
+      where: { id: messageId },
+      data: updates,
+    })
+
+    return NextResponse.json({ message: updatedMessage })
+  } catch (error) {
+    console.error('Error updating message:', error)
+    return NextResponse.json(
+      { error: 'Failed to update message' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/messages?id=<messageId> - Delete a message
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const messageId = searchParams.get('id')
+
+    if (!messageId) {
+      return NextResponse.json(
+        { error: 'Message ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Verify message ownership
+    const message = await prisma.unifiedMessage.findUnique({
+      where: { id: messageId },
+    })
+
+    if (!message || message.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Message not found' },
+        { status: 404 }
+      )
+    }
+
+    // Soft delete by marking as DELETED
+    await prisma.unifiedMessage.update({
+      where: { id: messageId },
+      data: {
+        status: 'DELETED',
+      },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting message:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete message' },
+      { status: 500 }
+    )
+  }
+}

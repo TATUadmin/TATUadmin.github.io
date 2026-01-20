@@ -43,6 +43,9 @@ enum MessagePlatform {
   INSTAGRAM
   FACEBOOK
   X_TWITTER
+  WHATSAPP
+  SMS
+  TIKTOK
   INTERNAL
 }
 
@@ -51,6 +54,35 @@ enum MessageStatus {
   READ
   ARCHIVED
   DELETED
+}
+
+enum CalendarProvider {
+  TATU            // Native TATU bookings
+  GOOGLE          // Google Calendar
+  APPLE           // iCloud Calendar (CalDAV)
+  OUTLOOK         // Microsoft Outlook/Office 365
+  SQUARE          // Square Appointments
+  CALENDLY        // Calendly
+  ACUITY          // Acuity Scheduling
+  MANUAL          // Manually added by user
+  EMAIL_PARSED    // Extracted from email confirmations
+  INSTAGRAM       // Booked via Instagram DM
+}
+
+enum EventStatus {
+  TENTATIVE       // Not confirmed yet
+  CONFIRMED       // Client confirmed
+  CANCELLED       // Cancelled by client or artist
+  NO_SHOW         // Client didn't show up
+  COMPLETED       // Appointment finished
+  RESCHEDULED     // Moved to different time
+}
+
+enum CalendarView {
+  DAY
+  WEEK
+  MONTH
+  AGENDA
 }
 
 model User {
@@ -88,6 +120,11 @@ model User {
   unifiedMessages   UnifiedMessage[]
   messageThreads    MessageThread[]
   
+  // Calendar relations
+  calendars         Calendar[]
+  calendarEvents    CalendarEvent[]
+  clientEvents      CalendarEvent[] @relation("ClientEvents")
+  
   // Payment relations
   visibilityBoosts  VisibilityBoost[]
   artistPayments    Payment[]        @relation("ArtistPayments")
@@ -97,6 +134,12 @@ model User {
   
   // Subscription relation
   subscription      Subscription?
+  
+  // Calendar preferences
+  calendarView      CalendarView    @default(WEEK)
+  workingHours      Json?           // { monday: { start: "09:00", end: "17:00" }, ... }
+  bufferTime        Int             @default(15) // Minutes between appointments
+  defaultEventDuration Int          @default(120) // Default 2-hour sessions
 }
 
 model Profile {
@@ -604,6 +647,94 @@ model Donation {
 
   @@index([appointmentId])
   @@index([artistId])
+  @@index([clientId])
+  @@index([status])
+}
+
+// Calendar Models - Unified Calendar Feature
+
+model Calendar {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String          // "Google Calendar", "Square Appointments"
+  provider        CalendarProvider
+  providerCalendarId String?      // External calendar ID
+  accessToken     String?         @db.Text
+  refreshToken    String?         @db.Text
+  tokenExpiresAt  DateTime?
+  syncEnabled     Boolean         @default(true)
+  lastSyncedAt    DateTime?
+  color           String          @default("#3B82F6") // Hex color for UI
+  isDefault       Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  events          CalendarEvent[]
+  
+  @@unique([userId, provider, providerCalendarId])
+  @@index([userId])
+}
+
+model CalendarEvent {
+  id              String          @id @default(cuid())
+  calendarId      String
+  calendar        Calendar        @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  
+  // Event details
+  title           String
+  description     String?         @db.Text
+  location        String?
+  
+  // Timing
+  startTime       DateTime
+  endTime         DateTime
+  allDay          Boolean         @default(false)
+  timezone        String          @default("UTC")
+  
+  // Recurrence
+  isRecurring     Boolean         @default(false)
+  recurrenceRule  String?         // iCal RRULE format
+  recurrenceId    String?         // Links to parent recurring event
+  
+  // Client information
+  clientId        String?
+  client          User?           @relation("ClientEvents", fields: [clientId], references: [id])
+  clientName      String?         // For non-TATU clients
+  clientEmail     String?
+  clientPhone     String?
+  
+  // Booking details (for tattoo appointments)
+  serviceType     String?         // "Tattoo Session", "Consultation", "Touch-up"
+  estimatedCost   Decimal?        @db.Decimal(10, 2)
+  depositPaid     Boolean         @default(false)
+  depositAmount   Decimal?        @db.Decimal(10, 2)
+  
+  // Status and metadata
+  status          EventStatus     @default(CONFIRMED)
+  color           String?         // Override calendar color
+  
+  // External sync
+  externalId      String?         // ID in external system (Google, Square, etc.)
+  externalUrl     String?         // Link to external booking
+  lastSyncedAt    DateTime?
+  
+  // Conflict detection
+  hasConflict     Boolean         @default(false)
+  conflictWith    String[]        // Array of conflicting event IDs
+  
+  // Notifications
+  reminderSentAt  DateTime?
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?       // Soft delete
+  
+  @@index([userId])
+  @@index([calendarId])
+  @@index([startTime, endTime])
   @@index([clientId])
   @@index([status])
 }

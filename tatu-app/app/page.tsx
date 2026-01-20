@@ -168,6 +168,64 @@ export default function Home() {
         </div>
       </section>
 
+      {/* For Artists - New Features */}
+      <section className="py-20 bg-gradient-to-br from-black via-gray-900 to-black">
+        <div className="container">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="display text-3xl md:text-4xl text-white mb-6">
+              Built for Modern Tattoo Artists
+            </h2>
+            <p className="body text-lg text-gray-400">
+              Powerful business tools to save time, prevent double bookings, and grow your business.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
+            <div className="card p-8 card-hover bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700">
+              <div className="flex items-center justify-center mx-auto mb-6">
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#20B2AA'}}>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+              </div>
+              <h3 className="headline text-2xl text-white mb-4">Unified Inbox</h3>
+              <p className="body text-gray-300 mb-4">
+                Manage all your client messages in one place. Connect Instagram, Email, Facebook, SMS, WhatsApp, and more.
+              </p>
+              <ul className="text-sm text-gray-400 space-y-2">
+                <li>✓ AI-powered message categorization</li>
+                <li>✓ Smart reply suggestions</li>
+                <li>✓ Never miss a booking request</li>
+                <li>✓ Save 2+ hours per day</li>
+              </ul>
+            </div>
+
+            <div className="card p-8 card-hover bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700">
+              <div className="flex items-center justify-center mx-auto mb-6">
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#FFD700'}}>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="headline text-2xl text-white mb-4">Unified Calendar</h3>
+              <p className="body text-gray-300 mb-4">
+                Sync all your bookings from Google, Apple, Square, Calendly, and more. Never double-book again.
+              </p>
+              <ul className="text-sm text-gray-400 space-y-2">
+                <li>✓ Automatic conflict detection</li>
+                <li>✓ AI email appointment parsing</li>
+                <li>✓ Multi-artist studio view</li>
+                <li>✓ Prevent $500+ in lost bookings</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <Link href="/register-artist" className="inline-block px-8 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-all duration-200">
+              Start Free Trial → PRO Features for 30 Days
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-20">
         <div className="container">
@@ -196,12 +254,12 @@ export default function Home() {
             <div className="card p-8 text-center card-hover">
               <div className="flex items-center justify-center mx-auto mb-6">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#FFD700'}}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="headline text-xl text-white mb-4">Secure Payments</h3>
+              <h3 className="headline text-xl text-white mb-4">Video Consultations</h3>
               <p className="body text-gray-400">
-                Industry-leading payment protection with escrow services and dispute resolution.
+                Free HD video calls with unlimited duration. Discuss your design before committing.
               </p>
             </div>
 
