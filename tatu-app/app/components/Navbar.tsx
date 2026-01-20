@@ -73,12 +73,18 @@ export default function Navbar() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
-                <Link href="/auth/signin" className="btn btn-ghost">
+              <div className="flex items-center space-x-3">
+                <Link 
+                  href="/login" 
+                  className="text-sm text-gray-400 hover:text-white transition-colors font-medium px-4 py-2"
+                >
                   Sign In
                 </Link>
-                <Link href="/auth/signup" className="btn btn-primary">
-                  Join
+                <Link 
+                  href="/signup" 
+                  className="btn btn-primary text-sm px-6 py-2"
+                >
+                  Sign Up
                 </Link>
               </div>
             )}
@@ -151,18 +157,18 @@ export default function Navbar() {
               ) : (
                 <div className="space-y-4">
                   <Link 
-                    href="/auth/signin" 
+                    href="/login" 
                     className="block text-gray-400 hover:text-white transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign In
                   </Link>
                   <Link 
-                    href="/auth/signup" 
+                    href="/signup" 
                     className="block text-white font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Join
+                    Sign Up
                   </Link>
                 </div>
               )}
