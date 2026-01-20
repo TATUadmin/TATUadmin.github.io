@@ -192,7 +192,7 @@ model PortfolioItem {
 }
 
 model Profile {
-  id                    String    @id
+  id                    String   @id
   bio                   String?
   avatar                String?
   phone                 String?
@@ -200,11 +200,9 @@ model Profile {
   website               String?
   location              String?
   specialties           String[]
-  userId                String    @unique
-  completedRegistration Boolean   @default(false)
-  visibilityBoostActive Boolean   @default(false)
-  visibilityBoostEndDate DateTime?
-  User                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String   @unique
+  completedRegistration Boolean  @default(false)
+  User                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Review {

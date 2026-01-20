@@ -27,29 +27,6 @@ type SignUpData = z.infer<typeof signUpSchema>
 
 export async function POST(req: Request) {
   try {
-    // Check required environment variables
-    if (!process.env.DATABASE_URL) {
-      console.error('=== SIGNUP ERROR: DATABASE_URL is not set ===')
-      return NextResponse.json(
-        { 
-          message: 'Database configuration error. Please contact support.',
-          error: 'DATABASE_URL is not configured'
-        },
-        { status: 500 }
-      )
-    }
-
-    if (!process.env.RESEND_API_KEY) {
-      console.error('=== SIGNUP ERROR: RESEND_API_KEY is not set ===')
-      return NextResponse.json(
-        { 
-          message: 'Email service not configured. Please contact support.',
-          error: 'RESEND_API_KEY is not configured'
-        },
-        { status: 500 }
-      )
-    }
-
     const data = await req.json()
 
     // Validate input using Zod
@@ -258,46 +235,14 @@ export async function POST(req: Request) {
       }
     }
 
-    // Log full error for debugging (works in production too)
+    // Log full error for debugging
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     const errorStack = error instanceof Error ? error.stack : undefined
     
-    // Enhanced error logging for production debugging
     console.error('=== SIGNUP ERROR ===')
-    console.error('Timestamp:', new Date().toISOString())
     console.error('Message:', errorMessage)
-    console.error('Error Type:', error?.constructor?.name || typeof error)
-    
-    // Log environment status (without exposing secrets)
-    console.error('Environment Check:')
-    console.error('  - DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'MISSING')
-    console.error('  - RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'SET' : 'MISSING')
-    console.error('  - NODE_ENV:', process.env.NODE_ENV)
-    
-    // Log Prisma-specific errors
-    if (error && typeof error === 'object' && 'code' in error) {
-      const prismaError = error as any
-      console.error('Prisma Error Code:', prismaError.code)
-      console.error('Prisma Error Meta:', JSON.stringify(prismaError.meta || {}, null, 2))
-    }
-    
-    // Log stack trace (helpful for debugging)
-    if (errorStack) {
-      console.error('Stack Trace:', errorStack)
-    }
-    
-    // Log full error details (safe for production - no secrets)
-    try {
-      const errorDetails = {
-        name: error instanceof Error ? error.name : 'Unknown',
-        message: errorMessage,
-        ...(error && typeof error === 'object' && 'code' in error ? { code: (error as any).code } : {})
-      }
-      console.error('Error Details:', JSON.stringify(errorDetails, null, 2))
-    } catch (e) {
-      console.error('Could not serialize error details')
-    }
-    
+    console.error('Stack:', errorStack)
+    console.error('Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2))
     console.error('===================')
 
     return NextResponse.json(
