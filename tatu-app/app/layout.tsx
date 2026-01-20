@@ -50,7 +50,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-black`}>
         {/* Simple black background */}
         <div 
           className="fixed inset-0 z-0 bg-black"

@@ -34,6 +34,11 @@ const navigation: NavItem[] = [
 export default function MobileNavigation() {
   const pathname = usePathname()
 
+  // Hide mobile navigation on dashboard pages (they have their own navigation)
+  if (pathname?.startsWith('/dashboard')) {
+    return null
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-sm border-t border-gray-700/50 lg:hidden z-50 focus:outline-none shadow-2xl">
       <div className="flex items-center justify-around h-16 px-2">

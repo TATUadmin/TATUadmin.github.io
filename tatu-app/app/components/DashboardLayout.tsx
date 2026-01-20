@@ -195,8 +195,8 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
         </header>
 
         {/* Page Content */}
-        <main className="p-4 lg:p-8">
-          <div className="max-w-7xl mx-auto">
+        <main className="bg-black min-h-screen">
+          <div className="max-w-7xl mx-auto p-4 lg:p-8">
             {children}
           </div>
         </main>

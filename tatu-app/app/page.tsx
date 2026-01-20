@@ -148,39 +148,9 @@ export default function Home() {
         </div>
       </section>
 
-
-      {/* Stats Section */}
-      <section className="py-16 bg-transparent">
-        <div className="container">
-          <div className="grid grid-cols-3 gap-8 text-center">
-            <div className="animate-fade-in">
-              <div className="display text-2xl md:text-3xl text-white mb-2">10K+</div>
-              <div className="body text-sm text-gray-400 uppercase tracking-wider">Artists</div>
-            </div>
-            <div className="animate-fade-in delay-100">
-              <div className="display text-2xl md:text-3xl text-white mb-2">50K+</div>
-              <div className="body text-sm text-gray-400 uppercase tracking-wider">Bookings</div>
-            </div>
-            <div className="animate-fade-in delay-200">
-              <div className="display text-2xl md:text-3xl text-white mb-2">200+</div>
-              <div className="body text-sm text-gray-400 uppercase tracking-wider">Cities</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
       <section className="py-20">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="display text-3xl md:text-4xl text-white mb-6">
-              Why Choose TATU
-            </h2>
-            <p className="body text-lg text-gray-400">
-              The professional platform connecting clients with verified tattoo artists worldwide.
-            </p>
-          </div>
-
           <div className="grid md:grid-cols-3 gap-8">
             <div className="card p-8 text-center card-hover">
               <div className="flex items-center justify-center mx-auto mb-6">

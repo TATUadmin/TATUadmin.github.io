@@ -1,6 +1,16 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export default function Footer() {
+  const pathname = usePathname()
+
+  // Hide footer on dashboard pages (they have their own layout)
+  if (pathname?.startsWith('/dashboard')) {
+    return null
+  }
+
   return (
     <footer className="bg-black border-t text-white" style={{borderColor: '#171717'}}>
       <div className="container py-16">

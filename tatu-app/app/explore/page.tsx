@@ -15,12 +15,7 @@ import { ALL_ARTISTS, Artist } from '@/lib/all-artists-data'
 const LeafletMap = dynamic(() => import('../components/LeafletMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[600px] bg-gray-900 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-        <p className="text-white text-sm">Loading map...</p>
-      </div>
-    </div>
+    <div className="w-full h-[600px] bg-black"></div>
   )
 })
 

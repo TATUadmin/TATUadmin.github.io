@@ -3,10 +3,17 @@
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
   const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const pathname = usePathname()
+
+  // Hide navbar on dashboard pages (they have their own navigation)
+  if (pathname?.startsWith('/dashboard')) {
+    return null
+  }
 
   return (
     <nav className="fixed top-0 w-full z-50 backdrop-blur-sm border-b bg-black/80" style={{borderColor: '#171717'}}>
@@ -66,19 +73,25 @@ export default function Navbar() {
                   </div>
                   <button
                     onClick={() => signOut()}
-                    className="btn btn-ghost text-sm px-4 py-2"
+                    className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
                   >
                     Sign Out
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
-                <Link href="/auth/signin" className="btn btn-ghost">
+              <div className="flex items-center space-x-6">
+                <Link 
+                  href="/login" 
+                  className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
+                >
                   Sign In
                 </Link>
-                <Link href="/auth/signup" className="btn btn-primary">
-                  Join
+                <Link 
+                  href="/signup" 
+                  className="text-xs bg-white text-black px-3 py-1.5 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Sign Up
                 </Link>
               </div>
             )}
@@ -151,18 +164,18 @@ export default function Navbar() {
               ) : (
                 <div className="space-y-4">
                   <Link 
-                    href="/auth/signin" 
+                    href="/login" 
                     className="block text-gray-400 hover:text-white transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign In
                   </Link>
                   <Link 
-                    href="/auth/signup" 
+                    href="/signup" 
                     className="block text-white font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Join
+                    Sign Up
                   </Link>
                 </div>
               )}
