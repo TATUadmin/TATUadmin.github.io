@@ -139,13 +139,16 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
 
         {/* User Profile Section */}
         <div className="border-t border-gray-900 p-4">
-          <div className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-900 rounded-lg transition-colors cursor-pointer">
+          <Link 
+            href="/dashboard" 
+            className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-900 rounded-lg transition-colors"
+          >
             <UserCircleIcon className="w-8 h-8 text-gray-400" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{userName}</p>
               <p className="text-xs text-gray-500 truncate capitalize">{userRole}</p>
             </div>
-          </div>
+          </Link>
           <button 
             onClick={() => signOut({ callbackUrl: '/' })}
             className="w-full mt-2 flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 rounded-lg transition-colors"
