@@ -104,9 +104,22 @@ export default function TermsPage() {
 
                 <div className="bg-surface p-6 rounded-lg">
                   <p className="text-gray-300 text-sm">
-                    <strong>Last updated:</strong> January 2025<br />
+                    <strong>Last updated:</strong> January 20, 2026<br />
+                    <strong>Version:</strong> 1.1<br />
                     These terms are effective as of the date above and will remain in effect except with respect to any changes in their provisions in the future.
                   </p>
+                  <div className="mt-4 pt-4 border-t border-gray-700">
+                    <p className="text-gray-300 text-sm mb-2">
+                      <strong>Note:</strong> This is a summary. Please review our comprehensive Terms and Conditions for complete legal details.
+                    </p>
+                    <a 
+                      href="/TERMS_AND_CONDITIONS.md" 
+                      target="_blank"
+                      className="inline-block px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition text-sm font-medium"
+                    >
+                      View Full Terms & Conditions →
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

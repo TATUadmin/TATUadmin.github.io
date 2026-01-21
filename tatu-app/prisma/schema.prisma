@@ -386,6 +386,17 @@ model User {
   Shop                                   Shop[]
   ShopsOnArtists                         ShopsOnArtists[]
   UnifiedMessage                         UnifiedMessage[]
+  
+  // Calendar relations
+  calendars                              Calendar[]
+  calendarEvents                         CalendarEvent[]
+  clientEvents                           CalendarEvent[]       @relation("ClientEvents")
+  
+  // Calendar preferences
+  calendarView                           CalendarView          @default(WEEK)
+  workingHours                           Json?
+  bufferTime                             Int                   @default(15)
+  defaultEventDuration                   Int                   @default(120)
 }
 
 model VerificationToken {
@@ -439,9 +450,126 @@ enum ShopStatus {
   INACTIVE
 }
 
+enum CalendarProvider {
+  TATU
+  GOOGLE
+  APPLE
+  OUTLOOK
+  SQUARE
+  CALENDLY
+  ACUITY
+  MANUAL
+  EMAIL_PARSED
+  INSTAGRAM
+}
+
+enum EventStatus {
+  TENTATIVE
+  CONFIRMED
+  CANCELLED
+  NO_SHOW
+  COMPLETED
+  RESCHEDULED
+}
+
+enum CalendarView {
+  DAY
+  WEEK
+  MONTH
+  AGENDA
+}
+
 enum UserRole {
   CUSTOMER
   ARTIST
   SHOP_OWNER
   ADMIN
+}
+
+// Calendar Models - Unified Calendar Feature
+
+model Calendar {
+  id                 String           @id @default(cuid())
+  userId             String
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name               String
+  provider           CalendarProvider
+  providerCalendarId String?
+  accessToken        String?          @db.Text
+  refreshToken       String?          @db.Text
+  tokenExpiresAt     DateTime?
+  syncEnabled        Boolean          @default(true)
+  lastSyncedAt       DateTime?
+  color              String           @default("#3B82F6")
+  isDefault          Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  events             CalendarEvent[]
+
+  @@unique([userId, provider, providerCalendarId])
+  @@index([userId])
+}
+
+model CalendarEvent {
+  id                 String       @id @default(cuid())
+  calendarId         String
+  calendar           Calendar     @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User         @relation(fields: [userId], references: [id])
+
+  // Event details
+  title              String
+  description        String?      @db.Text
+  location           String?
+
+  // Timing
+  startTime          DateTime
+  endTime            DateTime
+  allDay             Boolean      @default(false)
+  timezone           String       @default("UTC")
+
+  // Recurrence
+  isRecurring        Boolean      @default(false)
+  recurrenceRule     String?
+  recurrenceId       String?
+
+  // Client information
+  clientId           String?
+  client             User?        @relation("ClientEvents", fields: [clientId], references: [id])
+  clientName         String?
+  clientEmail        String?
+  clientPhone        String?
+
+  // Booking details
+  serviceType        String?
+  estimatedCost      Decimal?     @db.Decimal(10, 2)
+  depositPaid        Boolean      @default(false)
+  depositAmount      Decimal?     @db.Decimal(10, 2)
+
+  // Status and metadata
+  status             EventStatus  @default(CONFIRMED)
+  color              String?
+
+  // External sync
+  externalId         String?
+  externalUrl        String?
+  lastSyncedAt       DateTime?
+
+  // Conflict detection
+  hasConflict        Boolean      @default(false)
+  conflictWith       String[]
+
+  // Notifications
+  reminderSentAt     DateTime?
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  deletedAt          DateTime?
+
+  @@index([userId])
+  @@index([calendarId])
+  @@index([startTime, endTime])
+  @@index([clientId])
+  @@index([status])
 }
