@@ -167,13 +167,13 @@ export default function SettingsPage() {
       <div className="min-h-screen bg-black">
         {/* Header */}
         <div className="bg-gray-950 border-b border-gray-900">
-          <div className="max-w-5xl mx-auto px-4 py-6">
+          <div className="w-full px-4 py-6">
             <h1 className="text-3xl font-bold text-white">Settings</h1>
             <p className="text-gray-400 mt-1">Manage your account preferences</p>
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="w-full px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar Tabs */}
             <div className="lg:w-64 flex-shrink-0">
@@ -577,4 +577,5 @@ export default function SettingsPage() {
     </DashboardLayout>
   )
 }
+
 

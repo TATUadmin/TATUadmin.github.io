@@ -233,3 +233,4 @@ If you encounter any issues with the mobile app after these changes, check:
 
 All endpoints return consistent JSON structures, so mobile apps should continue to work with minimal or no changes.
 
+

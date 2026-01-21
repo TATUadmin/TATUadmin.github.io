@@ -112,3 +112,4 @@ postgresql://postgres.rdgbnzygadfxhptmacfg:[YOUR-PASSWORD]@aws-0-us-east-1.poole
 4. Update `DATABASE_URL` with this new URL
 5. Redeploy
 
+

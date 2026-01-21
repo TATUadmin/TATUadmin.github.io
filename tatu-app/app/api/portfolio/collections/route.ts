@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/auth'
 import { prisma } from '@/lib/prisma'
 import { PortfolioCollection } from '@prisma/client'
 
 interface CollectionWithCount extends PortfolioCollection {
   _count: {
-    items: number
+    PortfolioItem: number
   }
 }
 
@@ -15,19 +16,19 @@ interface CollectionResponse extends Omit<PortfolioCollection, 'userId'> {
 
 export async function GET() {
   try {
-    const session = await auth()
-    if (!session?.user) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const collections = await prisma.portfolioCollection.findMany({
       where: {
-        userId: session.user.id,
+        userId: session.user.id!,
       },
       include: {
         _count: {
           select: {
-            items: true,
+            PortfolioItem: true,
           },
         },
       },
@@ -43,7 +44,7 @@ export async function GET() {
       coverImage: collection.coverImage,
       createdAt: collection.createdAt,
       updatedAt: collection.updatedAt,
-      itemCount: collection._count.items,
+      itemCount: collection._count.PortfolioItem,
     }))
 
     return NextResponse.json(response)
@@ -58,8 +59,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await auth()
-    if (!session?.user) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -77,12 +78,12 @@ export async function POST(request: Request) {
         name,
         description,
         coverImage,
-        userId: session.user.id,
+        userId: session.user.id!,
       },
       include: {
         _count: {
           select: {
-            items: true,
+            PortfolioItem: true,
           },
         },
       },
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
       coverImage: collection.coverImage,
       createdAt: collection.createdAt,
       updatedAt: collection.updatedAt,
-      itemCount: collection._count.items,
+      itemCount: collection._count.PortfolioItem,
     }
 
     return NextResponse.json(response)

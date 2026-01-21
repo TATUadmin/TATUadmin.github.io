@@ -2,13 +2,28 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
   const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [avatar, setAvatar] = useState<string | null>(null)
   const pathname = usePathname()
+
+  // Fetch user avatar
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/profile')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.avatar) {
+            setAvatar(data.avatar)
+          }
+        })
+        .catch(err => console.error('Failed to fetch avatar:', err))
+    }
+  }, [session?.user?.id])
 
   // Hide navbar on dashboard pages (they have their own navigation)
   if (pathname?.startsWith('/dashboard')) {
@@ -47,12 +62,6 @@ export default function Navbar() {
             >
               Browse
             </Link>
-            <Link 
-              href="/how-it-works" 
-              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
-            >
-              How it Works
-            </Link>
           </div>
 
           {/* Auth Section */}
@@ -66,10 +75,18 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">
-                      {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
-                    </span>
+                  <div className="w-8 h-8 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center overflow-hidden">
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt={session.user?.name || 'User'}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white text-sm font-medium">
+                        {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
+                      </span>
+                    )}
                   </div>
                   <button
                     onClick={() => signOut()}
@@ -133,17 +150,30 @@ export default function Navbar() {
             >
               Browse
             </Link>
-            <Link 
-              href="/how-it-works" 
-              className="block text-gray-400 hover:text-white transition-colors font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              How it Works
-            </Link>
             
             <div className="border-t pt-4" style={{borderColor: '#171717'}}>
               {session ? (
                 <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-4">
+                    <div className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center overflow-hidden">
+                      {avatar ? (
+                        <img
+                          src={avatar}
+                          alt={session.user?.name || 'User'}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-sm font-medium">
+                          {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">
+                        {session.user?.name || session.user?.email}
+                      </p>
+                    </div>
+                  </div>
                   <Link 
                     href="/dashboard" 
                     className="block text-gray-400 hover:text-white transition-colors font-medium"

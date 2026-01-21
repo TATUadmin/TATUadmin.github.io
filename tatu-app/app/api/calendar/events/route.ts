@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '@/app/auth'
 import { prisma } from '@/lib/prisma'
 
 // GET /api/calendar/events - Get events for user's calendars
@@ -92,7 +92,10 @@ export async function POST(request: NextRequest) {
       depositPaid,
       depositAmount,
       status,
+      eventType,
+      visibility,
       color,
+      appointmentId, // Link to appointment if this is a booking
     } = body
 
     if (!calendarId || !title || !startTime || !endTime) {
@@ -114,26 +117,67 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate status
+    const validStatuses = ['TENTATIVE', 'CONFIRMED', 'CANCELLED', 'NO_SHOW', 'COMPLETED', 'RESCHEDULED', 'PENDING', 'DECLINED', 'AVAILABLE', 'BLOCKED']
+    const eventStatus = status && validStatuses.includes(status) ? status : 'CONFIRMED'
+    
+    // Validate eventType
+    const validEventTypes = ['MANUAL_BLOCK', 'BOOKING', 'PERSONAL', 'AVAILABILITY']
+    const eventTypeValue = eventType && validEventTypes.includes(eventType) ? eventType : 'BOOKING'
+    
+    // Validate visibility
+    const validVisibilities = ['PRIVATE', 'PUBLIC_BUSY', 'PUBLIC_AVAILABLE']
+    const visibilityValue = visibility && validVisibilities.includes(visibility) ? visibility : 'PRIVATE'
+
+    // Check for conflicts (double booking prevention)
+    const conflictingEvents = await prisma.calendarEvent.findMany({
+      where: {
+        userId: session.user.id,
+        deletedAt: null,
+        startTime: { lt: new Date(endTime) },
+        endTime: { gt: new Date(startTime) },
+        status: { notIn: ['CANCELLED', 'DECLINED'] },
+      },
+    })
+
+    if (conflictingEvents.length > 0 && eventTypeValue === 'BOOKING') {
+      return NextResponse.json(
+        { 
+          error: 'Time slot is already booked',
+          conflicts: conflictingEvents.map(e => ({
+            id: e.id,
+            title: e.title,
+            startTime: e.startTime,
+            endTime: e.endTime,
+          }))
+        },
+        { status: 409 }
+      )
+    }
+
     const event = await prisma.calendarEvent.create({
       data: {
         userId: session.user.id,
         calendarId,
         title,
-        description,
-        location,
+        description: description || null,
+        location: location || null,
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         allDay: allDay || false,
         timezone: timezone || 'UTC',
-        clientName,
-        clientEmail,
-        clientPhone,
-        serviceType,
-        estimatedCost: estimatedCost ? parseFloat(estimatedCost) : null,
+        clientName: clientName || null,
+        clientEmail: clientEmail || null,
+        clientPhone: clientPhone || null,
+        serviceType: serviceType || null,
+        estimatedCost: estimatedCost ? parseFloat(estimatedCost.toString()) : null,
         depositPaid: depositPaid || false,
-        depositAmount: depositAmount ? parseFloat(depositAmount) : null,
-        status: status || 'CONFIRMED',
-        color,
+        depositAmount: depositAmount ? parseFloat(depositAmount.toString()) : null,
+        status: eventStatus,
+        eventType: eventTypeValue,
+        visibility: visibilityValue,
+        color: color || null,
+        hasConflict: false, // Will be updated by conflict detection
       },
       include: {
         calendar: {
@@ -147,7 +191,30 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // TODO: Check for conflicts and update hasConflict field
+    // Update conflict status for other events that might conflict with this one
+    if (conflictingEvents.length > 0) {
+      for (const conflict of conflictingEvents) {
+        await prisma.calendarEvent.update({
+          where: { id: conflict.id },
+          data: {
+            hasConflict: true,
+            conflictWith: [...(conflict.conflictWith || []), event.id],
+          },
+        })
+      }
+    }
+
+    // If this is a booking event linked to an appointment, update the appointment
+    if (appointmentId && eventTypeValue === 'BOOKING') {
+      await prisma.appointment.update({
+        where: { id: appointmentId },
+        data: {
+          calendarEventId: event.id,
+          status: eventStatus === 'CONFIRMED' ? 'CONFIRMED' : 'PENDING',
+        },
+      })
+    }
+
     // TODO: If calendar has 2-way sync, create event in external calendar
 
     return NextResponse.json({ event }, { status: 201 })
@@ -199,11 +266,64 @@ export async function PATCH(request: NextRequest) {
     if (updates.endTime) {
       data.endTime = new Date(updates.endTime)
     }
-    if (updates.estimatedCost) {
-      data.estimatedCost = parseFloat(updates.estimatedCost)
+    if (updates.estimatedCost !== undefined) {
+      data.estimatedCost = updates.estimatedCost ? parseFloat(updates.estimatedCost.toString()) : null
     }
-    if (updates.depositAmount) {
-      data.depositAmount = parseFloat(updates.depositAmount)
+    if (updates.depositAmount !== undefined) {
+      data.depositAmount = updates.depositAmount ? parseFloat(updates.depositAmount.toString()) : null
+    }
+    // Validate status if provided
+    if (updates.status) {
+      const validStatuses = ['TENTATIVE', 'CONFIRMED', 'CANCELLED', 'NO_SHOW', 'COMPLETED', 'RESCHEDULED', 'PENDING', 'DECLINED', 'AVAILABLE', 'BLOCKED']
+      if (validStatuses.includes(updates.status)) {
+        data.status = updates.status
+      }
+    }
+    // Validate eventType if provided
+    if (updates.eventType) {
+      const validEventTypes = ['MANUAL_BLOCK', 'BOOKING', 'PERSONAL', 'AVAILABILITY']
+      if (validEventTypes.includes(updates.eventType)) {
+        data.eventType = updates.eventType
+      }
+    }
+    // Validate visibility if provided
+    if (updates.visibility) {
+      const validVisibilities = ['PRIVATE', 'PUBLIC_BUSY', 'PUBLIC_AVAILABLE']
+      if (validVisibilities.includes(updates.visibility)) {
+        data.visibility = updates.visibility
+      }
+    }
+    
+    // Check for conflicts if time is being updated
+    if (updates.startTime || updates.endTime) {
+      const newStartTime = updates.startTime ? new Date(updates.startTime) : event.startTime
+      const newEndTime = updates.endTime ? new Date(updates.endTime) : event.endTime
+      
+      const conflictingEvents = await prisma.calendarEvent.findMany({
+        where: {
+          userId: session.user.id,
+          id: { not: eventId },
+          deletedAt: null,
+          startTime: { lt: newEndTime },
+          endTime: { gt: newStartTime },
+          status: { notIn: ['CANCELLED', 'DECLINED'] },
+        },
+      })
+      
+      if (conflictingEvents.length > 0 && (data.eventType || event.eventType) !== 'MANUAL_BLOCK') {
+        return NextResponse.json(
+          { 
+            error: 'Time slot conflicts with existing event',
+            conflicts: conflictingEvents.map(e => ({
+              id: e.id,
+              title: e.title,
+              startTime: e.startTime,
+              endTime: e.endTime,
+            }))
+          },
+          { status: 409 }
+        )
+      }
     }
 
     const updatedEvent = await prisma.calendarEvent.update({

@@ -67,11 +67,6 @@ export default function Footer() {
                   Create Account
                 </Link>
               </li>
-              <li>
-                <Link href="/how-it-works" className="text-gray-400 hover:text-white transition-colors">
-                  How It Works
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -82,11 +77,6 @@ export default function Footer() {
               <li>
                 <Link href="/about" className="text-gray-400 hover:text-white transition-colors">
                   About TATU
-                </Link>
-              </li>
-              <li>
-                <Link href="/styles" className="text-gray-400 hover:text-white transition-colors">
-                  Tattoo Styles
                 </Link>
               </li>
               <li>

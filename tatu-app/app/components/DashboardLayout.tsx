@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
@@ -24,19 +24,20 @@ import type { Notification } from './NotificationCenter'
 
 interface DashboardLayoutProps {
   children: ReactNode
-  userRole?: 'artist' | 'admin' | 'client'
+  userRole?: 'artist' | 'admin' | 'client' | 'customer'
 }
 
 interface NavItem {
   name: string
   href: string
   icon: any
-  roles: Array<'artist' | 'admin' | 'client'>
+  roles: Array<'artist' | 'admin' | 'client' | 'customer'>
 }
 
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, roles: ['artist', 'admin', 'client'] },
-  { name: 'Appointments', href: '/dashboard/appointments', icon: CalendarIcon, roles: ['artist', 'admin', 'client'] },
+  { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarIcon, roles: ['artist', 'admin'] },
+  { name: 'Upcoming Bookings', href: '/dashboard/bookings', icon: CalendarIcon, roles: ['client'] },
   { name: 'Portfolio', href: '/dashboard/portfolio', icon: PhotoIcon, roles: ['artist', 'admin'] },
   { name: 'Messages', href: '/dashboard/messages', icon: ChatBubbleLeftIcon, roles: ['artist', 'admin', 'client'] },
   { name: 'Payments', href: '/dashboard/payments', icon: CreditCardIcon, roles: ['artist', 'admin'] },
@@ -70,8 +71,49 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
   const { data: session } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  const [avatar, setAvatar] = useState<string | null>(null)
 
-  const filteredNavigation = navigation.filter(item => item.roles.includes(userRole))
+  // Fetch user avatar
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/profile')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.avatar) {
+            setAvatar(data.avatar)
+          }
+        })
+        .catch(err => console.error('Failed to fetch avatar:', err))
+    }
+  }, [session?.user?.id])
+
+  // Get actual role from session, fallback to prop
+  // Map database role (CUSTOMER) to UI role (client/customer)
+  const getUIRole = (dbRole: string | undefined, propRole: string): 'artist' | 'admin' | 'client' | 'customer' => {
+    if (dbRole) {
+      const roleLower = dbRole.toLowerCase()
+      if (roleLower === 'customer') return 'client' // Map CUSTOMER to client for navigation
+      if (roleLower === 'shop_owner') return 'artist'
+      if (roleLower === 'artist') return 'artist'
+      if (roleLower === 'admin') return 'admin'
+    }
+    return propRole as any
+  }
+  const actualUIRole = getUIRole(session?.user?.role, userRole)
+  
+  // Map role for display (CUSTOMER -> customer, SHOP_OWNER -> shop owner, etc.)
+  const getRoleDisplayName = (role: string | undefined) => {
+    if (!role) return userRole
+    const roleLower = role.toLowerCase()
+    if (roleLower === 'shop_owner') return 'shop owner'
+    if (roleLower === 'customer') return 'customer'
+    if (roleLower === 'artist') return 'artist'
+    if (roleLower === 'admin') return 'admin'
+    return roleLower
+  }
+  const roleDisplayName = getRoleDisplayName(session?.user?.role) || userRole
+  
+  const filteredNavigation = navigation.filter(item => item.roles.includes(actualUIRole))
   const userName = session?.user?.name || 'User'
 
   const handleMarkAsRead = (id: string) => {
@@ -143,10 +185,20 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
             href="/dashboard" 
             className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-900 rounded-lg transition-colors"
           >
-            <UserCircleIcon className="w-8 h-8 text-gray-400" />
+            <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt={userName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <UserCircleIcon className="w-8 h-8 text-gray-400" />
+              )}
+            </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{userName}</p>
-              <p className="text-xs text-gray-500 truncate capitalize">{userRole}</p>
+              <p className="text-xs text-gray-500 truncate capitalize">{roleDisplayName}</p>
             </div>
           </Link>
           <button 
@@ -184,15 +236,28 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
             />
 
             {/* User Avatar (Desktop) */}
-            <button className="hidden lg:flex items-center space-x-2 p-2 hover:bg-gray-900 rounded-lg transition-colors">
-              <UserCircleIcon className="w-6 h-6 text-gray-400" />
-            </button>
+            <Link 
+              href="/dashboard"
+              className="hidden lg:flex items-center space-x-2 p-2 hover:bg-gray-900 rounded-lg transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center overflow-hidden">
+                {avatar ? (
+                  <img
+                    src={avatar}
+                    alt={userName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <UserCircleIcon className="w-6 h-6 text-gray-400" />
+                )}
+              </div>
+            </Link>
           </div>
         </header>
 
         {/* Page Content */}
         <main className="bg-black min-h-screen">
-          <div className="max-w-7xl mx-auto p-4 lg:p-8">
+          <div className="w-full h-full p-4 lg:p-8">
             {children}
           </div>
         </main>

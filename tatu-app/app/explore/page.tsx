@@ -10,6 +10,7 @@ import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
 import { classifySearch, formatSearchClassification } from '@/lib/smart-search'
 import { ALL_ARTISTS, Artist } from '@/lib/all-artists-data'
+import PortfolioGallery from '@/app/components/PortfolioGallery'
 
 // Lazy load the map component to improve initial page load
 const LeafletMap = dynamic(() => import('../components/LeafletMap'), {
@@ -31,6 +32,8 @@ export default function ExplorePage() {
   const [favoriteArtists, setFavoriteArtists] = useState<string[]>([])
   const [mapLocation, setMapLocation] = useState('') // Separate state for map panning
   const [lastSearchClassification, setLastSearchClassification] = useState<any>(null) // Track what was detected
+  const [portfolioItems, setPortfolioItems] = useState<any[]>([])
+  const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(true)
   
   // Track whether user manually edited filter boxes (resets on each search)
   const [manualLocationEdit, setManualLocationEdit] = useState(false)
@@ -43,7 +46,13 @@ export default function ExplorePage() {
 
   useEffect(() => {
     fetchArtists()
+    fetchPortfolioItems()
   }, [])
+
+  // Fetch portfolio items when filters change
+  useEffect(() => {
+    fetchPortfolioItems()
+  }, [styleFilter])
 
   // Only trigger search on initial load if there's a URL search param
   useEffect(() => {
@@ -294,6 +303,27 @@ export default function ExplorePage() {
     }
   }
 
+  const fetchPortfolioItems = async () => {
+    setIsLoadingPortfolio(true)
+    try {
+      const params = new URLSearchParams()
+      if (styleFilter) {
+        params.set('style', styleFilter)
+      }
+      
+      const response = await fetch(`/api/portfolio/public?${params.toString()}`)
+      if (!response.ok) throw new Error('Failed to fetch portfolio items')
+      
+      const data = await response.json()
+      setPortfolioItems(data.items || [])
+    } catch (error) {
+      console.error('Error fetching portfolio items:', error)
+      setPortfolioItems([])
+    } finally {
+      setIsLoadingPortfolio(false)
+    }
+  }
+
   const toggleFavorite = async (artistId: string) => {
     try {
       const response = await fetch('/api/favorites', {
@@ -312,6 +342,30 @@ export default function ExplorePage() {
     } catch (error) {
       console.error('Error toggling favorite:', error)
     }
+  }
+
+  const handlePortfolioLike = async (itemId: string) => {
+    // TODO: Implement like functionality
+    console.log('Like portfolio item:', itemId)
+  }
+
+  const handlePortfolioShare = async (itemId: string) => {
+    // TODO: Implement share functionality
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Check out this tattoo art',
+          url: `${window.location.origin}/portfolio/${itemId}`
+        })
+      } catch (error) {
+        console.error('Error sharing:', error)
+      }
+    }
+  }
+
+  const handlePortfolioView = (itemId: string) => {
+    // TODO: Navigate to portfolio item detail or open lightbox
+    console.log('View portfolio item:', itemId)
   }
 
   return (
@@ -333,6 +387,46 @@ export default function ExplorePage() {
         {/* Full Width Interactive Map - Edge to Edge */}
         <div className="w-full">
           <LeafletMap searchLocation={mapLocation} styleFilter={styleFilter} minReviews={minReviews} />
+        </div>
+      </section>
+
+      {/* Portfolio Gallery Section */}
+      <section className="py-20 bg-black">
+        <div className="container">
+          <div className="mb-8">
+            <h2 className="display text-3xl md:text-4xl text-white mb-2">
+              Featured Portfolio
+            </h2>
+            <p className="body text-lg text-gray-400 max-w-2xl">
+              Browse stunning tattoo artwork from our verified artists. Filter by style, search by tags, and discover your next piece.
+            </p>
+          </div>
+          
+          {isLoadingPortfolio ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="card p-6 animate-pulse">
+                  <div className="w-full h-64 bg-gray-800 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <PortfolioGallery
+              items={portfolioItems}
+              onLike={handlePortfolioLike}
+              onShare={handlePortfolioShare}
+              onView={handlePortfolioView}
+              showFilters={true}
+              showStats={true}
+              layout="grid"
+              columns={3}
+              enableLightbox={true}
+              enableSocial={true}
+              className="bg-transparent"
+            />
+          )}
         </div>
       </section>
 

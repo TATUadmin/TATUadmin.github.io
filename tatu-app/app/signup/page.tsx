@@ -11,12 +11,61 @@ export default function SignUpPage() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    // Artist-specific fields
+    phone: '',
+    city: '',
+    experience: '',
+    styles: [] as string[],
+    instagram: '',
+    portfolio: '',
+    shopName: '',
+    aboutMe: ''
   })
   const [isLoading, setIsLoading] = useState(false)
   const [passwordFocused, setPasswordFocused] = useState(false)
+  const [isArtistSignup, setIsArtistSignup] = useState(false)
   const router = useRouter()
   const role = searchParams.get('role') || 'CUSTOMER' // Default to CUSTOMER if no role specified
+
+  // Initialize artist signup if role is ARTIST
+  useEffect(() => {
+    if (role === 'ARTIST' || searchParams.get('artist') === 'true') {
+      setIsArtistSignup(true)
+    }
+  }, [role, searchParams])
+
+  const experienceLevels = [
+    '1-2 years',
+    '3-5 years', 
+    '6-10 years',
+    '10+ years'
+  ]
+
+  const tattooStyles = [
+    'Traditional', 'Realism', 'Watercolor', 'Geometric', 
+    'Blackwork', 'Neo-Traditional', 'Tribal', 'Japanese',
+    'Portrait', 'Abstract', 'Dotwork', 'Minimalist'
+  ]
+
+  const handleStyleToggle = (style: string) => {
+    setFormData(prev => ({
+      ...prev,
+      styles: prev.styles.includes(style)
+        ? prev.styles.filter(s => s !== style)
+        : [...prev.styles, style]
+    }))
+  }
+
+  const handleSwitchToArtist = () => {
+    setIsArtistSignup(true)
+    // Preserve already entered fields
+  }
+
+  const handleSwitchToCustomer = () => {
+    setIsArtistSignup(false)
+    // Preserve already entered fields
+  }
 
   // Password validation checks
   const passwordChecks = {
@@ -79,10 +128,26 @@ export default function SignUpPage() {
       return
     }
 
+    // Additional validation for artist signup
+    if (isArtistSignup) {
+      if (!formData.city) {
+        toast.error('City is required for artist signup')
+        setIsLoading(false)
+        return
+      }
+      if (formData.styles.length === 0) {
+        toast.error('Please select at least one tattoo style')
+        setIsLoading(false)
+        return
+      }
+    }
+
     try {
       // Add timeout to prevent hanging
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
+      const signupRole = isArtistSignup ? 'ARTIST' : 'CUSTOMER'
 
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
@@ -93,8 +158,9 @@ export default function SignUpPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: role === 'client' ? 'CUSTOMER' : 'CUSTOMER', // Ensure it's CUSTOMER for client signup
+          role: signupRole,
           terms: true,
+          artistSpecialties: isArtistSignup ? formData.styles : undefined,
         }),
         signal: controller.signal,
       })
@@ -112,6 +178,32 @@ export default function SignUpPage() {
       }
 
       if (response.ok) {
+        
+        // If artist signup, update profile with additional information
+        if (isArtistSignup && data.userId) {
+          try {
+            const profileResponse = await fetch('/api/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                phone: formData.phone || undefined,
+                location: formData.city || undefined,
+                instagram: formData.instagram || undefined,
+                website: formData.portfolio || undefined,
+                bio: formData.aboutMe || undefined,
+                specialties: formData.styles.length > 0 ? formData.styles : undefined,
+              }),
+            })
+
+            if (!profileResponse.ok) {
+              console.warn('Account created but profile update failed')
+            }
+          } catch (profileError) {
+            console.warn('Profile update error:', profileError)
+            // Don't fail the signup if profile update fails
+          }
+        }
+
         toast.success('Account created successfully! Please check your email to verify your account.')
         router.push('/login')
       } else {
@@ -161,11 +253,22 @@ export default function SignUpPage() {
             />
           </Link>
           <h2 className="display text-3xl text-white mb-2">
-            Join TATU
+            {isArtistSignup ? 'Join as Artist' : 'Join TATU'}
           </h2>
           <p className="body text-gray-400">
-            Create your account to get started
+            {isArtistSignup 
+              ? 'Create your artist account to showcase your work' 
+              : 'Create your account to get started'}
           </p>
+          {isArtistSignup && (
+            <button
+              type="button"
+              onClick={handleSwitchToCustomer}
+              className="mt-2 text-sm text-gray-400 hover:text-white transition-colors underline"
+            >
+              Switch to Customer signup
+            </button>
+          )}
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -292,13 +395,156 @@ export default function SignUpPage() {
                 placeholder="Confirm your password"
               />
             </div>
+
+            {/* Artist-specific fields - shown when isArtistSignup is true */}
+            {isArtistSignup && (
+              <div className="mt-6 pt-6 border-t border-gray-800 space-y-4">
+                <div className="mb-4">
+                  <p className="text-sm text-gray-300 font-medium mb-2">Artist Information</p>
+                  <p className="text-xs text-gray-500">Fill in your professional details</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-white mb-2">
+                      Phone Number
+                    </label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      className="input"
+                      placeholder="(555) 123-4567"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="city" className="block text-sm font-medium text-white mb-2">
+                      City/Location *
+                    </label>
+                    <input
+                      id="city"
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => handleInputChange('city', e.target.value)}
+                      className="input"
+                      placeholder="New York, NY"
+                      required={isArtistSignup}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Experience Level
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {experienceLevels.map((level) => (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => handleInputChange('experience', level)}
+                        className={`p-3 border rounded-xl text-sm font-medium transition-all ${
+                          formData.experience === level
+                            ? 'bg-white text-black border-white'
+                            : 'border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white'
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Your Specialty Styles * (Select all that apply)
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {tattooStyles.map((style) => (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => handleStyleToggle(style)}
+                        className={`p-3 border rounded-xl text-sm font-medium transition-all ${
+                          formData.styles.includes(style)
+                            ? 'bg-white text-black border-white'
+                            : 'border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white'
+                        }`}
+                      >
+                        {style}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="instagram" className="block text-sm font-medium text-white mb-2">
+                      Instagram Handle
+                    </label>
+                    <input
+                      id="instagram"
+                      type="text"
+                      value={formData.instagram}
+                      onChange={(e) => handleInputChange('instagram', e.target.value)}
+                      className="input"
+                      placeholder="@yourhandle"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="portfolio" className="block text-sm font-medium text-white mb-2">
+                      Portfolio Website
+                    </label>
+                    <input
+                      id="portfolio"
+                      type="url"
+                      value={formData.portfolio}
+                      onChange={(e) => handleInputChange('portfolio', e.target.value)}
+                      className="input"
+                      placeholder="https://yourportfolio.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="shopName" className="block text-sm font-medium text-white mb-2">
+                    Shop/Studio Name
+                  </label>
+                  <input
+                    id="shopName"
+                    type="text"
+                    value={formData.shopName}
+                    onChange={(e) => handleInputChange('shopName', e.target.value)}
+                    className="input"
+                    placeholder="Studio/Shop name (if applicable)"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="aboutMe" className="block text-sm font-medium text-white mb-2">
+                    Tell Us About Your Art
+                  </label>
+                  <textarea
+                    id="aboutMe"
+                    rows={4}
+                    value={formData.aboutMe}
+                    onChange={(e) => handleInputChange('aboutMe', e.target.value)}
+                    className="input resize-none"
+                    placeholder="Describe your artistic style, approach, and what makes your work unique..."
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
-          <div>
+          <div className="flex gap-3">
             <button
               type="submit"
               disabled={isLoading}
-              className="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -309,6 +555,15 @@ export default function SignUpPage() {
                 'Create Account'
               )}
             </button>
+            {!isArtistSignup && (
+              <button
+                type="button"
+                onClick={handleSwitchToArtist}
+                className="px-6 py-3 bg-transparent border-2 border-gray-400 text-white rounded-lg font-semibold hover:bg-gray-400 hover:text-black transition-all duration-200 whitespace-nowrap"
+              >
+                Join as Artist
+              </button>
+            )}
           </div>
 
           <div className="relative">

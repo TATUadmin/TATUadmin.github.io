@@ -87,6 +87,49 @@ export default function CalendarService({
     })
   }
 
+  // Get all events for a specific date (for week view)
+  const getEventsForDay = (date: Date): CalendarEvent[] => {
+    const dateStr = date.toISOString().split('T')[0]
+    return events.filter(event => {
+      const eventDate = event.start.toISOString().split('T')[0]
+      return eventDate === dateStr
+    })
+  }
+
+  // Calculate event position and height for week view
+  const getEventPosition = (event: CalendarEvent, workingHoursStart: number, workingHoursEnd: number) => {
+    const slotHeight = 64 // Height of each 30-minute slot in pixels
+    const minutesPerSlot = 30
+    
+    // Calculate start position
+    const eventStart = new Date(event.start)
+    const startHour = eventStart.getHours()
+    const startMinutes = eventStart.getMinutes()
+    
+    // Calculate end position
+    const eventEnd = new Date(event.end)
+    const endHour = eventEnd.getHours()
+    const endMinutes = eventEnd.getMinutes()
+    
+    // Calculate top position: (hours from working start * 2 slots/hour + minutes/30) * slotHeight
+    const hoursFromStart = startHour - workingHoursStart
+    const slotsFromStart = hoursFromStart * 2 + (startMinutes / minutesPerSlot)
+    const top = Math.max(0, slotsFromStart * slotHeight) // Don't go negative
+    
+    // Calculate height based on duration
+    const durationMs = event.end.getTime() - event.start.getTime()
+    const durationMinutes = durationMs / (1000 * 60)
+    let height = (durationMinutes / minutesPerSlot) * slotHeight
+    
+    // Clamp height to not extend beyond working hours if event starts within working hours
+    if (startHour >= workingHoursStart && startHour < workingHoursEnd) {
+      const maxHeight = (workingHoursEnd - startHour) * 2 * slotHeight - (startMinutes / minutesPerSlot) * slotHeight
+      height = Math.min(height, maxHeight)
+    }
+    
+    return { top, height }
+  }
+
   // Navigate calendar
   const navigate = (direction: 'prev' | 'next') => {
     const newDate = new Date(view.currentDate)
@@ -198,21 +241,54 @@ export default function CalendarService({
     return `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`
   }
 
-  // Get event color based on status
+  // Get event color based on status or custom color
   const getEventColor = (event: CalendarEvent) => {
-    if (event.color) return event.color
+    // If event has a custom color, use it with opacity
+    if (event.color && event.color !== '#FFFFFF') {
+      // Convert hex to rgba with opacity
+      const hex = event.color.replace('#', '')
+      const r = parseInt(hex.substring(0, 2), 16)
+      const g = parseInt(hex.substring(2, 4), 16)
+      const b = parseInt(hex.substring(4, 6), 16)
+      return {
+        backgroundColor: `rgba(${r}, ${g}, ${b}, 0.2)`,
+        borderColor: `rgba(${r}, ${g}, ${b}, 0.3)`,
+        color: event.color
+      }
+    }
     
+    // Fallback to status-based colors
     switch (event.status) {
       case 'confirmed':
-        return 'bg-white/20 border-white/30'
+        return {
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          borderColor: 'rgba(255, 255, 255, 0.3)',
+          color: '#FFFFFF'
+        }
       case 'pending':
-        return 'bg-gray-800 border-gray-700'
+        return {
+          backgroundColor: 'rgba(55, 65, 81, 1)',
+          borderColor: 'rgba(55, 65, 81, 1)',
+          color: '#9CA3AF'
+        }
       case 'completed':
-        return 'bg-white/10 border-gray-800'
+        return {
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderColor: 'rgba(31, 41, 55, 1)',
+          color: '#9CA3AF'
+        }
       case 'cancelled':
-        return 'bg-gray-900 border-gray-800'
+        return {
+          backgroundColor: 'rgba(17, 24, 39, 1)',
+          borderColor: 'rgba(31, 41, 55, 1)',
+          color: '#6B7280'
+        }
       default:
-        return 'bg-white/10 border-gray-800'
+        return {
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderColor: 'rgba(31, 41, 55, 1)',
+          color: '#9CA3AF'
+        }
     }
   }
 
@@ -290,7 +366,8 @@ export default function CalendarService({
             {generateMonthDays().map((day, index) => (
               <div
                 key={index}
-                className={`min-h-[120px] border-r border-b border-gray-800 p-2 ${
+                onDoubleClick={() => onDateClick?.(day.date)}
+                className={`min-h-[120px] border-r border-b border-gray-800 p-2 cursor-pointer hover:bg-gray-900/30 transition-colors ${
                   !day.isCurrentMonth ? 'bg-gray-900/50' : 'bg-gray-950'
                 } ${day.isToday ? 'bg-white/5' : ''}`}
               >
@@ -313,20 +390,28 @@ export default function CalendarService({
 
                 {/* Events for this day */}
                 <div className="space-y-1">
-                  {day.events.slice(0, 2).map((event) => (
-                    <button
-                      key={event.id}
-                      onClick={() => onEventClick?.(event)}
-                      className={`w-full text-left p-2 rounded text-xs transition-colors border ${getEventColor(event)}`}
-                    >
-                      <div className="font-medium text-white truncate">
-                        {event.title}
-                      </div>
-                      <div className="text-gray-400 truncate">
-                        {formatTime(event.start.toTimeString().slice(0, 5))}
-                      </div>
-                    </button>
-                  ))}
+                  {day.events.slice(0, 2).map((event) => {
+                    const eventColor = getEventColor(event)
+                    return (
+                      <button
+                        key={event.id}
+                        onClick={() => onEventClick?.(event)}
+                        className="w-full text-left p-2 rounded text-xs transition-colors border"
+                        style={{
+                          backgroundColor: eventColor.backgroundColor,
+                          borderColor: eventColor.borderColor,
+                          color: eventColor.color
+                        }}
+                      >
+                        <div className="font-medium truncate">
+                          {event.title}
+                        </div>
+                        <div className="text-gray-400 truncate opacity-80">
+                          {formatTime(event.start.toTimeString().slice(0, 5))}
+                        </div>
+                      </button>
+                    )
+                  })}
                   {day.events.length > 2 && (
                     <div className="text-xs text-gray-500 text-center">
                       +{day.events.length - 2} more
@@ -364,28 +449,62 @@ export default function CalendarService({
               ))}
             </div>
             
-            {generateWeekDays().map((day, dayIndex) => (
-              <div key={dayIndex} className="border-r border-gray-800">
-                {timeSlots.map((time) => {
-                  const slotEvents = getEventsForTimeSlot(day.date, time)
-                  return (
-                    <div key={time} className="h-16 border-b border-gray-800 p-1">
-                      {slotEvents.map((event) => (
-                        <button
-                          key={event.id}
-                          onClick={() => onEventClick?.(event)}
-                          className={`w-full h-full rounded text-xs p-1 transition-colors text-left border ${getEventColor(event)}`}
-                        >
-                          <div className="font-medium text-white truncate">
-                            {event.title}
+            {generateWeekDays().map((day, dayIndex) => {
+              const dayEvents = getEventsForDay(day.date)
+              const totalSlots = timeSlots.length
+              const totalHeight = totalSlots * 64 // 64px per slot
+              
+              return (
+                <div 
+                  key={dayIndex} 
+                  className="border-r border-gray-800 relative"
+                  style={{ minHeight: `${totalHeight}px` }}
+                >
+                  {/* Time slot grid for reference */}
+                  {timeSlots.map((time) => (
+                    <div 
+                      key={time} 
+                      className="h-16 border-b border-gray-800"
+                      onClick={() => onTimeSlotClick?.(day.date, time)}
+                    />
+                  ))}
+                  
+                  {/* Events positioned absolutely */}
+                  {dayEvents.map((event) => {
+                    const eventColor = getEventColor(event)
+                    const { top, height } = getEventPosition(event, workingHours.start, workingHours.end)
+                    
+                    return (
+                      <button
+                        key={event.id}
+                        onClick={() => onEventClick?.(event)}
+                        className="absolute left-1 right-1 rounded text-xs p-1.5 transition-colors text-left border z-10 hover:z-20"
+                        style={{
+                          top: `${top}px`,
+                          height: `${Math.max(height, 32)}px`, // Minimum height of 32px
+                          backgroundColor: eventColor.backgroundColor,
+                          borderColor: eventColor.borderColor,
+                          color: eventColor.color
+                        }}
+                      >
+                        <div className="font-medium truncate mb-0.5">
+                          {event.title}
+                        </div>
+                        {height >= 48 && (
+                          <div className="text-xs opacity-75 truncate">
+                            {(() => {
+                              const startTime = `${event.start.getHours().toString().padStart(2, '0')}:${event.start.getMinutes().toString().padStart(2, '0')}`
+                              const endTime = `${event.end.getHours().toString().padStart(2, '0')}:${event.end.getMinutes().toString().padStart(2, '0')}`
+                              return `${formatTime(startTime)} - ${formatTime(endTime)}`
+                            })()}
                           </div>
-                        </button>
-                      ))}
-                    </div>
-                  )
-                })}
-              </div>
-            ))}
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
@@ -413,24 +532,33 @@ export default function CalendarService({
                   </div>
                   <div className="flex-1 ml-4">
                     {slotEvents.length > 0 ? (
-                      slotEvents.map((event) => (
-                        <button
-                          key={event.id}
-                          onClick={() => onEventClick?.(event)}
-                          className={`w-full text-left p-3 rounded-lg transition-colors border mb-2 ${getEventColor(event)}`}
-                        >
-                          <div className="font-medium text-white">{event.title}</div>
-                          {event.description && (
-                            <div className="text-sm text-gray-400 mt-1">{event.description}</div>
-                          )}
-                        </button>
-                      ))
+                      slotEvents.map((event) => {
+                        const eventColor = getEventColor(event)
+                        return (
+                          <button
+                            key={event.id}
+                            onClick={() => onEventClick?.(event)}
+                            className="w-full text-left p-3 rounded-lg transition-colors border mb-2"
+                            style={{
+                              backgroundColor: eventColor.backgroundColor,
+                              borderColor: eventColor.borderColor,
+                              color: eventColor.color
+                            }}
+                          >
+                            <div className="font-medium">{event.title}</div>
+                            {event.description && (
+                              <div className="text-sm opacity-80 mt-1">{event.description}</div>
+                            )}
+                          </button>
+                        )
+                      })
                     ) : (
                       <div 
                         className="p-3 text-gray-600 border-2 border-dashed border-gray-800 rounded-lg cursor-pointer hover:border-gray-700 transition-colors"
                         onClick={() => onTimeSlotClick?.(view.currentDate, time)}
+                        onDoubleClick={() => onTimeSlotClick?.(view.currentDate, time)}
                       >
-                        Available
+                        Available (Double-click to create event)
                       </div>
                     )}
                   </div>
@@ -443,4 +571,5 @@ export default function CalendarService({
     </div>
   )
 }
+
 

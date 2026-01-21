@@ -194,9 +194,6 @@ export default function HelpPage() {
                 </div>
                 <h3 className="text-white font-medium mb-2">Help Articles</h3>
                 <p className="text-gray-300 text-sm mb-4">Browse detailed guides and tutorials</p>
-                <Link href="/styles" className="btn btn-secondary">
-                  View Guides
-                </Link>
               </div>
 
               <div className="text-center">

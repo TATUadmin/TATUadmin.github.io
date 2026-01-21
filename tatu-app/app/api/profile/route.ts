@@ -65,26 +65,38 @@ export async function PUT(req: Request) {
 
     // Update role-specific profile
     if (user.role === 'ARTIST' || user.role === 'SHOP_OWNER') {
+      // Build update data object, only including fields that are provided
+      const updateData: any = {}
+      if (data.avatar !== undefined) updateData.avatar = data.avatar
+      if (data.bio !== undefined) updateData.bio = data.bio
+      if (data.phone !== undefined) updateData.phone = data.phone
+      if (data.instagram !== undefined) updateData.instagram = data.instagram
+      if (data.website !== undefined) updateData.website = data.website
+      if (data.location !== undefined) updateData.location = data.location
+      if (data.specialties !== undefined) updateData.specialties = data.specialties || []
+      if (data.age !== undefined) updateData.age = data.age
+      if (data.latitude !== undefined) updateData.latitude = data.latitude
+      if (data.longitude !== undefined) updateData.longitude = data.longitude
+      if (data.locationRadius !== undefined) updateData.locationRadius = data.locationRadius
+      if (data.actualAddress !== undefined) updateData.actualAddress = data.actualAddress
+
       const profile = await prisma.artistProfile.update({
         where: { userId: session.user.id },
-        data: {
-          bio: data.bio,
-          phone: data.phone,
-          instagram: data.instagram,
-          website: data.website,
-          location: data.location,
-          specialties: data.specialties || [],
-        },
+        data: updateData,
       })
       return NextResponse.json(profile)
     } else if (user.role === 'CUSTOMER') {
+      // Build update data object, only including fields that are provided
+      const updateData: any = {}
+      if (data.avatar !== undefined) updateData.avatar = data.avatar
+      if (data.bio !== undefined) updateData.bio = data.bio
+      if (data.phone !== undefined) updateData.phone = data.phone
+      if (data.preferredStyles !== undefined) updateData.preferredStyles = data.preferredStyles
+      if (data.locationPreferences !== undefined) updateData.locationPreferences = data.locationPreferences
+
       const profile = await prisma.customerProfile.update({
         where: { userId: session.user.id },
-        data: {
-          phone: data.phone,
-          preferredStyles: data.preferredStyles || [],
-          locationPreferences: data.locationPreferences,
-        },
+        data: updateData,
       })
       return NextResponse.json(profile)
     }

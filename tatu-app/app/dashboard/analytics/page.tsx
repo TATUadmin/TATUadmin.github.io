@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
 import DashboardLayout from '../../components/DashboardLayout'
+import DashboardStats, { useDashboardStats } from '../../components/DashboardStats'
 import {
   ChartBarIcon,
   CurrencyDollarIcon,
   UsersIcon,
   CalendarIcon,
   StarIcon,
-
   TrendingDownIcon,
   EyeIcon,
   HeartIcon,
@@ -105,6 +105,10 @@ export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d')
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'customers' | 'artists' | 'insights'>('overview')
+  
+  // Fetch dashboard stats with time range filter
+  const statsRange = timeRange === '1y' ? '90d' : timeRange // API supports 7d, 30d, 90d
+  const { stats, isLoading: statsLoading } = useDashboardStats(statsRange as '7d' | '30d' | '90d')
 
   useEffect(() => {
     if (session?.user) {
@@ -452,6 +456,11 @@ export default function AnalyticsPage() {
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
+            {/* Dashboard Stats Cards */}
+            {!statsLoading && stats.length > 0 && (
+              <DashboardStats stats={stats} layout="grid" />
+            )}
+            
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-gray-950 border border-gray-900 rounded-xl p-6">

@@ -183,12 +183,6 @@ export default function HomepageGothic() {
 
       {/* Navigation Back */}
       <div className="relative z-10 py-8 text-center border-t border-gray-800">
-        <Link 
-          href="/styles" 
-          className="font-nosifer text-gray-300 hover:text-purple-400 text-sm underline decoration-wavy underline-offset-4 tracking-wider transition-colors"
-        >
-          ← RETURN TO THE MORTAL REALM
-        </Link>
       </div>
     </div>
   )

@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 export default function AboutPage() {
   const [activeSection, setActiveSection] = useState('mission');
+  const [activeTab, setActiveTab] = useState<'clients' | 'artists'>('clients');
 
   const sections = [
     {
@@ -24,12 +25,6 @@ export default function AboutPage() {
       title: 'Our Values',
       content: 'Quality, authenticity, community, and innovation. We believe every tattoo tells a story, and every artist deserves a platform to showcase their unique vision.',
       icon: '💎'
-    },
-    {
-      id: 'team',
-      title: 'Our Team',
-      content: 'A diverse group of designers, developers, and tattoo industry professionals passionate about revolutionizing how people discover and connect with tattoo artists worldwide.',
-      icon: '👥'
     }
   ];
 
@@ -38,21 +33,6 @@ export default function AboutPage() {
     { number: '15K+', label: 'Verified Artists', description: 'Professional tattoo artists' },
     { number: '2.5M+', label: 'Artworks', description: 'Portfolio pieces shared' },
     { number: '180+', label: 'Countries', description: 'Global artist network' }
-  ];
-
-  const team = [
-    {
-      name: 'Kelso Norden',
-      role: 'CEO & Co-Founder',
-      bio: 'Former tattoo artist with 15+ years in the industry. Passionate about supporting artists and connecting them with clients.',
-      image: '/Kelso Headshot.jpg'
-    },
-    {
-      name: 'Pedro Perin',
-      role: 'CTO & Co-Founder',
-      bio: 'Tech entrepreneur with expertise in marketplace platforms. Believes technology can enhance human connections.',
-      image: '/Profile Pic BW.jpg'
-    }
   ];
 
   return (
@@ -123,32 +103,251 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* How It Works Section */}
       <section className="py-24 bg-surface">
+        <div className="container">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h2 className="display text-4xl md:text-5xl text-white mb-4">
+              How It Works
+            </h2>
+            <p className="body text-xl text-gray-300">
+              Whether you're looking for the perfect tattoo or building your career as an artist, 
+              we've made the process simple and secure.
+            </p>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="max-w-2xl mx-auto mb-16">
+            <div className="flex bg-surface-2 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab('clients')}
+                className={`flex-1 py-3 px-6 rounded-md font-medium transition-all ${
+                  activeTab === 'clients'
+                    ? 'bg-white text-black'
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                I'm a client
+              </button>
+              <button
+                onClick={() => setActiveTab('artists')}
+                className={`flex-1 py-3 px-6 rounded-md font-medium transition-all ${
+                  activeTab === 'artists'
+                    ? 'bg-white text-black'
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                I'm an artist
+              </button>
+            </div>
+          </div>
+
+          {/* Clients Process */}
+          {activeTab === 'clients' && (
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-16">
+                <h3 className="display text-3xl md:text-4xl text-white mb-4">
+                  Find Your Perfect Artist
+                </h3>
+                <p className="body text-xl text-gray-300">
+                  From discovery to completion, here's how to get your dream tattoo
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {[
+                  {
+                    step: '1',
+                    title: 'Discover Artists',
+                    description: 'Browse verified artists by style, location, and availability. View portfolios and read reviews.',
+                    icon: '🔍'
+                  },
+                  {
+                    step: '2',
+                    title: 'Book Consultation',
+                    description: 'Schedule a free consultation to discuss your design, placement, and budget with your chosen artist.',
+                    icon: '📅'
+                  },
+                  {
+                    step: '3',
+                    title: 'Design & Plan',
+                    description: 'Work with your artist to create the perfect design. Get digital mockups and make revisions.',
+                    icon: '✏️'
+                  },
+                  {
+                    step: '4',
+                    title: 'Get Inked',
+                    description: 'Show up for your appointment with confidence. Your artist is ready to create your masterpiece.',
+                    icon: '🎨'
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="card card-hover p-6 text-center animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                    <div className="mb-6">
+                      <div className="bg-white text-black text-lg font-bold px-3 py-1 rounded-full inline-block mb-4">
+                        {item.step}
+                      </div>
+                    </div>
+                    <div className="text-3xl mb-4">{item.icon}</div>
+                    <h4 className="headline text-xl text-white mb-3">{item.title}</h4>
+                    <p className="body text-gray-400">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Artists Process */}
+          {activeTab === 'artists' && (
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-16">
+                <h3 className="display text-3xl md:text-4xl text-white mb-4">
+                  Grow Your Business
+                </h3>
+                <p className="body text-xl text-gray-300">
+                  Join thousands of artists building successful careers on TATU
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {[
+                  {
+                    step: '1',
+                    title: 'Apply & Verify',
+                    description: 'Submit your application with portfolio samples. We verify all artists for quality and safety.',
+                    icon: '✅'
+                  },
+                  {
+                    step: '2',
+                    title: 'Build Profile',
+                    description: 'Create your artist profile with portfolio, services, pricing, and availability.',
+                    icon: '👤'
+                  },
+                  {
+                    step: '3',
+                    title: 'Get Bookings',
+                    description: 'Receive booking requests from clients. Manage your schedule and consultations.',
+                    icon: '📱'
+                  },
+                  {
+                    step: '4',
+                    title: 'Earn & Grow',
+                    description: 'Complete appointments, get paid securely, and build your client base.',
+                    icon: '💰'
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="card card-hover p-6 text-center animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                    <div className="mb-6">
+                      <div className="bg-white text-black text-lg font-bold px-3 py-1 rounded-full inline-block mb-4">
+                        {item.step}
+                      </div>
+                    </div>
+                    <div className="text-3xl mb-4">{item.icon}</div>
+                    <h4 className="headline text-xl text-white mb-3">{item.title}</h4>
+                    <p className="body text-gray-400">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="display text-4xl md:text-5xl text-white mb-4">
-                Meet Our Team
+                Why Choose TATU
               </h2>
               <p className="body text-xl text-gray-300">
-                The passionate people behind TATU
+                Built for artists and clients who demand the best
               </p>
             </div>
-            
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {team.map((member, index) => (
-                <div key={index} className="text-center">
-                  <div className="relative mb-6">
-                    <img 
-                      src={member.image} 
-                      alt={member.name}
-                      className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-gray-600"
-                    />
-                  </div>
-                  <h3 className="headline text-xl text-white mb-2">{member.name}</h3>
-                  <p className="label text-gray-300 mb-3">{member.role}</p>
-                  <p className="body text-gray-300 text-sm leading-relaxed">{member.bio}</p>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  title: 'Verified Artists',
+                  description: 'Every artist is thoroughly vetted with portfolio reviews and background checks.',
+                  icon: '🛡️'
+                },
+                {
+                  title: 'Secure Payments',
+                  description: 'Protected transactions with escrow services and secure payment processing.',
+                  icon: '🔒'
+                },
+                {
+                  title: 'Quality Guarantee',
+                  description: 'We stand behind every appointment with our satisfaction guarantee.',
+                  icon: '⭐'
+                },
+                {
+                  title: '24/7 Support',
+                  description: 'Round-the-clock customer support for both artists and clients.',
+                  icon: '📞'
+                },
+                {
+                  title: 'Portfolio Showcase',
+                  description: 'Beautiful portfolio galleries to showcase your best work.',
+                  icon: '🖼️'
+                },
+                {
+                  title: 'Analytics & Insights',
+                  description: 'Detailed analytics to help artists grow their business.',
+                  icon: '📊'
+                }
+              ].map((feature, index) => (
+                <div key={index} className="card card-hover p-6 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                  <div className="text-3xl mb-4">{feature.icon}</div>
+                  <h3 className="headline text-xl text-white mb-3">{feature.title}</h3>
+                  <p className="body text-gray-400">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 bg-surface">
+        <div className="container">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="display text-4xl md:text-5xl text-white mb-4">
+                Frequently Asked Questions
+              </h2>
+              <p className="body text-xl text-gray-300">
+                Everything you need to know about TATU
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {[
+                {
+                  question: 'How do I find the right artist for my tattoo?',
+                  answer: 'Use our search filters to browse by style, location, and availability. Read reviews, view portfolios, and schedule consultations to find your perfect match.'
+                },
+                {
+                  question: 'What happens if I need to cancel my appointment?',
+                  answer: 'Cancellation policies vary by artist, but most offer free cancellation up to 24-48 hours before your appointment. Check your artist\'s specific policy.'
+                },
+                {
+                  question: 'How do artists get paid?',
+                  answer: 'Artists receive payment securely through our platform after appointment completion. We handle all payment processing and provide detailed earnings reports.'
+                },
+                {
+                  question: 'Is my personal information secure?',
+                  answer: 'Yes, we use industry-standard encryption and security measures to protect all personal and payment information. We never share your data with third parties.'
+                },
+                {
+                  question: 'Can I bring my own design?',
+                  answer: 'Absolutely! Most artists welcome custom designs. You can upload your design during the booking process and discuss modifications during your consultation.'
+                }
+              ].map((faq, index) => (
+                <div key={index} className="card p-6 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                  <h3 className="headline text-lg text-white mb-3">{faq.question}</h3>
+                  <p className="body text-gray-400">{faq.answer}</p>
                 </div>
               ))}
             </div>
@@ -180,4 +379,4 @@ export default function AboutPage() {
       </section>
     </div>
   );
-} 
+}

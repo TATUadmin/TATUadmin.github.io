@@ -49,6 +49,9 @@ model Appointment {
   serviceId                       String
   startTime                       DateTime
   status                          AppointmentStatus @default(PENDING)
+  // Link to CalendarEvent when booking is confirmed
+  calendarEventId                 String?           @unique
+  CalendarEvent                   CalendarEvent?    @relation(fields: [calendarEventId], references: [id])
   User_Appointment_artistIdToUser User              @relation("Appointment_artistIdToUser", fields: [artistId], references: [id])
   User_Appointment_clientIdToUser User              @relation("Appointment_clientIdToUser", fields: [clientId], references: [id])
   Service                         Service           @relation(fields: [serviceId], references: [id])
@@ -58,6 +61,7 @@ model Appointment {
   @@index([clientId])
   @@index([serviceId])
   @@index([shopId])
+  @@index([calendarEventId])
 }
 
 model Comment {
@@ -199,9 +203,20 @@ model ArtistProfile {
   instagram              String?
   website                String?
   location               String?
+  // Location fields for privacy and booking
+  latitude               Float?
+  longitude              Float?
+  locationRadius         Float?    @default(500) // Radius in feet for privacy (~500ft default)
+  actualAddress          String?   // Full address only shown after booking confirmation
+  age                    Int?
   specialties            String[]
   userId                 String    @unique
   completedRegistration  Boolean   @default(false)
+  // Instagram OAuth fields (same as CustomerProfile)
+  instagramHandle        String?   // Instagram username
+  instagramAccessToken   String?   // OAuth token for Instagram API
+  instagramTokenExpiry   DateTime? // Token expiration date
+  instagramLinked        Boolean   @default(false) // Whether Instagram is connected
   // Subscription fields (artists only)
   subscriptionTier       String? // FREE, PRO, STUDIO
   subscriptionStatus     String? // ACTIVE, CANCELLED, EXPIRED
@@ -216,11 +231,17 @@ model CustomerProfile {
   id                    String   @id
   avatar                String?
   phone                 String?
+  bio                   String?  // Short bio for customer profile
   userId                String   @unique
   completedRegistration Boolean  @default(false)
   // Customer preferences
   preferredStyles       String[] // Tattoo styles they're interested in
   locationPreferences   String? // Preferred location/city
+  // Instagram integration
+  instagramHandle       String? // Instagram username
+  instagramAccessToken  String? // OAuth token for Instagram API
+  instagramTokenExpiry  DateTime? // Token expiration
+  instagramLinked       Boolean  @default(false) // Whether Instagram is connected
   User                  User     @relation("CustomerProfile", fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -376,8 +397,8 @@ model User {
   MessageThread                          MessageThread[]
   PortfolioCollection                    PortfolioCollection[]
   PortfolioItem                          PortfolioItem[]
-  ArtistProfile                          ArtistProfile?        @relation("ArtistProfile")
-  CustomerProfile                        CustomerProfile?      @relation("CustomerProfile")
+  artistProfile                          ArtistProfile?        @relation("ArtistProfile")
+  customerProfile                        CustomerProfile?      @relation("CustomerProfile")
   subscription                           Subscription?
   Review                                 Review[]
   Service                                Service[]
@@ -386,17 +407,17 @@ model User {
   Shop                                   Shop[]
   ShopsOnArtists                         ShopsOnArtists[]
   UnifiedMessage                         UnifiedMessage[]
-  
+
   // Calendar relations
-  calendars                              Calendar[]
-  calendarEvents                         CalendarEvent[]
-  clientEvents                           CalendarEvent[]       @relation("ClientEvents")
-  
+  calendars      Calendar[]
+  calendarEvents CalendarEvent[]
+  clientEvents   CalendarEvent[] @relation("ClientEvents")
+
   // Calendar preferences
-  calendarView                           CalendarView          @default(WEEK)
-  workingHours                           Json?
-  bufferTime                             Int                   @default(15)
-  defaultEventDuration                   Int                   @default(120)
+  calendarView         CalendarView @default(WEEK)
+  workingHours         Json?
+  bufferTime           Int          @default(15)
+  defaultEventDuration Int          @default(120)
 }
 
 model VerificationToken {
@@ -470,6 +491,23 @@ enum EventStatus {
   NO_SHOW
   COMPLETED
   RESCHEDULED
+  PENDING
+  DECLINED
+  AVAILABLE
+  BLOCKED
+}
+
+enum EventType {
+  MANUAL_BLOCK
+  BOOKING
+  PERSONAL
+  AVAILABILITY
+}
+
+enum EventVisibility {
+  PRIVATE
+  PUBLIC_BUSY
+  PUBLIC_AVAILABLE
 }
 
 enum CalendarView {
@@ -505,67 +543,72 @@ model Calendar {
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 
-  events             CalendarEvent[]
+  events CalendarEvent[]
 
   @@unique([userId, provider, providerCalendarId])
   @@index([userId])
 }
 
 model CalendarEvent {
-  id                 String       @id @default(cuid())
-  calendarId         String
-  calendar           Calendar     @relation(fields: [calendarId], references: [id], onDelete: Cascade)
-  userId             String
-  user               User         @relation(fields: [userId], references: [id])
+  id         String   @id @default(cuid())
+  calendarId String
+  calendar   Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
 
   // Event details
-  title              String
-  description        String?      @db.Text
-  location           String?
+  title       String
+  description String? @db.Text
+  location    String?
 
   // Timing
-  startTime          DateTime
-  endTime            DateTime
-  allDay             Boolean      @default(false)
-  timezone           String       @default("UTC")
+  startTime DateTime
+  endTime   DateTime
+  allDay    Boolean  @default(false)
+  timezone  String   @default("UTC")
 
   // Recurrence
-  isRecurring        Boolean      @default(false)
-  recurrenceRule     String?
-  recurrenceId       String?
+  isRecurring    Boolean @default(false)
+  recurrenceRule String?
+  recurrenceId   String?
 
   // Client information
-  clientId           String?
-  client             User?        @relation("ClientEvents", fields: [clientId], references: [id])
-  clientName         String?
-  clientEmail        String?
-  clientPhone        String?
+  clientId    String?
+  client      User?   @relation("ClientEvents", fields: [clientId], references: [id])
+  clientName  String?
+  clientEmail String?
+  clientPhone String?
 
   // Booking details
-  serviceType        String?
-  estimatedCost      Decimal?     @db.Decimal(10, 2)
-  depositPaid        Boolean      @default(false)
-  depositAmount      Decimal?     @db.Decimal(10, 2)
+  serviceType   String?
+  estimatedCost Decimal? @db.Decimal(10, 2)
+  depositPaid   Boolean  @default(false)
+  depositAmount Decimal? @db.Decimal(10, 2)
 
   // Status and metadata
-  status             EventStatus  @default(CONFIRMED)
-  color              String?
+  status     EventStatus     @default(CONFIRMED)
+  eventType  EventType       @default(BOOKING)
+  visibility EventVisibility @default(PRIVATE)
+  color      String?
 
   // External sync
-  externalId         String?
-  externalUrl        String?
-  lastSyncedAt       DateTime?
+  externalId   String?
+  externalUrl  String?
+  lastSyncedAt DateTime?
 
   // Conflict detection
-  hasConflict        Boolean      @default(false)
-  conflictWith       String[]
+  hasConflict  Boolean  @default(false)
+  conflictWith String[]
 
   // Notifications
-  reminderSentAt     DateTime?
+  reminderSentAt DateTime?
 
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
-  deletedAt          DateTime?
+  // Booking reference (links to Appointment if this is a booking event)
+  Appointment Appointment?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([userId])
   @@index([calendarId])

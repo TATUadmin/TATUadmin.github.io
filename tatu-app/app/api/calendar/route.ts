@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '@/app/auth'
 import { prisma } from '@/lib/prisma'
 
 // GET /api/calendar - Get all calendars for the authenticated user
@@ -62,11 +62,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate provider against enum
+    const validProviders = ['TATU', 'GOOGLE', 'APPLE', 'OUTLOOK', 'SQUARE', 'CALENDLY', 'ACUITY', 'MANUAL', 'EMAIL_PARSED', 'INSTAGRAM']
+    if (!validProviders.includes(provider)) {
+      return NextResponse.json(
+        { error: 'Invalid provider. Must be one of: ' + validProviders.join(', ') },
+        { status: 400 }
+      )
+    }
+
     // Check subscription tier limits
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: {
-        profile: true,
+        artistProfile: {
+          select: {
+            subscriptionTier: true,
+          },
+        },
         calendars: true,
       },
     })
@@ -77,7 +90,7 @@ export async function POST(request: NextRequest) {
       STUDIO: Infinity,
     }
 
-    const tier = user?.profile?.subscriptionTier || 'FREE'
+    const tier = user?.artistProfile?.subscriptionTier || 'FREE'
     const limit = tierLimits[tier]
     
     if (user && user.calendars.length >= limit) {

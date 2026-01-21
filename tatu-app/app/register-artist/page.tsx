@@ -7,6 +7,7 @@ export default function RegisterArtist() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     phone: '',
     city: '',
     experience: '',
@@ -41,12 +42,76 @@ export default function RegisterArtist() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Submit to API
-    console.log('Artist registration:', formData);
-    alert('Thank you for your interest! We\'ll be in touch within 24 hours.');
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // First, create the user account with ARTIST role
+      const signupResponse = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: 'ARTIST',
+          terms: true,
+          artistSpecialties: formData.styles,
+        }),
+      });
+
+      // Read response body once
+      let signupData
+      try {
+        signupData = await signupResponse.json()
+      } catch (jsonError) {
+        console.error('Error parsing JSON response:', jsonError)
+        throw new Error('Invalid response from server')
+      }
+
+      if (!signupResponse.ok) {
+        throw new Error(signupData.message || signupData.error || 'Failed to create account')
+      }
+      
+      // Then update the artist profile with additional information
+      if (signupData.userId) {
+        const profileResponse = await fetch('/api/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: formData.phone,
+            location: formData.city,
+            instagram: formData.instagram,
+            website: formData.portfolio,
+            bio: formData.aboutMe,
+            specialties: formData.styles,
+          }),
+        });
+
+        if (!profileResponse.ok) {
+          console.warn('Account created but profile update failed');
+        }
+      }
+
+      setSuccess(true);
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        window.location.href = '/login?message=Account created successfully. Please check your email to verify your account.';
+      }, 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account. Please try again.');
+      console.error('Registration error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -157,6 +222,24 @@ export default function RegisterArtist() {
                     placeholder="your@email.com"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Password *
+                </label>
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  className="w-full px-4 py-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600/50 focus:border-gray-600 transition-all duration-200"
+                  placeholder="At least 8 characters with uppercase, lowercase, number, and special character"
+                />
+                <p className="text-gray-500 text-xs mt-1">
+                  Must contain uppercase, lowercase, number, and special character
+                </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
@@ -290,17 +373,34 @@ export default function RegisterArtist() {
                 />
               </div>
 
+              {/* Error Message */}
+              {error && (
+                <div className="p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-300 text-sm">
+                  {error}
+                </div>
+              )}
+
+              {/* Success Message */}
+              {success && (
+                <div className="p-4 bg-green-900/20 border border-green-800 rounded-lg text-green-300 text-sm">
+                  Account created successfully! Redirecting to login...
+                </div>
+              )}
+
               {/* Submit Button */}
               <div className="pt-6">
                 <button
                   type="submit"
-                  className="btn btn-primary w-full py-4 text-lg"
+                  disabled={isSubmitting || success}
+                  className="btn btn-primary w-full py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Apply to Join TATU
+                  {isSubmitting ? 'Creating Account...' : success ? 'Account Created!' : 'Create Artist Account'}
                 </button>
                 
                 <p className="text-gray-400 text-sm text-center mt-4">
-                  We'll review your application and get back to you within 24 hours
+                  {success 
+                    ? 'Please check your email to verify your account.'
+                    : 'You\'ll receive a verification email after signup.'}
                 </p>
               </div>
             </form>

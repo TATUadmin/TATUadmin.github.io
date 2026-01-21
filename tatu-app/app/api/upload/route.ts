@@ -3,17 +3,26 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import crypto from 'crypto'
 
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-})
+// Get AWS configuration with defaults
+const awsRegion = process.env.AWS_REGION || 'us-east-1'
+const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID
+const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
+const awsBucketName = process.env.AWS_BUCKET_NAME
+
+// Only create S3Client if credentials are available
+const s3Client = awsAccessKeyId && awsSecretAccessKey
+  ? new S3Client({
+      region: awsRegion,
+      credentials: {
+        accessKeyId: awsAccessKeyId,
+        secretAccessKey: awsSecretAccessKey,
+      },
+    })
+  : null
 
 export async function POST(request: Request) {
   try {
-    // For now, skip auth check to test basic functionality
+    // Parse form data first (can only be read once)
     const formData = await request.formData()
     const file = formData.get('file') as File
 
@@ -30,7 +39,35 @@ export async function POST(request: Request) {
       )
     }
 
-    // Validate file size (10MB limit)
+    // Check if S3 is configured
+    if (!s3Client || !awsBucketName) {
+      // Fallback: Use base64 encoding for development when S3 is not configured
+      // Validate file size (5MB limit for base64)
+      const maxSize = 5 * 1024 * 1024 // 5MB in bytes
+      if (file.size > maxSize) {
+        return NextResponse.json(
+          { error: 'File size exceeds 5MB limit' },
+          { status: 400 }
+        )
+      }
+
+      // Convert to base64 for local storage
+      const buffer = Buffer.from(await file.arrayBuffer())
+      const base64 = buffer.toString('base64')
+      const dataUrl = `data:${file.type};base64,${base64}`
+
+      // Return data URL (for development only)
+      return NextResponse.json({ 
+        url: dataUrl,
+        warning: 'S3 not configured - using base64 encoding. This is for development only.'
+      })
+    }
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    }
+
+    // Validate file size (10MB limit for S3)
     const maxSize = 10 * 1024 * 1024 // 10MB in bytes
     if (file.size > maxSize) {
       return NextResponse.json(
@@ -49,7 +86,7 @@ export async function POST(request: Request) {
 
     // Upload to S3
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME!,
+      Bucket: awsBucketName!,
       Key: key,
       Body: buffer,
       ContentType: file.type,
@@ -58,7 +95,7 @@ export async function POST(request: Request) {
     await s3Client.send(command)
 
     // Return public URL (adjust based on your S3 configuration)
-    const url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
+    const url = `https://${awsBucketName}.s3.${awsRegion}.amazonaws.com/${key}`
 
     return NextResponse.json({ url })
   } catch (error) {
@@ -72,6 +109,17 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    // Check if S3 is configured
+    if (!s3Client || !awsBucketName) {
+      return NextResponse.json(
+        { 
+          error: 'File upload is not configured. AWS S3 credentials are missing.',
+          details: 'Please configure AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_BUCKET_NAME environment variables.'
+        },
+        { status: 503 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const key = searchParams.get('key')
 
@@ -81,7 +129,7 @@ export async function GET(request: Request) {
 
     // Generate signed URL for downloading
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME!,
+      Bucket: awsBucketName,
       Key: key,
     })
     const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 })

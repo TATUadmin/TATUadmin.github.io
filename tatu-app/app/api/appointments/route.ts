@@ -261,7 +261,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       }, request)
 
       span.setAttribute('status', 'success')
-      const artist = appointment.Appointment_artistIdToUser
+      const appointmentArtist = appointment.Appointment_artistIdToUser
       return ApiResponse.success({
         appointmentId: appointment.id,
         status: appointment.status,
@@ -269,8 +269,8 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         appointment: {
           id: appointment.id,
           artist: {
-            name: artist?.ArtistProfile?.bio || artist?.name || 'Artist',
-            shop: artist?.Shop?.[0]?.name
+            name: appointmentArtist?.ArtistProfile?.bio || appointmentArtist?.name || 'Artist',
+            shop: appointmentArtist?.Shop?.[0]?.name
           },
           date: appointment.preferredDate,
           time: appointment.preferredTime,

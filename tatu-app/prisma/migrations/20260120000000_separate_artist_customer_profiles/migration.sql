@@ -111,3 +111,4 @@ ALTER TABLE "CustomerProfile" ADD CONSTRAINT "CustomerProfile_userId_fkey"
 -- Drop the old Profile table
 DROP TABLE "Profile";
 
+

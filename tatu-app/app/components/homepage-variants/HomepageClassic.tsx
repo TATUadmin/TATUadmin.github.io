@@ -146,12 +146,6 @@ export default function HomepageClassic() {
 
       {/* Navigation Back */}
       <div className="relative z-10 py-8 text-center border-t-4 border-double border-amber-800">
-        <Link 
-          href="/styles" 
-          className="font-crimson text-amber-800 hover:text-amber-900 text-lg underline decoration-double underline-offset-4"
-        >
-          ← Back to Style Selection
-        </Link>
       </div>
     </div>
   )
