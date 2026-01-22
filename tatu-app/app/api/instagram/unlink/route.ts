@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/auth'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 // POST /api/instagram/unlink - Unlink Instagram account
 export async function POST(request: NextRequest) {
   try {

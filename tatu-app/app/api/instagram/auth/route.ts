@@ -4,6 +4,8 @@ import { authOptions } from '@/app/auth'
 import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 
+export const dynamic = 'force-dynamic'
+
 // POST /api/instagram/auth - Initiate Instagram OAuth flow
 export async function POST(request: NextRequest) {
   try {

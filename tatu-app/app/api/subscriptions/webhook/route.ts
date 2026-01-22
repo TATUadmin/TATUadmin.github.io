@@ -4,6 +4,8 @@ import { subscriptionService } from '@/lib/subscription-service'
 import { logger } from '@/lib/monitoring'
 import { headers } from 'next/headers'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * Stripe Webhook Handler for Subscription Events
  * 

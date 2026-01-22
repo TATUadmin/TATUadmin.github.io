@@ -8,6 +8,8 @@ import { ApiResponse, withErrorHandling } from '@/lib/api-response'
 import { rateLimiters } from '@/lib/rate-limit'
 import { logger } from '@/lib/monitoring'
 import { cacheService } from '@/lib/cache'
+
+export const dynamic = 'force-dynamic'
 import { CacheTags, CacheKeyGenerators } from '@/lib/cache'
 
 const prisma = new PrismaClient()

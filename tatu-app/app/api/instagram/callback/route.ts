@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/auth'
 import { prisma } from '@/lib/prisma'
 
+// Force dynamic rendering since we use request.url
+export const dynamic = 'force-dynamic'
+
 // GET /api/instagram/callback - Handle Instagram OAuth callback
 export async function GET(request: NextRequest) {
   try {

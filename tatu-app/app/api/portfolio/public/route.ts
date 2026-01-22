@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Force dynamic rendering since we use request.url
+export const dynamic = 'force-dynamic'
+
 // GET /api/portfolio/public - Get all public portfolio items
 export async function GET(request: NextRequest) {
   try {

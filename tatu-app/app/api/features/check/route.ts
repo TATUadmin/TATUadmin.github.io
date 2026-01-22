@@ -5,6 +5,8 @@ import { FeatureGate } from '@/lib/feature-gates'
 import { PrismaClient } from '@prisma/client'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const prisma = new PrismaClient()
 
 const checkFeatureSchema = z.object({

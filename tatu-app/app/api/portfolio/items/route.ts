@@ -4,6 +4,8 @@ import { authOptions } from '@/app/auth'
 import { prisma } from '@/lib/prisma'
 import { PortfolioItem } from '@prisma/client'
 
+export const dynamic = 'force-dynamic'
+
 interface ItemWithCounts extends PortfolioItem {
   _count: {
     likes: number

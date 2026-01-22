@@ -37,12 +37,31 @@ interface WebSocketContextType {
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined)
 
+// Default context for when provider is not available
+const defaultContext: WebSocketContextType = {
+  isConnected: false,
+  isConnecting: false,
+  error: null,
+  notifications: [],
+  unreadCount: 0,
+  addNotification: () => {},
+  markNotificationRead: () => {},
+  markAllNotificationsRead: () => {},
+  clearNotifications: () => {},
+  messages: [],
+  typingUsers: [],
+  addMessage: () => {},
+  updateMessage: () => {},
+  addTypingUser: () => {},
+  removeTypingUser: () => {},
+  connect: () => {},
+  disconnect: () => {},
+}
+
 export function useWebSocketContext() {
   const context = useContext(WebSocketContext)
-  if (!context) {
-    throw new Error('useWebSocketContext must be used within a WebSocketProvider')
-  }
-  return context
+  // Return default context if provider is not available (for pages that don't need WebSocket)
+  return context || defaultContext
 }
 
 interface WebSocketProviderProps {

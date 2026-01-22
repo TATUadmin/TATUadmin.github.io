@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { subDays, subMonths, startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns'
 import { Prisma } from '@prisma/client'
 
+export const dynamic = 'force-dynamic'
+
 interface TrendAnalysis {
   metric: string
   trend: 'up' | 'down' | 'stable'

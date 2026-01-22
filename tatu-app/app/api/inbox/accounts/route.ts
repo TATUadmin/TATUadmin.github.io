@@ -5,6 +5,8 @@ import { MessagePlatform } from '@prisma/client'
 import { z } from 'zod'
 import crypto from 'crypto'
 
+export const dynamic = 'force-dynamic'
+
 // Encryption helpers
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY!
 const IV_LENGTH = 16

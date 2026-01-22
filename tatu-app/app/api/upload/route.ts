@@ -3,6 +3,8 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import crypto from 'crypto'
 
+export const dynamic = 'force-dynamic'
+
 // Get AWS configuration with defaults
 const awsRegion = process.env.AWS_REGION || 'us-east-1'
 const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID

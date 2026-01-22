@@ -8,6 +8,8 @@ import { logger } from '@/lib/monitoring'
 import { cacheService } from '@/lib/cache'
 import { CacheTags, CacheKeyGenerators } from '@/lib/cache'
 
+export const dynamic = 'force-dynamic'
+
 const prisma = new PrismaClient()
 
 // Fallback mock data for when database is unavailable
