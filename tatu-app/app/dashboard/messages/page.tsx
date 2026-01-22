@@ -32,6 +32,9 @@ interface Conversation {
   lastMessageTime: string
   unreadCount: number
   isOnline?: boolean
+  isNotification?: boolean
+  notificationId?: string
+  actionUrl?: string
 }
 
 export default function MessagesPage() {
@@ -43,6 +46,7 @@ export default function MessagesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSending, setIsSending] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [notifications, setNotifications] = useState<any[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const isCustomer = session?.user?.role === 'CUSTOMER'
@@ -50,15 +54,38 @@ export default function MessagesPage() {
 
   useEffect(() => {
     if (session?.user) {
-      fetchConversations()
+      fetchNotifications()
     }
   }, [session])
 
+  // Refetch conversations when notifications change
+  useEffect(() => {
+    if (session?.user) {
+      fetchConversations()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, notifications])
+
   useEffect(() => {
     if (selectedConversation) {
-      fetchMessages(selectedConversation)
+      const conversation = conversations.find(c => c.id === selectedConversation)
+      // If it's a notification-based conversation, show the notification message
+      if (conversation?.isNotification) {
+        setMessages([{
+          id: conversation.notificationId || conversation.id,
+          senderId: conversation.participantId,
+          senderName: conversation.participantName,
+          senderAvatar: conversation.participantAvatar,
+          content: conversation.lastMessage,
+          timestamp: conversation.lastMessageTime,
+          isRead: conversation.unreadCount === 0,
+          isSent: false,
+        }])
+      } else {
+        fetchMessages(selectedConversation)
+      }
     }
-  }, [selectedConversation])
+  }, [selectedConversation, conversations])
 
   useEffect(() => {
     scrollToBottom()
@@ -66,6 +93,18 @@ export default function MessagesPage() {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications?limit=100')
+      if (response.ok) {
+        const data = await response.json()
+        setNotifications(data.notifications || [])
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
+    }
   }
 
   const fetchConversations = async () => {
@@ -77,12 +116,88 @@ export default function MessagesPage() {
         throw new Error(errorData.error || 'Failed to fetch conversations')
       }
       const data = await response.json()
-      setConversations(data.conversations || [])
+      
+      // Convert message-type notifications into conversations
+      // Use current notifications state
+      const currentNotifications = notifications
+      const notificationConversations = currentNotifications
+        .filter(n => n.type === 'message')
+        .map((notification) => {
+          // Extract sender name from notification title or message
+          const senderMatch = notification.title.match(/^New Message from (.+)$/) || 
+                             notification.title.match(/^(.+?) sent you a message$/) ||
+                             notification.message.match(/(.+?) sent you a message/)
+          const senderName = senderMatch ? senderMatch[1] : 
+                            notification.metadata?.senderName || 
+                            'Unknown User'
+          
+          return {
+            id: `notification-${notification.id}`,
+            participantId: notification.metadata?.senderId || `notif-${notification.id}`,
+            participantName: senderName,
+            participantAvatar: notification.avatar || notification.metadata?.avatar,
+            lastMessage: notification.message,
+            lastMessageTime: notification.timestamp,
+            unreadCount: notification.read ? 0 : 1,
+            isNotification: true,
+            notificationId: notification.id,
+            actionUrl: notification.actionUrl
+          }
+        })
+      
+      // Merge with existing conversations
+      const allConversations = [...(data.conversations || []), ...notificationConversations]
+      
+      // Remove duplicates based on participantId, keeping the most recent
+      const uniqueConversations = allConversations.reduce((acc: Conversation[], conv) => {
+        const existing = acc.find(c => c.participantId === conv.participantId)
+        if (!existing) {
+          acc.push(conv)
+        } else if (new Date(conv.lastMessageTime) > new Date(existing.lastMessageTime)) {
+          // Replace with more recent conversation
+          const index = acc.indexOf(existing)
+          acc[index] = conv
+        }
+        return acc
+      }, [])
+      
+      // Sort by last message time (most recent first)
+      uniqueConversations.sort((a, b) => 
+        new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+      )
+      
+      setConversations(uniqueConversations)
     } catch (error: any) {
       console.error('Error fetching conversations:', error)
       toast.error(error.message || 'Failed to load conversations')
-      // Use mock data for now
-      setConversations([
+      
+      // Convert notifications to conversations even if API fails
+      const currentNotifications = notifications
+      const notificationConversations = currentNotifications
+        .filter(n => n.type === 'message')
+        .map((notification) => {
+          const senderMatch = notification.title.match(/^New Message from (.+)$/) || 
+                             notification.title.match(/^(.+?) sent you a message$/) ||
+                             notification.message.match(/(.+?) sent you a message/)
+          const senderName = senderMatch ? senderMatch[1] : 
+                            notification.metadata?.senderName || 
+                            'Unknown User'
+          
+          return {
+            id: `notification-${notification.id}`,
+            participantId: notification.metadata?.senderId || `notif-${notification.id}`,
+            participantName: senderName,
+            participantAvatar: notification.avatar || notification.metadata?.avatar,
+            lastMessage: notification.message,
+            lastMessageTime: notification.timestamp,
+            unreadCount: notification.read ? 0 : 1,
+            isNotification: true,
+            notificationId: notification.id,
+            actionUrl: notification.actionUrl
+          }
+        })
+      
+      setConversations(notificationConversations.length > 0 ? notificationConversations : [
         {
           id: '1',
           participantId: 'artist1',
@@ -243,7 +358,20 @@ export default function MessagesPage() {
               filteredConversations.map((conversation) => (
                 <button
                   key={conversation.id}
-                  onClick={() => setSelectedConversation(conversation.id)}
+                  onClick={() => {
+                    // If it's a notification-based conversation, mark notification as read and navigate
+                    if (conversation.isNotification && conversation.notificationId) {
+                      fetch(`/api/notifications/${conversation.notificationId}/read`, { method: 'POST' })
+                        .catch(err => console.error('Failed to mark notification as read:', err))
+                      
+                      // If there's an action URL, navigate there, otherwise open conversation
+                      if (conversation.actionUrl) {
+                        window.location.href = conversation.actionUrl
+                        return
+                      }
+                    }
+                    setSelectedConversation(conversation.id)
+                  }}
                   className={`w-full p-4 border-b border-gray-800 hover:bg-gray-900 transition-colors text-left ${
                     selectedConversation === conversation.id ? 'bg-gray-900' : ''
                   }`}
@@ -264,9 +392,14 @@ export default function MessagesPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-white font-medium truncate">
-                          {conversation.participantName}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-white font-medium truncate">
+                            {conversation.participantName}
+                          </h3>
+                          {conversation.isNotification && (
+                            <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full" title="From notification" />
+                          )}
+                        </div>
                         {conversation.unreadCount > 0 && (
                           <span className="flex-shrink-0 ml-2 bg-white text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                             {conversation.unreadCount}

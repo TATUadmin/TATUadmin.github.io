@@ -205,13 +205,13 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
       </div>
 
       <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
-        <Tab.List className="flex space-x-1 rounded-xl bg-indigo-900/20 p-1">
+        <Tab.List className="flex space-x-1 rounded-xl bg-gray-900/50 border border-gray-800 p-1">
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -219,10 +219,10 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab>
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -230,10 +230,10 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab>
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -241,10 +241,10 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab>
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -252,10 +252,10 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab>
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >

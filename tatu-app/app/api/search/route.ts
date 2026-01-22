@@ -77,7 +77,9 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         role: 'ARTIST',
         status: 'ACTIVE',
         artistProfile: {
-          completedRegistration: true
+          completedRegistration: true,
+          latitude: { not: null },
+          longitude: { not: null }
         }
       }
 

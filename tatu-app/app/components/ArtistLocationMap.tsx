@@ -247,33 +247,83 @@ export default function ArtistLocationMap({
     setIsLoading(true)
     setError(null)
 
-    // Check permissions API if available
-    let permissionStatus = 'prompt'
-    try {
-      if ('permissions' in navigator && 'query' in navigator.permissions) {
-        const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName })
-        permissionStatus = result.state
-        console.log('Geolocation permission status:', permissionStatus)
-        
-        if (permissionStatus === 'denied') {
-          setError('Location access is blocked. Please reset location permissions: Chrome/Edge: Settings → Privacy → Site Settings → Location → Reset permissions for this site. Safari: Safari → Settings → Websites → Location → Remove this site, then reload.')
-          setIsLoading(false)
-          return
-        }
-      }
-    } catch (e) {
-      // Permissions API not supported or failed, continue anyway
-      console.log('Permissions API not available:', e)
-    }
-
-    // Try with less strict options first, then fallback to high accuracy
+    // Try to get location - like Google Maps, just attempt it directly
+    // Browser will show permission prompt if needed
     const tryGetLocation = (options: PositionOptions, attempt: number = 1) => {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude: lat, longitude: lng } = position.coords
+          console.log('Location obtained:', lat, lng)
 
+          // Wait for map to be available if needed (with timeout)
+          const updateMapWithLocation = (retries = 10) => {
+            if (!map) {
+              if (retries > 0) {
+                // Map might still be initializing, wait a bit
+                setTimeout(() => updateMapWithLocation(retries - 1), 200)
+                return
+              } else {
+                // Map never became available, but still save the location
+                console.warn('Map not available, but saving location data')
+                setAddressInput(`${lat.toFixed(6)}, ${lng.toFixed(6)}`)
+                onLocationChange({
+                  latitude: lat,
+                  longitude: lng,
+                  locationRadius: locationRadius || 500,
+                  actualAddress: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+                })
+                setIsLoading(false)
+                setError('Location saved, but map is still loading. Please refresh the page.')
+                return
+              }
+            }
+
+            // Map is available, update it
+            try {
+              // Update map view first
+              map.setView([lat, lng], 13)
+
+              // Update or create marker
+              if (marker) {
+                marker.setLatLng([lat, lng])
+              } else {
+                import('leaflet').then((L) => {
+                  if (map) {
+                    const newMarker = L.default.marker([lat, lng]).addTo(map)
+                    setMarker(newMarker)
+                  }
+                })
+              }
+
+              // Update or create circle
+              const radiusInMeters = (locationRadius || 500) * 0.3048
+              if (circle) {
+                circle.setLatLng([lat, lng])
+                circle.setRadius(radiusInMeters)
+              } else {
+                import('leaflet').then((L) => {
+                  if (map) {
+                    const newCircle = L.default.circle([lat, lng], {
+                      radius: radiusInMeters,
+                      color: '#3b82f6',
+                      fillColor: '#3b82f6',
+                      fillOpacity: 0.2,
+                    }).addTo(map)
+                    setCircle(newCircle)
+                  }
+                })
+              }
+            } catch (mapError) {
+              console.error('Error updating map:', mapError)
+              // Still save the location even if map update fails
+            }
+          }
+
+          updateMapWithLocation()
+
+          // Try to reverse geocode for address, but don't block on failure
+          let address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`
           try {
-            // Reverse geocode to get address
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
               {
@@ -282,59 +332,32 @@ export default function ArtistLocationMap({
                 }
               }
             )
-            const data = await response.json()
-            const address = data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`
-
-            // Update marker
-            if (marker && map) {
-              marker.setLatLng([lat, lng])
-            } else if (map) {
-              import('leaflet').then((L) => {
-                const newMarker = L.default.marker([lat, lng]).addTo(map)
-                setMarker(newMarker)
-              })
+            if (response.ok) {
+              const data = await response.json()
+              if (data.display_name) {
+                address = data.display_name
+              }
             }
-
-            // Update circle
-            const radiusInMeters = (locationRadius || 500) * 0.3048
-            if (circle && map) {
-              circle.setLatLng([lat, lng])
-              circle.setRadius(radiusInMeters)
-            } else if (map) {
-              import('leaflet').then((L) => {
-                const newCircle = L.default.circle([lat, lng], {
-                  radius: radiusInMeters,
-                  color: '#3b82f6',
-                  fillColor: '#3b82f6',
-                  fillOpacity: 0.2,
-                }).addTo(map)
-                setCircle(newCircle)
-              })
-            }
-
-            if (map) {
-              map.setView([lat, lng], 13)
-            }
-
-            setAddressInput(address)
-
-            onLocationChange({
-              latitude: lat,
-              longitude: lng,
-              locationRadius: locationRadius || 500,
-              actualAddress: address,
-            })
-
-            setIsLoading(false)
           } catch (err) {
-            console.error('Error reverse geocoding:', err)
-            setError('Failed to get address for this location')
-            setIsLoading(false)
+            console.error('Error reverse geocoding (non-blocking):', err)
+            // Continue with coordinates as address
           }
+
+          setAddressInput(address)
+
+          // Always call onLocationChange with coordinates, even if reverse geocoding failed
+          onLocationChange({
+            latitude: lat,
+            longitude: lng,
+            locationRadius: locationRadius || 500,
+            actualAddress: address,
+          })
+
+          setIsLoading(false)
+          setError(null)
         },
         (err) => {
           console.error('Geolocation error:', err)
-          let errorMessage = 'Failed to get your location. '
           
           switch (err.code) {
             case err.PERMISSION_DENIED:
@@ -349,15 +372,22 @@ export default function ArtistLocationMap({
                 return
               }
               
-              errorMessage += 'Location access was denied. '
-              if (permissionStatus === 'prompt') {
-                errorMessage += 'Please check: 1) Browser location settings (lock icon → Location → Allow), 2) System location services are enabled, 3) Try refreshing the page and allowing the prompt.'
-              } else {
-                errorMessage += 'Location is blocked. To fix: Chrome/Edge: Settings → Privacy → Site Settings → Location → Find this site → Reset. Safari: Safari → Settings → Websites → Location → Remove this site, then reload.'
-              }
+              // Only show minimal error - user can enter address manually
+              setError('Location access denied. Please enter your address manually.')
+              setIsLoading(false)
               break
             case err.POSITION_UNAVAILABLE:
-              errorMessage += 'Location information is unavailable. Please check: 1) System location services are enabled, 2) GPS/Wi-Fi is working, 3) Try entering an address manually.'
+              // Retry once with cached location
+              if (attempt === 1) {
+                tryGetLocation({
+                  enableHighAccuracy: false,
+                  timeout: 10000,
+                  maximumAge: 300000 // Allow 5 minute old cache
+                }, 2)
+                return
+              }
+              setError('Location unavailable. Please enter your address manually.')
+              setIsLoading(false)
               break
             case err.TIMEOUT:
               // Retry with longer timeout if first attempt
@@ -370,25 +400,25 @@ export default function ArtistLocationMap({
                 }, 2)
                 return
               }
-              errorMessage += 'Location request timed out. Please check your internet connection or enter an address manually.'
+              setError('Location request timed out. Please enter your address manually.')
+              setIsLoading(false)
               break
             default:
-              errorMessage += 'An unknown error occurred. Please try entering an address manually or check your browser console for details.'
+              setError('Unable to get location. Please enter your address manually.')
+              setIsLoading(false)
               break
           }
-          
-          setError(errorMessage)
-          setIsLoading(false)
         },
         options
       )
     }
 
     // Start with high accuracy, will fallback if needed
+    // Use more lenient options for better compatibility
     tryGetLocation({
       enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
+      timeout: 15000, // Increased timeout for better reliability
+      maximumAge: 300000 // Allow 5 minute old cache as fallback
     })
   }
 

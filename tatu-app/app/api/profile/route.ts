@@ -80,6 +80,82 @@ export async function PUT(req: Request) {
       if (data.locationRadius !== undefined) updateData.locationRadius = data.locationRadius
       if (data.actualAddress !== undefined) updateData.actualAddress = data.actualAddress
 
+      // If location text is provided but lat/lng are missing, geocode it
+      if (data.location && data.location.trim() && (!data.latitude || !data.longitude)) {
+        try {
+          // Geocode the location using Nominatim (same as geocode API)
+          const nominatimResponse = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.location.trim())}&limit=1&addressdetails=1`,
+            {
+              headers: {
+                'User-Agent': 'TATU-App/1.0',
+                'Accept': 'application/json'
+              }
+            }
+          )
+          
+          if (nominatimResponse.ok) {
+            const nominatimData = await nominatimResponse.json()
+            if (Array.isArray(nominatimData) && nominatimData.length > 0) {
+              const result = nominatimData[0]
+              const lat = parseFloat(result.lat)
+              const lon = parseFloat(result.lon)
+              
+              // Validate coordinates
+              if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                updateData.latitude = lat
+                updateData.longitude = lon
+                if (!updateData.actualAddress && result.display_name) {
+                  updateData.actualAddress = result.display_name
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error geocoding location:', error)
+          // Continue without lat/lng if geocoding fails
+        }
+      }
+
+      // If artist is setting their location (latitude and longitude), make profile visible
+      // This ensures the artist becomes discoverable once they set their location on the map
+      // Artists with completedRegistration: true appear in search results and on the map
+      if (data.latitude !== undefined && data.longitude !== undefined) {
+        // Check if location is being set (not cleared - both values must be valid numbers)
+        const isSettingLocation = data.latitude !== null && 
+                                   data.longitude !== null &&
+                                   !isNaN(data.latitude) && 
+                                   !isNaN(data.longitude) &&
+                                   data.latitude >= -90 && data.latitude <= 90 &&
+                                   data.longitude >= -180 && data.longitude <= 180
+        if (isSettingLocation) {
+          updateData.completedRegistration = true
+        }
+      } else if (updateData.latitude !== undefined && updateData.longitude !== undefined) {
+        // Check if we geocoded the location and got lat/lng
+        const isSettingLocation = updateData.latitude !== null && 
+                                   updateData.longitude !== null &&
+                                   !isNaN(updateData.latitude) && 
+                                   !isNaN(updateData.longitude) &&
+                                   updateData.latitude >= -90 && updateData.latitude <= 90 &&
+                                   updateData.longitude >= -180 && updateData.longitude <= 180
+        if (isSettingLocation) {
+          updateData.completedRegistration = true
+        }
+      } else {
+        // If not updating location, check if user already has location data
+        // and ensure completedRegistration is set to true
+        const currentProfile = await prisma.artistProfile.findUnique({
+          where: { userId: session.user.id },
+          select: { latitude: true, longitude: true, completedRegistration: true }
+        })
+        
+        if (currentProfile?.latitude && currentProfile?.longitude && !currentProfile.completedRegistration) {
+          // User has location data but completedRegistration is false - fix it
+          updateData.completedRegistration = true
+        }
+      }
+
       const profile = await prisma.artistProfile.update({
         where: { userId: session.user.id },
         data: updateData,

@@ -72,11 +72,34 @@ input[type="range"].slider::-moz-range-thumb {
 /* Override Leaflet styles that might cause blue backgrounds */
 .leaflet-container {
   background: #000000 !important;
+  position: relative !important;
+  z-index: 0 !important;
 }
 
 .leaflet-tile {
   /* Brighten the lighter gray elements while keeping dark areas unchanged */
   filter: brightness(2.6) !important;
+}
+
+/* Ensure map fade overlays appear above Leaflet tiles */
+.leaflet-map-pane {
+  z-index: 0 !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 0 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 100 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 200 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 300 !important;
 }
 
 /* Ensure all sections have proper black background */

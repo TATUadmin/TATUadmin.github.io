@@ -310,12 +310,12 @@ export default function UnifiedInbox({ userId, userTier }: UnifiedInboxProps) {
                 <div
                   key={message.id}
                   onClick={() => setSelectedMessage(message)}
-                  className={`p-4 border-b border-gray-200 cursor-pointer transition-colors ${
+                  className={`p-4 border-b border-gray-800 cursor-pointer transition-colors rounded-2xl ${
                     selectedMessage?.id === message.id
-                      ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                      ? 'bg-gray-900 border-l-4 border-l-white'
                       : !message.isRead
-                      ? 'bg-blue-50/30 hover:bg-gray-50'
-                      : 'hover:bg-gray-50'
+                      ? 'bg-gray-900/50 hover:bg-gray-900'
+                      : 'hover:bg-gray-900'
                   }`}
                 >
                   <div className="flex items-start gap-3">

@@ -70,7 +70,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
   const pathname = usePathname()
   const { data: session } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [avatar, setAvatar] = useState<string | null>(null)
 
   // Fetch user avatar
@@ -84,6 +84,24 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
           }
         })
         .catch(err => console.error('Failed to fetch avatar:', err))
+    }
+  }, [session?.user?.id])
+
+  // Fetch notifications
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/notifications?limit=50')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.notifications) {
+            setNotifications(data.notifications)
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch notifications:', err)
+          // Fallback to mock notifications if API fails
+          setNotifications(mockNotifications)
+        })
     }
   }, [session?.user?.id])
 
@@ -116,12 +134,29 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
   const filteredNavigation = navigation.filter(item => item.roles.includes(actualUIRole))
   const userName = session?.user?.name || 'User'
 
-  const handleMarkAsRead = (id: string) => {
+  const handleMarkAsRead = async (id: string) => {
+    // Optimistically update UI
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    
+    // Update on server
+    try {
+      await fetch(`/api/notifications/${id}/read`, { method: 'POST' })
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error)
+      // Revert on error
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n))
+    }
   }
 
   const handleNotificationClick = (notification: Notification) => {
-    console.log('Notification clicked:', notification)
+    // Navigate based on notification type
+    if (notification.actionUrl) {
+      window.location.href = notification.actionUrl
+    } else if (notification.type === 'message') {
+      window.location.href = '/dashboard/messages'
+    } else if (notification.type === 'booking') {
+      window.location.href = '/dashboard/bookings'
+    }
   }
 
   return (
@@ -151,7 +186,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 hover:bg-gray-900 rounded-lg transition-colors"
+            className="lg:hidden p-2 hover:bg-gray-900 rounded-full transition-colors"
           >
             <XMarkIcon className="w-6 h-6 text-gray-400" />
           </button>
@@ -166,7 +201,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
                 key={item.name}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                className={`flex items-center px-4 py-3 text-sm font-medium rounded-full transition-colors ${
                   isActive
                     ? 'bg-white text-black'
                     : 'text-gray-400 hover:text-white hover:bg-gray-900'
@@ -183,7 +218,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
         <div className="border-t border-gray-900 p-4">
           <Link 
             href="/dashboard" 
-            className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-900 rounded-lg transition-colors"
+            className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-900 rounded-full transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0">
               {avatar ? (
@@ -203,7 +238,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
           </Link>
           <button 
             onClick={() => signOut({ callbackUrl: '/' })}
-            className="w-full mt-2 flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 rounded-lg transition-colors"
+            className="w-full mt-2 flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 rounded-full transition-colors"
           >
             <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2" />
             Sign Out
@@ -218,7 +253,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
           {/* Mobile Menu Button */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 hover:bg-gray-900 rounded-lg transition-colors"
+            className="lg:hidden p-2 hover:bg-gray-900 rounded-full transition-colors"
           >
             <Bars3Icon className="w-6 h-6 text-gray-400" />
           </button>
@@ -238,7 +273,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
             {/* User Avatar (Desktop) */}
             <Link 
               href="/dashboard"
-              className="hidden lg:flex items-center space-x-2 p-2 hover:bg-gray-900 rounded-lg transition-colors"
+              className="hidden lg:flex items-center space-x-2 p-2 hover:bg-gray-900 rounded-full transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center overflow-hidden">
                 {avatar ? (

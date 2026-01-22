@@ -296,187 +296,407 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="w-full space-y-8">
-        {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">My Profile</h1>
-          <p className="text-gray-400">Manage your profile and preferences</p>
-        </div>
+      <CustomerDashboard 
+        profile={profile}
+        setProfile={setProfile}
+        isLoading={isLoading}
+        isEditingBio={isEditingBio}
+        setIsEditingBio={setIsEditingBio}
+        bioText={bioText}
+        setBioText={setBioText}
+        isUploadingAvatar={isUploadingAvatar}
+        isLinkingInstagram={isLinkingInstagram}
+        handleAvatarUpload={handleAvatarUpload}
+        handleBioSave={handleBioSave}
+        handleLinkInstagram={handleLinkInstagram}
+        handleUnlinkInstagram={handleUnlinkInstagram}
+      />
+    </DashboardLayout>
+  )
+}
 
-        {/* Profile Section */}
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-          <div className="flex flex-col md:flex-row gap-8">
-            {/* Profile Picture */}
-            <div className="flex-shrink-0">
-              <div className="relative">
-                <div className="w-32 h-32 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center overflow-hidden">
-                  {profile?.avatar ? (
-                    <img
-                      src={profile.avatar}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
+// Customer Dashboard Component
+interface CustomerDashboardProps {
+  profile: CustomerProfile | null
+  setProfile: (profile: CustomerProfile | null) => void
+  isLoading: boolean
+  isEditingBio: boolean
+  setIsEditingBio: (editing: boolean) => void
+  bioText: string
+  setBioText: (text: string) => void
+  isUploadingAvatar: boolean
+  isLinkingInstagram: boolean
+  handleAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleBioSave: () => void
+  handleLinkInstagram: () => void
+  handleUnlinkInstagram: () => void
+}
+
+function CustomerDashboard({
+  profile,
+  setProfile,
+  isLoading,
+  isEditingBio,
+  setIsEditingBio,
+  bioText,
+  setBioText,
+  isUploadingAvatar,
+  isLinkingInstagram,
+  handleAvatarUpload,
+  handleBioSave,
+  handleLinkInstagram,
+  handleUnlinkInstagram,
+}: CustomerDashboardProps) {
+  const { data: session } = useSession()
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([])
+  const [isLoadingAppointments, setIsLoadingAppointments] = useState(true)
+
+  const fetchUpcomingAppointments = useCallback(async () => {
+    setIsLoadingAppointments(true)
+    try {
+      const response = await fetch('/api/appointments')
+      if (!response.ok) throw new Error('Failed to fetch appointments')
+      const appointments = await response.json()
+      
+      // Filter for upcoming appointments (status CONFIRMED or PENDING, date in future)
+      const now = new Date()
+      const upcoming = appointments
+        .filter((apt: any) => {
+          const aptDate = new Date(`${apt.date}T${apt.startTime}`)
+          return aptDate >= now && (apt.status === 'confirmed' || apt.status === 'pending')
+        })
+        .sort((a: any, b: any) => {
+          const dateA = new Date(`${a.date}T${a.startTime}`)
+          const dateB = new Date(`${b.date}T${b.startTime}`)
+          return dateA.getTime() - dateB.getTime()
+        })
+        .slice(0, 5) // Show top 5 upcoming
+      
+      setUpcomingAppointments(upcoming)
+    } catch (error) {
+      console.error('Error fetching appointments:', error)
+    } finally {
+      setIsLoadingAppointments(false)
+    }
+  }, [])
+
+  // Fetch upcoming appointments
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchUpcomingAppointments()
+    }
+  }, [session?.user?.id, fetchUpcomingAppointments])
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
+  const formatTime = (timeString: string) => {
+    // Handle both "HH:MM" and "HH:MM:SS" formats
+    const [hours, minutes] = timeString.split(':')
+    const hour = parseInt(hours)
+    const ampm = hour >= 12 ? 'PM' : 'AM'
+    const displayHour = hour % 12 || 12
+    return `${displayHour}:${minutes} ${ampm}`
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+        return 'bg-green-500/20 text-green-400 border border-green-500/30'
+      case 'pending':
+        return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+      default:
+        return 'bg-gray-800 text-gray-400 border border-gray-700'
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-full space-y-8">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+        <p className="text-gray-400">Welcome back! Here's what's happening today.</p>
+      </div>
+
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Profile and Instagram */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Profile Section */}
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
+            <div className="flex flex-col md:flex-row gap-8">
+              {/* Profile Picture */}
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center overflow-hidden">
+                    {profile?.avatar ? (
+                      <img
+                        src={profile.avatar}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-500">
+                        <CameraIcon className="w-12 h-12" />
+                      </div>
+                    )}
+                  </div>
+                  <label
+                    htmlFor="avatar-upload-customer"
+                    className="absolute bottom-0 right-0 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
+                    title="Upload profile picture"
+                  >
+                    <CameraIcon className="w-5 h-5" />
+                    <input
+                      id="avatar-upload-customer"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                      disabled={isUploadingAvatar}
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-500">
-                      <CameraIcon className="w-12 h-12" />
+                  </label>
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                     </div>
                   )}
                 </div>
-                <label
-                  htmlFor="avatar-upload"
-                  className="absolute bottom-0 right-0 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
-                  title="Upload profile picture"
-                >
-                  <CameraIcon className="w-5 h-5" />
-                  <input
-                    id="avatar-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarUpload}
-                    disabled={isUploadingAvatar}
-                  />
-                </label>
-                {isUploadingAvatar && (
-                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                  </div>
-                )}
               </div>
-                  </div>
 
-            {/* Bio Section */}
-            <div className="flex-1">
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-white">Bio</label>
-                  {!isEditingBio && (
-                    <button
-                      onClick={() => setIsEditingBio(true)}
-                      className="text-gray-400 hover:text-white transition-colors"
-                      title="Edit bio"
-                    >
-                      <PencilIcon className="w-5 h-5" />
-                    </button>
-                        )}
-                      </div>
-                {isEditingBio ? (
-                  <div className="space-y-3">
-                    <textarea
-                      value={bioText}
-                      onChange={(e) => setBioText(e.target.value)}
-                      maxLength={500}
-                      rows={4}
-                      className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-600 resize-none"
-                      placeholder="Tell us about yourself..."
-                    />
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">
-                        {bioText.length}/500 characters
+              {/* Name and Bio */}
+              <div className="flex-1">
+                {/* User Name */}
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  {session?.user?.name || 'Customer'}
+                </h2>
+
+                {/* Bio Section */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-white">Bio</label>
+                    {!isEditingBio && (
+                      <button
+                        onClick={() => setIsEditingBio(true)}
+                        className="text-gray-400 hover:text-white transition-colors"
+                        title="Edit bio"
+                      >
+                        <PencilIcon className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                  {isEditingBio ? (
+                    <div className="space-y-3">
+                      <textarea
+                        value={bioText}
+                        onChange={(e) => setBioText(e.target.value)}
+                        maxLength={500}
+                        rows={4}
+                        className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-600 resize-none"
+                        placeholder="Tell us about yourself..."
+                      />
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">
+                          {bioText.length}/500 characters
                         </span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            setIsEditingBio(false)
-                            setBioText(profile?.bio || '')
-                          }}
-                          className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
-                        >
-                          Cancel
-                            </button>
-                        <button
-                          onClick={handleBioSave}
-                          className="px-4 py-2 text-sm bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                        >
-                          Save
-                            </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setIsEditingBio(false)
+                              setBioText(profile?.bio || '')
+                            }}
+                            className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleBioSave}
+                            className="px-4 py-2 text-sm bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                          >
+                            Save
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-300 min-h-[60px]">
-                    {profile?.bio || (
-                      <span className="text-gray-500 italic">No bio yet. Click the edit icon to add one.</span>
-                    )}
-                  </p>
-                )}
+                  ) : (
+                    <p className="text-gray-300 min-h-[60px]">
+                      {profile?.bio || (
+                        <span className="text-gray-500 italic">No bio yet. Click the edit icon to add one.</span>
+                      )}
+                    </p>
+                  )}
+                </div>
               </div>
+            </div>
+          </div>
+
+          {/* Instagram Section */}
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-white mb-1">Instagram Preview</h2>
+                <p className="text-sm text-gray-400">
+                  {profile?.instagramLinked
+                    ? `Connected as @${profile.instagramHandle}`
+                    : 'Link your Instagram to showcase recent photos'}
+                </p>
               </div>
+              {profile?.instagramLinked ? (
+                <button
+                  onClick={handleUnlinkInstagram}
+                  className="px-4 py-2 text-sm bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors border border-gray-700 flex items-center gap-2"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                  Unlink
+                </button>
+              ) : (
+                <button
+                  onClick={handleLinkInstagram}
+                  disabled={isLinkingInstagram}
+                  className="px-4 py-2 text-sm bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center gap-2 disabled:opacity-50"
+                >
+                  <LinkIcon className="w-4 h-4" />
+                  {isLinkingInstagram ? 'Linking...' : 'Link Instagram'}
+                </button>
+              )}
+            </div>
+
+            {profile?.instagramLinked ? (
+              profile.instagramImages && profile.instagramImages.length > 0 ? (
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                  {profile.instagramImages.slice(0, 6).map((image) => (
+                    <div
+                      key={image.id}
+                      className="aspect-square rounded-lg overflow-hidden bg-gray-800 border border-gray-700"
+                    >
+                      <img
+                        src={image.thumbnail || image.url}
+                        alt={image.caption || 'Instagram photo'}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 border border-gray-800 rounded-lg">
+                  <p className="text-gray-400 mb-2">No Instagram photos found</p>
+                  <p className="text-sm text-gray-500">Your recent photos will appear here</p>
+                </div>
+              )
+            ) : (
+              <div className="text-center py-12 border border-gray-800 rounded-lg border-dashed">
+                <LinkIcon className="w-12 h-12 text-gray-700 mx-auto mb-4" />
+                <p className="text-gray-400 mb-2">Instagram not connected</p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Connect your Instagram account to display your recent photos
+                </p>
+                <button
+                  onClick={handleLinkInstagram}
+                  disabled={isLinkingInstagram}
+                  className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
+                >
+                  {isLinkingInstagram ? 'Linking...' : 'Connect Instagram'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Instagram Section */}
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-semibold text-white mb-1">Instagram Preview</h2>
-              <p className="text-sm text-gray-400">
-                {profile?.instagramLinked
-                  ? `Connected as @${profile.instagramHandle}`
-                  : 'Link your Instagram to showcase recent photos'}
-              </p>
+        {/* Right Column - Upcoming Appointments */}
+        <div className="lg:col-span-1">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 sticky top-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-white" />
+                <h2 className="text-xl font-bold text-white">Upcoming Appointments</h2>
               </div>
-            {profile?.instagramLinked ? (
-              <button
-                onClick={handleUnlinkInstagram}
-                className="px-4 py-2 text-sm bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors border border-gray-700 flex items-center gap-2"
+              <Link
+                href="/dashboard/bookings"
+                className="text-sm text-white hover:text-gray-300 transition-colors flex items-center gap-1"
               >
-                <XMarkIcon className="w-4 h-4" />
-                Unlink
-              </button>
+                View all
+                <ArrowRightIcon className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {isLoadingAppointments ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              </div>
+            ) : upcomingAppointments.length === 0 ? (
+              <div className="text-center py-8">
+                <CalendarIcon className="w-12 h-12 text-gray-700 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">No upcoming appointments</p>
+              </div>
             ) : (
-              <button
-                onClick={handleLinkInstagram}
-                disabled={isLinkingInstagram}
-                className="px-4 py-2 text-sm bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center gap-2 disabled:opacity-50"
-              >
-                <LinkIcon className="w-4 h-4" />
-                {isLinkingInstagram ? 'Linking...' : 'Link Instagram'}
-              </button>
-            )}
+              <div className="space-y-3">
+                {upcomingAppointments.map((appointment) => (
+                  <div
+                    key={appointment.id}
+                    className="bg-black border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold mb-1">
+                          {appointment.artistName || 'Artist'}
+                        </h3>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+                          {appointment.status}
+                        </span>
+                      </div>
+                      {appointment.amount > 0 && (
+                        <span className="text-white font-medium">${appointment.amount}</span>
+                      )}
+                    </div>
+                    
+                    <p className="text-gray-400 text-sm mb-3">{appointment.serviceName || 'Tattoo Session'}</p>
+                    
+                    <div className="space-y-1 mb-3">
+                      <div className="flex items-center gap-2 text-gray-400 text-sm">
+                        <CalendarIcon className="w-4 h-4" />
+                        {formatDate(appointment.date)}
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400 text-sm">
+                        <ClockIcon className="w-4 h-4" />
+                        {formatTime(appointment.startTime)}
+                      </div>
                     </div>
 
-          {profile?.instagramLinked ? (
-            profile.instagramImages && profile.instagramImages.length > 0 ? (
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-                {profile.instagramImages.slice(0, 6).map((image) => (
-                  <div
-                    key={image.id}
-                    className="aspect-square rounded-lg overflow-hidden bg-gray-800 border border-gray-700"
-                  >
-                    <img
-                      src={image.thumbnail || image.url}
-                      alt={image.caption || 'Instagram photo'}
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="flex gap-2">
+                      {appointment.artistId && (
+                        <Link
+                          href={`/artist/${appointment.artistId}`}
+                          className="flex-1 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium text-center"
+                        >
+                          View Artist
+                        </Link>
+                      )}
+                      <button className="flex-1 px-3 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                        Details
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="text-center py-12 border border-gray-800 rounded-lg">
-                <p className="text-gray-400 mb-2">No Instagram photos found</p>
-                <p className="text-sm text-gray-500">Your recent photos will appear here</p>
-              </div>
-            )
-          ) : (
-            <div className="text-center py-12 border border-gray-800 rounded-lg border-dashed">
-              <LinkIcon className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-              <p className="text-gray-400 mb-2">Instagram not connected</p>
-              <p className="text-sm text-gray-500 mb-4">
-                Connect your Instagram account to display your recent photos
-              </p>
-              <button
-                onClick={handleLinkInstagram}
-                disabled={isLinkingInstagram}
-                className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
-              >
-                {isLinkingInstagram ? 'Linking...' : 'Connect Instagram'}
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
 

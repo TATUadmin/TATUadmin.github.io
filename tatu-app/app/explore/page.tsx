@@ -9,7 +9,6 @@ import { MagnifyingGlassIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/o
 import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
 import { classifySearch, formatSearchClassification } from '@/lib/smart-search'
-import { ALL_ARTISTS, Artist } from '@/lib/all-artists-data'
 import PortfolioGallery from '@/app/components/PortfolioGallery'
 
 // Lazy load the map component to improve initial page load
@@ -148,91 +147,24 @@ export default function ExplorePage() {
     })
   }
 
-  // Use centralized artist data
-  const mockArtists: Artist[] = ALL_ARTISTS
-
   const fetchArtists = async () => {
     setIsLoading(true)
     try {
-      // Removed artificial delay for faster loading
-      let filteredArtists = [...mockArtists]
+      const params = new URLSearchParams()
+      if (searchQuery) params.set('query', searchQuery)
+      if (locationFilter) params.set('location', locationFilter)
+      if (styleFilter) params.set('style', styleFilter)
+      if (sortBy) params.set('sortBy', sortBy)
+      params.set('limit', '100')
       
-      // Enhanced search by name, bio, specialties, or location
-      if (searchQuery) {
-        const searchTerms = searchQuery.toLowerCase().trim().split(/\s+/).filter(term => term.length > 0)
-        
-        if (searchTerms.length > 0) {
-          filteredArtists = filteredArtists.filter(artist => {
-            // Check if ALL search terms match somewhere in the artist's profile
-            return searchTerms.every(term => 
-              artist.name.toLowerCase().includes(term) ||
-              artist.bio.toLowerCase().includes(term) ||
-              artist.specialties.some(specialty => specialty.toLowerCase().includes(term)) ||
-              artist.location.toLowerCase().includes(term) ||
-              artist.instagram.toLowerCase().includes(term)
-            )
-          })
-        }
-      }
+      const response = await fetch(`/api/artists?${params.toString()}`)
+      if (!response.ok) throw new Error('Failed to fetch artists')
       
-      // Filter by location (more flexible matching)
-      if (locationFilter) {
-        const searchLocation = locationFilter.toLowerCase().trim()
-        filteredArtists = filteredArtists.filter(artist => {
-          // Check if the artist's location contains the searched city or state
-          const artistLocation = artist.location.toLowerCase()
-          const cityMatch = artistLocation.includes(searchLocation)
-          const stateMatch = artistLocation.includes(searchLocation)
-          return cityMatch || stateMatch
-        })
-      }
-      
-      // Filter by style (more flexible matching)
-      if (styleFilter) {
-        const style = styleFilter.toLowerCase()
-        console.log('Filtering by style:', style)
-        const beforeCount = filteredArtists.length
-        filteredArtists = filteredArtists.filter(artist => {
-          const hasStyle = artist.specialties.some(specialty => 
-            specialty.toLowerCase().includes(style) ||
-            specialty.toLowerCase().replace(/\s+/g, '').includes(style.replace(/\s+/g, ''))
-          )
-          console.log(`Artist ${artist.name} has style ${style}:`, hasStyle, 'Specialties:', artist.specialties)
-          return hasStyle
-        })
-        console.log(`Style filter applied: ${beforeCount} -> ${filteredArtists.length} artists`)
-      }
-      
-      // Note: When both locationFilter and styleFilter are specified,
-      // the filtering above will show only artists that meet BOTH criteria
-      // because the filters are applied sequentially (AND logic)
-      
-      // Sort artists
-      if (sortBy) {
-        switch (sortBy) {
-          case 'rating':
-            filteredArtists.sort((a, b) => b.rating - a.rating)
-            break
-          case 'reviews':
-            filteredArtists.sort((a, b) => b.reviewCount - a.reviewCount)
-            break
-          case 'portfolio':
-            filteredArtists.sort((a, b) => b.portfolioCount - a.portfolioCount)
-            break
-          case 'recent':
-            // For demo purposes, sort by ID (newer artists have higher IDs)
-            filteredArtists.sort((a, b) => parseInt(b.id) - parseInt(a.id))
-            break
-          default:
-            break
-        }
-      }
-      
-      setArtists(filteredArtists)
+      const data = await response.json()
+      setArtists(data.artists || [])
     } catch (error) {
       console.error('Error fetching artists:', error)
-      // Fallback to mock data on error
-      setArtists(mockArtists)
+      setArtists([])
     } finally {
       setIsLoading(false)
     }
@@ -370,68 +302,16 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header Section */}
-      <section className="pt-20 pb-8">
-        <div className="container">
-          <h1 className="display text-4xl md:text-5xl text-white mb-4">
-            Browse Artists
-          </h1>
-          <p className="body text-lg text-gray-400 max-w-2xl">
-            Discover verified tattoo artists from around the world. Browse portfolios, read reviews, and book your next session.
-          </p>
-        </div>
-      </section>
-
       {/* Map Section - Full Width Edge to Edge */}
-      <section className="relative">
+      <section className="relative z-0 pt-16 overflow-visible">
         {/* Full Width Interactive Map - Edge to Edge */}
-        <div className="w-full">
+        <div className="w-full h-[calc(100vh-20rem)] min-h-[500px] overflow-visible">
           <LeafletMap searchLocation={mapLocation} styleFilter={styleFilter} minReviews={minReviews} />
         </div>
       </section>
 
-      {/* Portfolio Gallery Section */}
-      <section className="py-20 bg-black">
-        <div className="container">
-          <div className="mb-8">
-            <h2 className="display text-3xl md:text-4xl text-white mb-2">
-              Featured Portfolio
-            </h2>
-            <p className="body text-lg text-gray-400 max-w-2xl">
-              Browse stunning tattoo artwork from our verified artists. Filter by style, search by tags, and discover your next piece.
-            </p>
-          </div>
-          
-          {isLoadingPortfolio ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="card p-6 animate-pulse">
-                  <div className="w-full h-64 bg-gray-800 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-700 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <PortfolioGallery
-              items={portfolioItems}
-              onLike={handlePortfolioLike}
-              onShare={handlePortfolioShare}
-              onView={handlePortfolioView}
-              showFilters={true}
-              showStats={true}
-              layout="grid"
-              columns={3}
-              enableLightbox={true}
-              enableSocial={true}
-              className="bg-transparent"
-            />
-          )}
-        </div>
-      </section>
-
-      {/* Search Section */}
-      <section className="py-10 -mt-8 bg-black relative z-10">
+      {/* Search Section - Map Filters */}
+      <section className="py-10 bg-black relative z-10">
         <div className="container">
           {/* First Row - Search input and Sort By */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -592,6 +472,46 @@ export default function ExplorePage() {
             </div>
           )}
 
+        </div>
+      </section>
+
+      {/* Portfolio Gallery Section */}
+      <section className="py-20 bg-black">
+        <div className="container">
+          <div className="mb-8">
+            <h2 className="display text-3xl md:text-4xl text-white mb-2">
+              Featured Portfolio
+            </h2>
+            <p className="body text-lg text-gray-400 max-w-2xl">
+              Browse stunning tattoo artwork from our verified artists. Filter by style, search by tags, and discover your next piece.
+            </p>
+          </div>
+          
+          {isLoadingPortfolio ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="card p-6 animate-pulse">
+                  <div className="w-full h-64 bg-gray-800 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <PortfolioGallery
+              items={portfolioItems}
+              onLike={handlePortfolioLike}
+              onShare={handlePortfolioShare}
+              onView={handlePortfolioView}
+              showFilters={true}
+              showStats={true}
+              layout="grid"
+              columns={3}
+              enableLightbox={true}
+              enableSocial={true}
+              className="bg-transparent"
+            />
+          )}
         </div>
       </section>
 

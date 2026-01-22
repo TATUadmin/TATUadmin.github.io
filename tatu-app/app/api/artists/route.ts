@@ -160,11 +160,14 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
   try {
     // Build where conditions
+    // Only show artists who have completed registration AND have set their location
+    // This ensures only artists with location data appear in search results and on the map
     const whereConditions: any = {
       role: 'ARTIST',
-      status: 'ACTIVE',
       artistProfile: {
-        completedRegistration: true
+        completedRegistration: true,
+        latitude: { not: null },
+        longitude: { not: null }
       }
     }
 
@@ -291,7 +294,11 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         verified: false, // Not in ArtistProfile schema - would need to add if needed
         featured: artist.artistProfile?.featuredListingActive || false,
         shop: artist.shop,
-        recentWork: artist.portfolioItems
+        recentWork: artist.portfolioItems,
+        // Include location data for map display
+        latitude: artist.artistProfile?.latitude || null,
+        longitude: artist.artistProfile?.longitude || null,
+        locationRadius: artist.artistProfile?.locationRadius || null
       }
     })
 

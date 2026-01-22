@@ -186,7 +186,7 @@ export default function PortfolioGallery({
     <div className={`space-y-6 ${className}`}>
       {/* Filters and Controls */}
       {showFilters && (
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Search */}
             <div className="flex-1 max-w-md">
@@ -197,14 +197,14 @@ export default function PortfolioGallery({
                   placeholder="Search portfolio..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-black border border-gray-700 rounded-md text-white placeholder-gray-400 focus:ring-2 focus:ring-gray-600 focus:border-gray-600"
+                  className="w-full pl-10 pr-4 py-2 bg-black border border-gray-700 rounded-full text-white placeholder-gray-400 focus:ring-2 focus:ring-gray-600 focus:border-gray-600"
                 />
               </div>
             </div>
 
             {/* View Controls */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center bg-gray-800 rounded-md p-1 border border-gray-700">
+              <div className="flex items-center bg-gray-800 rounded-full p-1 border border-gray-700">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded transition-colors ${
@@ -230,7 +230,7 @@ export default function PortfolioGallery({
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 bg-black border border-gray-700 rounded-md text-white focus:ring-2 focus:ring-gray-600 focus:border-gray-600"
+                className="px-3 py-2 bg-black border border-gray-700 rounded-full text-white focus:ring-2 focus:ring-gray-600 focus:border-gray-600"
               >
                 <option value="newest" className="bg-gray-900">Newest First</option>
                 <option value="oldest" className="bg-gray-900">Oldest First</option>
@@ -344,7 +344,7 @@ export default function PortfolioGallery({
           {filteredItems.map((item, index) => (
             <div
               key={item.id}
-              className="group bg-gray-900 rounded-lg border border-gray-800 overflow-hidden hover:border-gray-700 transition-all duration-300 cursor-pointer"
+              className="group bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden hover:border-gray-700 transition-all duration-300 cursor-pointer"
               onClick={() => openLightbox(index)}
             >
               {/* Image */}

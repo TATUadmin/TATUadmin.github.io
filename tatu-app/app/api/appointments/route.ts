@@ -59,6 +59,10 @@ export async function GET(request: NextRequest) {
     // Transform the data for the frontend
     const transformedAppointments = appointments.map(apt => ({
       id: apt.id,
+      artistId: apt.artistId,
+      artistName: apt.Appointment_artistIdToUser?.name || 'Unknown Artist',
+      artistEmail: apt.Appointment_artistIdToUser?.email || '',
+      artistAvatar: apt.Appointment_artistIdToUser?.ArtistProfile?.avatar || null,
       clientId: apt.clientId,
       clientName: apt.Appointment_clientIdToUser?.name || 'Unknown Client',
       clientEmail: apt.Appointment_clientIdToUser?.email || '',

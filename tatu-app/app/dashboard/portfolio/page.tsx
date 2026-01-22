@@ -628,7 +628,7 @@ export default function PortfolioPage() {
                 className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
                     ? 'border-white text-white'
-                    : 'border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-700'
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700'
                 }`}
               >
                 {tab.icon}
