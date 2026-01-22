@@ -516,15 +516,30 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
         
         const responseData = await response.json()
         
-        // API returns ApiResponse format: { success: true, data: [...], meta: {...} }
+        // API returns ApiResponse.paginated format: { success: true, data: [...], meta: {...} }
         // Handle both ApiResponse format and direct array format
-        const artistsArray = Array.isArray(responseData) 
-          ? responseData 
-          : (responseData.data || responseData.artists || [])
+        let artistsArray = []
+        if (Array.isArray(responseData)) {
+          artistsArray = responseData
+        } else if (responseData.data && Array.isArray(responseData.data)) {
+          artistsArray = responseData.data
+        } else if (responseData.artists && Array.isArray(responseData.artists)) {
+          artistsArray = responseData.artists
+        } else if (responseData.success && responseData.data) {
+          artistsArray = Array.isArray(responseData.data) ? responseData.data : []
+        }
+        
+        console.log('Fetched artists from API:', artistsArray.length, 'total artists')
         
         // Transform API data to match component's Artist interface
         const transformedArtists = artistsArray
-          .filter((artist: any) => artist.latitude && artist.longitude) // Only include artists with location data
+          .filter((artist: any) => {
+            const hasLocation = artist.latitude && artist.longitude
+            if (!hasLocation) {
+              console.log('Filtered out artist (no location):', artist.name, artist.id)
+            }
+            return hasLocation
+          })
           .map((artist: any) => ({
             id: artist.id,
             name: artist.name || 'Unknown Artist',
@@ -542,11 +557,18 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
             city: artist.city || ''
           }))
         
-        // Filter by minimum reviews
-        const filteredArtists = transformedArtists.filter((artist: any) => 
-          artist.reviewCount >= minReviews
-        )
+        console.log('Transformed artists with location:', transformedArtists.length)
         
+        // Filter by minimum reviews
+        const filteredArtists = transformedArtists.filter((artist: any) => {
+          const meetsMinReviews = artist.reviewCount >= minReviews
+          if (!meetsMinReviews) {
+            console.log('Filtered out artist (min reviews):', artist.name, 'has', artist.reviewCount, 'reviews, need', minReviews)
+          }
+          return meetsMinReviews
+        })
+        
+        console.log('Final filtered artists:', filteredArtists.length)
         setArtists(filteredArtists)
       } catch (error) {
         console.error('Error fetching artists:', error)
@@ -601,14 +623,26 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
           fillOpacity: 0.8
         })
 
-        marker.bindPopup(`
-          <div class="p-2">
-            <h3 class="font-semibold text-sm">${artist.name}</h3>
-            <p class="text-xs text-gray-600">${artist.specialty}</p>
-            <p class="text-xs">⭐ ${artist.rating.toFixed(1)} (${artist.reviewCount} reviews)</p>
-            <Link href="/artist/${artist.id}" class="text-blue-600 hover:underline text-xs">View Profile</Link>
+        // Create popup content with proper styling and clickable link
+        const popupContent = `
+          <div style="min-width: 220px; padding: 12px; background-color: #111827; color: #fff; border-radius: 8px;">
+            <h3 style="font-weight: 600; font-size: 16px; margin: 0 0 6px 0; color: #fff;">${artist.name}</h3>
+            <p style="font-size: 13px; color: #9ca3af; margin: 0 0 6px 0;">${artist.specialty}</p>
+            <p style="font-size: 13px; color: #fff; margin: 0 0 10px 0;">⭐ ${artist.rating.toFixed(1)} (${artist.reviewCount} ${artist.reviewCount === 1 ? 'review' : 'reviews'})</p>
+            <a href="/artist/${artist.id}" style="display: inline-block; padding: 8px 16px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 500; transition: background-color 0.2s; cursor: pointer;" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">View Profile</a>
           </div>
-        `)
+        `
+        
+        marker.bindPopup(popupContent, {
+          className: 'custom-popup',
+          maxWidth: 280,
+          closeButton: true
+        })
+        
+        // Add click handler to marker to open profile page when marker is clicked
+        marker.on('click', () => {
+          // Popup opens automatically, link in popup handles navigation
+        })
 
         marker.addTo(mapInstanceRef.current!)
       markersRef.current.push(marker)
