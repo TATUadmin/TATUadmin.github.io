@@ -10,6 +10,7 @@ import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
 import { classifySearch, formatSearchClassification } from '@/lib/smart-search'
 import PortfolioGallery from '@/app/components/PortfolioGallery'
+import { useI18n } from '@/lib/i18n/context'
 
 // Lazy load the map component to improve initial page load
 const LeafletMap = dynamic(() => import('../components/LeafletMap'), {
@@ -20,6 +21,7 @@ const LeafletMap = dynamic(() => import('../components/LeafletMap'), {
 })
 
 export default function ExplorePage() {
+  const { t } = useI18n()
   const searchParams = useSearchParams()
   const [artists, setArtists] = useState<Artist[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -320,7 +322,7 @@ export default function ExplorePage() {
               <MagnifyingGlassIcon className="absolute left-4 w-5 h-5 text-gray-400 pointer-events-none z-10" style={{top: '50%', transform: 'translateY(-50%)'}} />
               <input
                 type="text"
-                placeholder="Search artists, styles, keywords..."
+                placeholder={t('explore.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -331,7 +333,7 @@ export default function ExplorePage() {
             {/* Min Reviews Slider */}
             <div className="relative px-2">
               <label className="block text-sm text-gray-400 font-medium mb-2">
-                Min Reviews: {minReviews}+
+                {t('explore.minReviews')}: {minReviews}+
               </label>
               <input
                 type="range"
@@ -358,7 +360,7 @@ export default function ExplorePage() {
               <MapPinIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
               <input
                 type="text"
-                placeholder="Enter a location"
+                placeholder={t('explore.enterLocation')}
                 value={locationFilter}
                 onChange={(e) => {
                   setLocationFilter(e.target.value)
@@ -381,7 +383,7 @@ export default function ExplorePage() {
                 className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-full text-white focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200 appearance-none cursor-pointer"
                 style={{paddingRight: '3rem'}}
               >
-                <option value="" className="bg-gray-800 text-white">All Styles</option>
+                <option value="" className="bg-gray-800 text-white">{t('explore.allStyles')}</option>
                 {styles.map((style) => (
                   <option key={style} value={style.toLowerCase()} className="bg-gray-800 text-white">
                     {style}
@@ -401,7 +403,7 @@ export default function ExplorePage() {
                 onClick={handleSearch}
                 className="w-full px-8 py-3 bg-white border-2 border-gray-400 text-black rounded-full font-semibold hover:bg-gray-100 transition-all duration-200 text-center"
               >
-                Search
+                {t('common.search')}
               </button>
             </div>
 
@@ -421,7 +423,7 @@ export default function ExplorePage() {
                 }}
                 className="w-full px-8 py-3 bg-transparent border-2 border-gray-400 text-white rounded-full font-semibold hover:bg-gray-700 transition-all duration-200 text-center"
               >
-                Clear Filters
+                {t('explore.clearFilters')}
               </button>
             </div>
           </div>
@@ -430,20 +432,20 @@ export default function ExplorePage() {
           {lastSearchClassification && lastSearchClassification.type !== 'general' && (
             <div className="mt-3 py-2 px-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg">
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-400">Smart Search detected:</span>
+                <span className="text-gray-400">{t('explore.smartSearchDetected')}:</span>
                 {lastSearchClassification.type === 'location' && (
                   <span className="text-orange-400 font-medium">
-                    📍 Location: {lastSearchClassification.location}
+                    📍 {t('explore.location')}: {lastSearchClassification.location}
                   </span>
                 )}
                 {lastSearchClassification.type === 'style' && (
                   <span className="text-yellow-400 font-medium">
-                    🎨 Style: {lastSearchClassification.style}
+                    🎨 {t('explore.style')}: {lastSearchClassification.style}
                   </span>
                 )}
                 {lastSearchClassification.type === 'artist_name' && (
                   <span className="text-teal-400 font-medium">
-                    👤 Artist: {lastSearchClassification.artistName}
+                    👤 {t('explore.artist')}: {lastSearchClassification.artistName}
                   </span>
                 )}
                 {lastSearchClassification.type === 'combined' && (

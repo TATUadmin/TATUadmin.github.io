@@ -193,7 +193,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               name: 'My Calendar',
-              provider: 'TATU',
+      provider: 'TATU',
               color: '#FFFFFF',
               isDefault: true
             })
@@ -205,7 +205,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
               name: newCalendar.calendar.name,
               provider: newCalendar.calendar.provider,
               color: newCalendar.calendar.color || '#FFFFFF',
-              enabled: true,
+      enabled: true,
               isDefault: true
             }]
           }
@@ -426,7 +426,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
           {isLoading.calendars ? (
             <div className="text-sm text-gray-500">Loading calendars...</div>
           ) : calendars.length === 0 ? (
-            <div className="rounded-lg border border-gray-800 bg-black p-4 text-sm text-gray-400">
+            <div className="rounded-xl border border-gray-800 bg-black p-4 text-sm text-gray-400">
               No calendars yet. Create one to start scheduling.
             </div>
           ) : (
@@ -434,7 +434,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
               {calendars.map(calendar => (
                 <div
                   key={calendar.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-800 bg-black px-3 py-2"
+                  className="flex items-center justify-between rounded-xl border border-gray-800 bg-black px-3 py-2"
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -463,7 +463,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
 
           <button
             onClick={() => setShowCreateCalendarModal(true)}
-            className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors"
+            className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-xl hover:bg-yellow-400 hover:text-black transition-colors"
           >
             <Plus size={18} />
             New Calendar
@@ -471,7 +471,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
         </div>
 
         {hasConflicts && (
-          <div className="mt-6 p-4 bg-gray-900 border border-gray-800 rounded-lg">
+          <div className="mt-6 p-4 bg-gray-900 border border-gray-800 rounded-xl">
             <div className="flex items-start gap-2">
               <AlertCircle className="text-white mt-0.5" size={18} />
               <div>
@@ -485,12 +485,12 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
         )}
 
         {userTier === 'FREE' && (
-          <div className="mt-6 p-4 border border-gray-800 rounded-lg bg-black">
+          <div className="mt-6 p-4 border border-gray-800 rounded-xl bg-black">
             <h4 className="text-sm font-semibold text-white">Upgrade for more syncs</h4>
             <p className="text-xs text-gray-500 mt-1">
               Connect more calendars and unlock advanced scheduling tools.
             </p>
-            <button className="mt-3 w-full px-3 py-2 bg-white text-black text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+            <button className="mt-3 w-full px-3 py-2 bg-white text-black text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors">
               Upgrade Plan
             </button>
           </div>
@@ -509,12 +509,12 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
           <div className="flex items-center gap-2">
               <button
               onClick={() => openCreateEventModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-xl hover:bg-gray-200 transition-colors"
             >
               <Plus size={18} />
               Add Event
             </button>
-            <button className="p-2 bg-black border border-gray-800 rounded-lg hover:bg-gray-900 transition-colors">
+            <button className="p-2 bg-black border border-gray-800 rounded-xl hover:bg-gray-900 transition-colors">
               <Settings size={18} className="text-gray-400" />
             </button>
           </div>
@@ -538,12 +538,12 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
       {/* Event Details Modal */}
       {showEventModal && selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="w-full max-w-xl rounded-lg border border-gray-800 bg-gray-950 p-6">
+          <div className="w-full max-w-xl rounded-xl border border-gray-900 bg-gray-950 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">Event Details</h3>
               <button
                 onClick={() => setShowEventModal(false)}
-                className="rounded-lg p-2 text-gray-400 hover:bg-gray-900 hover:text-white"
+                className="rounded-xl p-2 text-gray-400 hover:bg-gray-900 hover:text-white"
               >
                 <X size={18} />
               </button>
@@ -595,12 +595,12 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
       {/* Create Event Modal */}
       {showCreateEventModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="w-full max-w-xl rounded-lg border border-gray-800 bg-gray-950 p-6">
+          <div className="w-full max-w-xl rounded-xl border border-gray-900 bg-gray-950 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">Add Event</h3>
               <button
                 onClick={() => setShowCreateEventModal(false)}
-                className="rounded-lg p-2 text-gray-400 hover:bg-gray-900 hover:text-white"
+                className="rounded-xl p-2 text-gray-400 hover:bg-gray-900 hover:text-white"
               >
                 <X size={18} />
               </button>
@@ -614,7 +614,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
                 <select
                   value={eventForm.calendarId}
                   onChange={event => setEventForm(prev => ({ ...prev, calendarId: event.target.value }))}
-                  className={`w-full rounded-md border px-3 py-2 text-sm text-white focus:outline-none ${
+                  className={`w-full rounded-xl border px-3 py-2 text-sm text-white focus:outline-none ${
                     !eventForm.calendarId ? 'border-red-500 bg-black' : 'border-gray-800 bg-black focus:border-white'
                   }`}
                   required
@@ -639,7 +639,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
                   type="text"
                   value={eventForm.title}
                   onChange={event => setEventForm(prev => ({ ...prev, title: event.target.value }))}
-                  className={`w-full rounded-md border px-3 py-2 text-sm text-white focus:outline-none ${
+                  className={`w-full rounded-xl border px-3 py-2 text-sm text-white focus:outline-none ${
                     !eventForm.title ? 'border-red-500 bg-black' : 'border-gray-800 bg-black focus:border-white'
                   }`}
                   placeholder="Enter event title"
@@ -656,7 +656,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
                     type="date"
                     value={eventForm.date}
                     onChange={event => setEventForm(prev => ({ ...prev, date: event.target.value }))}
-                    className={`w-full rounded-md border px-3 py-2 text-sm text-white focus:outline-none ${
+                    className={`w-full rounded-xl border px-3 py-2 text-sm text-white focus:outline-none ${
                       !eventForm.date ? 'border-red-500 bg-black' : 'border-gray-800 bg-black focus:border-white'
                     }`}
                     required
@@ -676,7 +676,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
                         endTime: prev.endTime || getDefaultEndTime(event.target.value)
                       }))
                     }
-                    className={`w-full rounded-md border px-3 py-2 text-sm text-white focus:outline-none ${
+                    className={`w-full rounded-xl border px-3 py-2 text-sm text-white focus:outline-none ${
                       !eventForm.startTime ? 'border-red-500 bg-black' : 'border-gray-800 bg-black focus:border-white'
                     }`}
                     required
@@ -688,7 +688,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
                     type="time"
                     value={eventForm.endTime}
                     onChange={event => setEventForm(prev => ({ ...prev, endTime: event.target.value }))}
-                    className="w-full rounded-md border border-gray-800 bg-black px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
+                    className="w-full rounded-xl border border-gray-800 bg-black px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
                   />
                 </div>
               </div>
@@ -729,7 +729,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
                   <select
                     value={eventForm.eventType}
                     onChange={event => setEventForm(prev => ({ ...prev, eventType: event.target.value as any }))}
-                    className="w-full rounded-md border border-gray-800 bg-black px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
+                    className="w-full rounded-xl border border-gray-800 bg-black px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
                   >
                     <option value="PERSONAL">Personal Event</option>
                     <option value="MANUAL_BLOCK">Block Time</option>
@@ -741,7 +741,7 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
                   <select
                     value={eventForm.visibility}
                     onChange={event => setEventForm(prev => ({ ...prev, visibility: event.target.value as any }))}
-                    className="w-full rounded-md border border-gray-800 bg-black px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
+                    className="w-full rounded-xl border border-gray-800 bg-black px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
                   >
                     <option value="PRIVATE">Private</option>
                     <option value="PUBLIC_BUSY">Public (Shows as Busy)</option>
@@ -754,14 +754,14 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
             <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => setShowCreateEventModal(false)}
-                className="px-4 py-2 rounded-lg border border-gray-800 text-gray-300 hover:bg-gray-900"
+                className="px-4 py-2 rounded-xl border border-gray-800 text-gray-300 hover:bg-gray-900"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateEvent}
                 disabled={isSaving}
-                className="px-4 py-2 rounded-lg bg-white text-black hover:bg-gray-200 disabled:opacity-60"
+                className="px-4 py-2 rounded-xl bg-white text-black hover:bg-gray-200 disabled:opacity-60"
               >
                 Save Event
               </button>
@@ -773,12 +773,12 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
       {/* Create Calendar Modal */}
       {showCreateCalendarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="w-full max-w-md rounded-lg border border-gray-800 bg-gray-950 p-6">
+          <div className="w-full max-w-md rounded-xl border border-gray-900 bg-gray-950 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">New Calendar</h3>
               <button
                 onClick={() => setShowCreateCalendarModal(false)}
-                className="rounded-lg p-2 text-gray-400 hover:bg-gray-900 hover:text-white"
+                className="rounded-xl p-2 text-gray-400 hover:bg-gray-900 hover:text-white"
               >
                 <X size={18} />
               </button>
@@ -810,14 +810,14 @@ export default function UnifiedCalendar({ userId, userTier }: UnifiedCalendarPro
             <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => setShowCreateCalendarModal(false)}
-                className="px-4 py-2 rounded-lg border border-gray-800 text-gray-300 hover:bg-gray-900"
+                className="px-4 py-2 rounded-xl border border-gray-800 text-gray-300 hover:bg-gray-900"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateCalendar}
                 disabled={isSaving}
-                className="px-4 py-2 rounded-lg bg-white text-black hover:bg-gray-200 disabled:opacity-60"
+                className="px-4 py-2 rounded-xl bg-white text-black hover:bg-gray-200 disabled:opacity-60"
               >
                 Create Calendar
               </button>

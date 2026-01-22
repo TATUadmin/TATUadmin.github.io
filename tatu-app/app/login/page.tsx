@@ -5,8 +5,10 @@ import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
+import { useI18n } from '@/lib/i18n/context'
 
 function LoginContent() {
+  const { t } = useI18n()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -19,11 +21,11 @@ function LoginContent() {
   // Show success message if redirected from email verification
   useEffect(() => {
     if (searchParams.get('verified') === 'true') {
-      toast.success('Email verified successfully! You can now sign in.')
+      toast.success(t('auth.emailVerified'))
       // Clean up the URL
       router.replace('/login', { scroll: false })
     }
-  }, [searchParams, router])
+  }, [searchParams, router, t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,9 +39,9 @@ function LoginContent() {
       })
 
       if (result?.error) {
-        toast.error('Invalid credentials. Please try again.')
+        toast.error(t('auth.invalidCredentials'))
       } else if (result?.ok) {
-        toast.success('Signed in successfully!')
+        toast.success(t('auth.signedInSuccess'))
         router.push(callbackUrl)
       }
     } catch (error) {
@@ -84,7 +86,7 @@ function LoginContent() {
             />
           </Link>
           <p className="body text-gray-400">
-            Sign in to your TATU account
+            {t('auth.signInTitle')}
           </p>
         </div>
 
@@ -92,7 +94,7 @@ function LoginContent() {
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-                Email Address
+                {t('auth.emailAddress')}
               </label>
               <input
                 id="email"
@@ -100,13 +102,13 @@ function LoginContent() {
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 className="input"
-                placeholder="Enter your email"
+                placeholder={t('auth.enterEmail')}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
-                Password
+                {t('auth.password')}
               </label>
               <input
                 id="password"
@@ -114,7 +116,7 @@ function LoginContent() {
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 className="input"
-                placeholder="Enter your password"
+                placeholder={t('auth.enterPassword')}
               />
             </div>
           </div>
@@ -122,7 +124,7 @@ function LoginContent() {
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <Link href="/forgot-password" className="text-gray-400 hover:text-white transition-colors">
-                Forgot your password?
+                {t('auth.forgotPassword')}
               </Link>
             </div>
           </div>
@@ -136,10 +138,10 @@ function LoginContent() {
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing In...
+                  {t('auth.signingIn')}
                 </>
               ) : (
-                'Sign In'
+                t('auth.signin')
               )}
             </button>
 
@@ -148,7 +150,7 @@ function LoginContent() {
                 <div className="w-full border-t" style={{borderColor: '#171717'}} />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-black text-gray-400">Or continue with</span>
+                <span className="px-2 bg-black text-gray-400">{t('auth.orContinueWith')}</span>
               </div>
             </div>
 
@@ -164,15 +166,15 @@ function LoginContent() {
                 <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              Continue with Google
+              {t('auth.continueWithGoogle')}
             </button>
           </div>
 
           <div className="text-center">
             <span className="text-sm text-gray-400">
-              Don't have an account?{' '}
+              {t('auth.noAccount')}{' '}
               <Link href="/signup" className="text-white hover:text-gray-300 transition-colors font-medium">
-                Sign up
+                {t('auth.signup')}
               </Link>
             </span>
           </div>

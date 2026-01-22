@@ -469,8 +469,8 @@ export default function AnalyticsPage() {
                     <p className="text-sm font-medium text-gray-400">Total Revenue</p>
                     <p className="text-2xl font-bold text-white">{formatCurrency(analyticsData.overview.totalRevenue)}</p>
                   </div>
-                  <div className="p-3 bg-white/10 rounded-lg border border-gray-800">
-                    <CurrencyDollarIcon className="h-6 w-6 text-white" />
+                  <div className="p-3 bg-teal-400/10 rounded-xl border border-teal-400/30">
+                    <CurrencyDollarIcon className="h-6 w-6 text-teal-400" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center gap-2">
@@ -487,8 +487,8 @@ export default function AnalyticsPage() {
                     <p className="text-sm font-medium text-gray-400">Total Appointments</p>
                     <p className="text-2xl font-bold text-white">{formatNumber(analyticsData.overview.totalAppointments)}</p>
                   </div>
-                  <div className="p-3 bg-white/10 rounded-lg border border-gray-800">
-                    <CalendarIcon className="h-6 w-6 text-white" />
+                  <div className="p-3 bg-yellow-400/10 rounded-xl border border-yellow-400/30">
+                    <CalendarIcon className="h-6 w-6 text-yellow-400" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center gap-2">
@@ -504,8 +504,8 @@ export default function AnalyticsPage() {
                     <p className="text-sm font-medium text-gray-400">Customer Retention</p>
                     <p className="text-2xl font-bold text-white">{analyticsData.overview.customerRetention}%</p>
                   </div>
-                  <div className="p-3 bg-white/10 rounded-lg border border-gray-800">
-                    <UsersIcon className="h-6 w-6 text-white" />
+                  <div className="p-3 bg-orange-400/10 rounded-xl border border-orange-400/30">
+                    <UsersIcon className="h-6 w-6 text-orange-400" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center gap-2">
@@ -521,8 +521,8 @@ export default function AnalyticsPage() {
                     <p className="text-sm font-medium text-gray-400">Conversion Rate</p>
                     <p className="text-2xl font-bold text-white">{analyticsData.overview.conversionRate}%</p>
                   </div>
-                  <div className="p-3 bg-white/10 rounded-lg border border-gray-800">
-                    <ArrowTrendingUpIcon className="h-6 w-6 text-white" />
+                  <div className="p-3 bg-teal-400/10 rounded-xl border border-teal-400/30">
+                    <ArrowTrendingUpIcon className="h-6 w-6 text-teal-400" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center gap-2">

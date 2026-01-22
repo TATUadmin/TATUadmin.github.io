@@ -646,10 +646,10 @@ export default function PortfolioPage() {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
+              <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
                 <div className="flex items-center">
-                  <div className="p-2 bg-gray-800 rounded-lg">
-                    <PhotoIcon className="h-6 w-6 text-white" />
+                  <div className="p-2 bg-teal-400/10 rounded-xl border border-teal-400/30">
+                    <PhotoIcon className="h-6 w-6 text-teal-400" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-400">Total Items</p>
@@ -658,10 +658,10 @@ export default function PortfolioPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
+              <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
                 <div className="flex items-center">
-                  <div className="p-2 bg-gray-800 rounded-lg">
-                    <EyeIcon className="h-6 w-6 text-white" />
+                  <div className="p-2 bg-yellow-400/10 rounded-xl border border-yellow-400/30">
+                    <EyeIcon className="h-6 w-6 text-yellow-400" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-400">Total Views</p>
@@ -670,7 +670,7 @@ export default function PortfolioPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
+              <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-gray-800 rounded-lg">
                     <HeartIcon className="h-6 w-6 text-white" />
@@ -682,10 +682,10 @@ export default function PortfolioPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
+              <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
                 <div className="flex items-center">
-                  <div className="p-2 bg-gray-800 rounded-lg">
-                    <StarIcon className="h-6 w-6 text-white" />
+                  <div className="p-2 bg-yellow-400/10 rounded-xl border border-yellow-400/30">
+                    <StarIcon className="h-6 w-6 text-yellow-400" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-400">Featured Items</p>
@@ -697,7 +697,7 @@ export default function PortfolioPage() {
 
             {/* Growth & Popular Styles */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
+              <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">Monthly Growth</h3>
                 <div className="flex items-center">
                   <div className={`p-2 rounded-lg ${portfolioStats.monthlyGrowth >= 0 ? 'bg-gray-800' : 'bg-gray-800'}`}>
@@ -716,7 +716,7 @@ export default function PortfolioPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
+              <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">Popular Styles</h3>
                 <div className="space-y-3">
                   {portfolioStats.popularStyles.slice(0, 5).map((style, index) => (

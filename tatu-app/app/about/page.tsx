@@ -2,37 +2,39 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function AboutPage() {
+  const { t } = useI18n();
   const [activeSection, setActiveSection] = useState('mission');
   const [activeTab, setActiveTab] = useState<'clients' | 'artists'>('clients');
 
   const sections = [
     {
       id: 'mission',
-      title: 'Our Mission',
-      content: 'To create the world\'s most trusted platform connecting tattoo artists with clients, fostering creativity, and building lasting relationships in the tattoo community.',
+      title: t('about.mission.title'),
+      content: t('about.mission.content'),
       icon: '🎯'
     },
     {
       id: 'story',
-      title: 'Our Story',
-      content: 'Founded by tattoo enthusiasts who experienced the challenges of finding quality artists, TATU was born from a simple idea: make great tattoo art accessible to everyone while supporting talented artists.',
+      title: t('about.story.title'),
+      content: t('about.story.content'),
       icon: '📖'
     },
     {
       id: 'values',
-      title: 'Our Values',
-      content: 'Quality, authenticity, community, and innovation. We believe every tattoo tells a story, and every artist deserves a platform to showcase their unique vision.',
+      title: t('about.values.title'),
+      content: t('about.values.content'),
       icon: '💎'
     }
   ];
 
   const stats = [
-    { number: '50K+', label: 'Happy Clients', description: 'Satisfied customers worldwide' },
-    { number: '15K+', label: 'Verified Artists', description: 'Professional tattoo artists' },
-    { number: '2.5M+', label: 'Artworks', description: 'Portfolio pieces shared' },
-    { number: '180+', label: 'Countries', description: 'Global artist network' }
+    { number: '50K+', label: t('about.stats.happyClients'), description: t('about.stats.happyClientsDesc') },
+    { number: '15K+', label: t('about.stats.verifiedArtists'), description: t('about.stats.verifiedArtistsDesc') },
+    { number: '2.5M+', label: t('about.stats.artworks'), description: t('about.stats.artworksDesc') },
+    { number: '180+', label: t('about.stats.countries'), description: t('about.stats.countriesDesc') }
   ];
 
   return (
@@ -42,7 +44,7 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="display text-4xl md:text-5xl text-white mb-6">
-              TATU is a professional tattoo artist marketplace. We're building the future of tattoo art discovery and artist-client connections.
+              {t('about.hero')}
             </h1>
           </div>
         </div>
@@ -108,11 +110,10 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center mb-12">
             <h2 className="display text-4xl md:text-5xl text-white mb-4">
-              How It Works
+              {t('about.howItWorks.title')}
             </h2>
             <p className="body text-xl text-gray-300">
-              Whether you're looking for the perfect tattoo or building your career as an artist, 
-              we've made the process simple and secure.
+              {t('about.howItWorks.description')}
             </p>
           </div>
 
@@ -127,7 +128,7 @@ export default function AboutPage() {
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
-                I'm a client
+                {t('about.tabs.client')}
               </button>
               <button
                 onClick={() => setActiveTab('artists')}
@@ -137,7 +138,7 @@ export default function AboutPage() {
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
-                I'm an artist
+                {t('about.tabs.artist')}
               </button>
             </div>
           </div>
@@ -147,10 +148,10 @@ export default function AboutPage() {
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
                 <h3 className="display text-3xl md:text-4xl text-white mb-4">
-                  Find Your Perfect Artist
+                  {t('about.clients.title')}
                 </h3>
                 <p className="body text-xl text-gray-300">
-                  From discovery to completion, here's how to get your dream tattoo
+                  {t('about.clients.description')}
                 </p>
               </div>
 
@@ -158,26 +159,26 @@ export default function AboutPage() {
                 {[
                   {
                     step: '1',
-                    title: 'Discover Artists',
-                    description: 'Browse verified artists by style, location, and availability. View portfolios and read reviews.',
+                    title: t('about.clients.step1.title'),
+                    description: t('about.clients.step1.description'),
                     icon: '🔍'
                   },
                   {
                     step: '2',
-                    title: 'Book Consultation',
-                    description: 'Schedule a free consultation to discuss your design, placement, and budget with your chosen artist.',
+                    title: t('about.clients.step2.title'),
+                    description: t('about.clients.step2.description'),
                     icon: '📅'
                   },
                   {
                     step: '3',
-                    title: 'Design & Plan',
-                    description: 'Work with your artist to create the perfect design. Get digital mockups and make revisions.',
+                    title: t('about.clients.step3.title'),
+                    description: t('about.clients.step3.description'),
                     icon: '✏️'
                   },
                   {
                     step: '4',
-                    title: 'Get Inked',
-                    description: 'Show up for your appointment with confidence. Your artist is ready to create your masterpiece.',
+                    title: t('about.clients.step4.title'),
+                    description: t('about.clients.step4.description'),
                     icon: '🎨'
                   }
                 ].map((item, index) => (
@@ -201,10 +202,10 @@ export default function AboutPage() {
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
                 <h3 className="display text-3xl md:text-4xl text-white mb-4">
-                  Grow Your Business
+                  {t('about.artists.title')}
                 </h3>
                 <p className="body text-xl text-gray-300">
-                  Join thousands of artists building successful careers on TATU
+                  {t('about.artists.description')}
                 </p>
               </div>
 
@@ -212,26 +213,26 @@ export default function AboutPage() {
                 {[
                   {
                     step: '1',
-                    title: 'Apply & Verify',
-                    description: 'Submit your application with portfolio samples. We verify all artists for quality and safety.',
+                    title: t('about.artists.step1.title'),
+                    description: t('about.artists.step1.description'),
                     icon: '✅'
                   },
                   {
                     step: '2',
-                    title: 'Build Profile',
-                    description: 'Create your artist profile with portfolio, services, pricing, and availability.',
+                    title: t('about.artists.step2.title'),
+                    description: t('about.artists.step2.description'),
                     icon: '👤'
                   },
                   {
                     step: '3',
-                    title: 'Get Bookings',
-                    description: 'Receive booking requests from clients. Manage your schedule and consultations.',
+                    title: t('about.artists.step3.title'),
+                    description: t('about.artists.step3.description'),
                     icon: '📱'
                   },
                   {
                     step: '4',
-                    title: 'Earn & Grow',
-                    description: 'Complete appointments, get paid securely, and build your client base.',
+                    title: t('about.artists.step4.title'),
+                    description: t('about.artists.step4.description'),
                     icon: '💰'
                   }
                 ].map((item, index) => (
@@ -258,43 +259,43 @@ export default function AboutPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="display text-4xl md:text-5xl text-white mb-4">
-                Why Choose TATU
+                {t('about.features.title')}
               </h2>
               <p className="body text-xl text-gray-300">
-                Built for artists and clients who demand the best
+                {t('about.features.description')}
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 {
-                  title: 'Verified Artists',
-                  description: 'Every artist is thoroughly vetted with portfolio reviews and background checks.',
+                  title: t('about.features.verifiedArtists.title'),
+                  description: t('about.features.verifiedArtists.description'),
                   icon: '🛡️'
                 },
                 {
-                  title: 'Secure Payments',
-                  description: 'Protected transactions with escrow services and secure payment processing.',
+                  title: t('about.features.securePayments.title'),
+                  description: t('about.features.securePayments.description'),
                   icon: '🔒'
                 },
                 {
-                  title: 'Quality Guarantee',
-                  description: 'We stand behind every appointment with our satisfaction guarantee.',
+                  title: t('about.features.qualityGuarantee.title'),
+                  description: t('about.features.qualityGuarantee.description'),
                   icon: '⭐'
                 },
                 {
-                  title: '24/7 Support',
-                  description: 'Round-the-clock customer support for both artists and clients.',
+                  title: t('about.features.support.title'),
+                  description: t('about.features.support.description'),
                   icon: '📞'
                 },
                 {
-                  title: 'Portfolio Showcase',
-                  description: 'Beautiful portfolio galleries to showcase your best work.',
+                  title: t('about.features.portfolio.title'),
+                  description: t('about.features.portfolio.description'),
                   icon: '🖼️'
                 },
                 {
-                  title: 'Analytics & Insights',
-                  description: 'Detailed analytics to help artists grow their business.',
+                  title: t('about.features.analytics.title'),
+                  description: t('about.features.analytics.description'),
                   icon: '📊'
                 }
               ].map((feature, index) => (
@@ -315,34 +316,34 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="display text-4xl md:text-5xl text-white mb-4">
-                Frequently Asked Questions
+                {t('about.faq.title')}
               </h2>
               <p className="body text-xl text-gray-300">
-                Everything you need to know about TATU
+                {t('about.faq.description')}
               </p>
             </div>
 
             <div className="space-y-6">
               {[
                 {
-                  question: 'How do I find the right artist for my tattoo?',
-                  answer: 'Use our search filters to browse by style, location, and availability. Read reviews, view portfolios, and schedule consultations to find your perfect match.'
+                  question: t('about.faq.q1.question'),
+                  answer: t('about.faq.q1.answer')
                 },
                 {
-                  question: 'What happens if I need to cancel my appointment?',
-                  answer: 'Cancellation policies vary by artist, but most offer free cancellation up to 24-48 hours before your appointment. Check your artist\'s specific policy.'
+                  question: t('about.faq.q2.question'),
+                  answer: t('about.faq.q2.answer')
                 },
                 {
-                  question: 'How do artists get paid?',
-                  answer: 'Artists receive payment securely through our platform after appointment completion. We handle all payment processing and provide detailed earnings reports.'
+                  question: t('about.faq.q3.question'),
+                  answer: t('about.faq.q3.answer')
                 },
                 {
-                  question: 'Is my personal information secure?',
-                  answer: 'Yes, we use industry-standard encryption and security measures to protect all personal and payment information. We never share your data with third parties.'
+                  question: t('about.faq.q4.question'),
+                  answer: t('about.faq.q4.answer')
                 },
                 {
-                  question: 'Can I bring my own design?',
-                  answer: 'Absolutely! Most artists welcome custom designs. You can upload your design during the booking process and discuss modifications during your consultation.'
+                  question: t('about.faq.q5.question'),
+                  answer: t('about.faq.q5.answer')
                 }
               ].map((faq, index) => (
                 <div key={index} className="card p-6 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
@@ -360,18 +361,17 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="display text-4xl md:text-5xl text-white mb-6">
-              Join the TATU Community
+              {t('about.cta.title')}
             </h2>
             <p className="body text-xl text-gray-300 mb-8">
-              Whether you're an artist looking to showcase your work or a client seeking the perfect tattoo, 
-              we're here to help you connect and create.
+              {t('about.cta.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/explore" className="btn btn-primary">
-                Browse Artists
+                {t('about.cta.browseArtists')}
               </Link>
               <Link href="/register-artist" className="btn btn-ghost">
-                Apply as Artist
+                {t('about.cta.applyArtist')}
               </Link>
             </div>
           </div>

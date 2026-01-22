@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast'
 import DashboardStats, { useDashboardStats } from '../components/DashboardStats'
 import ArtistLocationMap from '../components/ArtistLocationMap'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/context'
 
 interface CustomerProfile {
   id: string
@@ -347,6 +348,7 @@ function CustomerDashboard({
   handleLinkInstagram,
   handleUnlinkInstagram,
 }: CustomerDashboardProps) {
+  const { t } = useI18n()
   const { data: session } = useSession()
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([])
   const [isLoadingAppointments, setIsLoadingAppointments] = useState(true)
@@ -408,9 +410,11 @@ function CustomerDashboard({
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'confirmed':
-        return 'bg-green-500/20 text-green-400 border border-green-500/30'
+        return 'bg-teal-400/20 text-teal-400 border border-teal-400/30'
       case 'pending':
-        return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+        return 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/30'
+      case 'cancelled':
+        return 'bg-orange-400/20 text-orange-400 border border-orange-400/30'
       default:
         return 'bg-gray-800 text-gray-400 border border-gray-700'
     }
@@ -428,8 +432,8 @@ function CustomerDashboard({
     <div className="w-full space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-        <p className="text-gray-400">Welcome back! Here's what's happening today.</p>
+        <h1 className="text-3xl font-bold text-white mb-2">{t('dashboard.title')}</h1>
+        <p className="text-gray-400">{t('dashboard.welcome')}</p>
       </div>
 
       {/* Two Column Layout */}
@@ -437,7 +441,7 @@ function CustomerDashboard({
         {/* Left Column - Profile and Instagram */}
         <div className="lg:col-span-2 space-y-8">
           {/* Profile Section */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
+          <div className="bg-gray-950 border border-gray-900 rounded-xl p-8">
             <div className="flex flex-col md:flex-row gap-8">
               {/* Profile Picture */}
               <div className="flex-shrink-0">
@@ -488,12 +492,12 @@ function CustomerDashboard({
                 {/* Bio Section */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-white">Bio</label>
+                    <label className="block text-sm font-medium text-white">{t('dashboard.bio')}</label>
                     {!isEditingBio && (
                       <button
                         onClick={() => setIsEditingBio(true)}
                         className="text-gray-400 hover:text-white transition-colors"
-                        title="Edit bio"
+                        title={t('dashboard.editBio')}
                       >
                         <PencilIcon className="w-5 h-5" />
                       </button>
@@ -506,7 +510,7 @@ function CustomerDashboard({
                         onChange={(e) => setBioText(e.target.value)}
                         maxLength={500}
                         rows={4}
-                        className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-600 resize-none"
+                        className="w-full px-4 py-3 bg-black border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-600 resize-none"
                         placeholder="Tell us about yourself..."
                       />
                       <div className="flex items-center justify-between">
@@ -525,7 +529,7 @@ function CustomerDashboard({
                           </button>
                           <button
                             onClick={handleBioSave}
-                            className="px-4 py-2 text-sm bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                            className="px-4 py-2 text-sm bg-white text-black rounded-xl hover:bg-gray-200 transition-colors font-medium"
                           >
                             Save
                           </button>
@@ -535,7 +539,7 @@ function CustomerDashboard({
                   ) : (
                     <p className="text-gray-300 min-h-[60px]">
                       {profile?.bio || (
-                        <span className="text-gray-500 italic">No bio yet. Click the edit icon to add one.</span>
+                        <span className="text-gray-500 italic">{t('dashboard.noBio')}</span>
                       )}
                     </p>
                   )}
@@ -545,29 +549,32 @@ function CustomerDashboard({
           </div>
 
           {/* Instagram Section */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
+          <div className="bg-gray-950 border border-gray-900 rounded-xl p-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-white mb-1">Instagram Preview</h2>
+                <h2 className="text-xl font-semibold text-white mb-1 flex items-center gap-2">
+                  {t('dashboard.instagramPreview')}
+                  <div className="w-1 h-1 rounded-full bg-teal-400"></div>
+                </h2>
                 <p className="text-sm text-gray-400">
                   {profile?.instagramLinked
-                    ? `Connected as @${profile.instagramHandle}`
-                    : 'Link your Instagram to showcase recent photos'}
+                    ? `${t('dashboard.instagramConnected')} @${profile.instagramHandle}`
+                    : t('dashboard.connectInstagram')}
                 </p>
               </div>
               {profile?.instagramLinked ? (
                 <button
                   onClick={handleUnlinkInstagram}
-                  className="px-4 py-2 text-sm bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors border border-gray-700 flex items-center gap-2"
+                  className="px-4 py-2 text-sm bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors border border-gray-700 flex items-center gap-2"
                 >
                   <XMarkIcon className="w-4 h-4" />
-                  Unlink
+                  {t('dashboard.unlink')}
                 </button>
               ) : (
                 <button
                   onClick={handleLinkInstagram}
                   disabled={isLinkingInstagram}
-                  className="px-4 py-2 text-sm bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center gap-2 disabled:opacity-50"
+                  className="px-4 py-2 text-sm bg-white text-black rounded-xl hover:bg-gray-200 transition-colors font-medium flex items-center gap-2 disabled:opacity-50"
                 >
                   <LinkIcon className="w-4 h-4" />
                   {isLinkingInstagram ? 'Linking...' : 'Link Instagram'}
@@ -581,7 +588,7 @@ function CustomerDashboard({
                   {profile.instagramImages.slice(0, 6).map((image) => (
                     <div
                       key={image.id}
-                      className="aspect-square rounded-lg overflow-hidden bg-gray-800 border border-gray-700"
+                        className="aspect-square rounded-xl overflow-hidden bg-gray-800 border border-gray-700"
                     >
                       <img
                         src={image.thumbnail || image.url}
@@ -592,13 +599,13 @@ function CustomerDashboard({
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 border border-gray-800 rounded-lg">
+                <div className="text-center py-12 border border-gray-800 rounded-xl">
                   <p className="text-gray-400 mb-2">No Instagram photos found</p>
                   <p className="text-sm text-gray-500">Your recent photos will appear here</p>
                 </div>
               )
             ) : (
-              <div className="text-center py-12 border border-gray-800 rounded-lg border-dashed">
+              <div className="text-center py-12 border border-gray-800 rounded-xl border-dashed">
                 <LinkIcon className="w-12 h-12 text-gray-700 mx-auto mb-4" />
                 <p className="text-gray-400 mb-2">Instagram not connected</p>
                 <p className="text-sm text-gray-500 mb-4">
@@ -607,7 +614,7 @@ function CustomerDashboard({
                 <button
                   onClick={handleLinkInstagram}
                   disabled={isLinkingInstagram}
-                  className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
+                  className="px-6 py-2 bg-white text-black rounded-xl hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
                 >
                   {isLinkingInstagram ? 'Linking...' : 'Connect Instagram'}
                 </button>
@@ -618,10 +625,10 @@ function CustomerDashboard({
 
         {/* Right Column - Upcoming Appointments */}
         <div className="lg:col-span-1">
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 sticky top-8">
+          <div className="bg-gray-950 border border-gray-900 rounded-xl p-6 sticky top-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5 text-white" />
+                <CalendarIcon className="w-5 h-5 text-yellow-400" />
                 <h2 className="text-xl font-bold text-white">Upcoming Appointments</h2>
               </div>
               <Link
@@ -640,14 +647,14 @@ function CustomerDashboard({
             ) : upcomingAppointments.length === 0 ? (
               <div className="text-center py-8">
                 <CalendarIcon className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-                <p className="text-gray-400 text-sm">No upcoming appointments</p>
+                <p className="text-gray-400 text-sm">{t('dashboard.noUpcomingAppointments')}</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {upcomingAppointments.map((appointment) => (
                   <div
                     key={appointment.id}
-                    className="bg-black border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors"
+                    className="bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-gray-700 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -667,11 +674,11 @@ function CustomerDashboard({
                     
                     <div className="space-y-1 mb-3">
                       <div className="flex items-center gap-2 text-gray-400 text-sm">
-                        <CalendarIcon className="w-4 h-4" />
+                        <CalendarIcon className="w-4 h-4 text-orange-400" />
                         {formatDate(appointment.date)}
                       </div>
                       <div className="flex items-center gap-2 text-gray-400 text-sm">
-                        <ClockIcon className="w-4 h-4" />
+                        <ClockIcon className="w-4 h-4 text-teal-400" />
                         {formatTime(appointment.startTime)}
                       </div>
                     </div>
@@ -680,13 +687,13 @@ function CustomerDashboard({
                       {appointment.artistId && (
                         <Link
                           href={`/artist/${appointment.artistId}`}
-                          className="flex-1 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium text-center"
+                          className="flex-1 px-3 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors text-sm font-medium text-center"
                         >
-                          View Artist
+                          {t('dashboard.viewArtist')}
                         </Link>
                       )}
-                      <button className="flex-1 px-3 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
-                        Details
+                      <button className="flex-1 px-3 py-2 bg-white text-black rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium">
+                        {t('common.details')}
                       </button>
                     </div>
                   </div>
@@ -734,6 +741,7 @@ function ArtistDashboard({
 }: ArtistDashboardProps) {
   const { stats, isLoading: statsLoading } = useDashboardStats('30d')
   const { data: session } = useSession()
+  const { t } = useI18n()
   const [artistStats, setArtistStats] = useState<{ reviewCount: number; averageRating: number } | null>(null)
   const [isSavingLocation, setIsSavingLocation] = useState(false)
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([])
@@ -842,9 +850,11 @@ function ArtistDashboard({
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'confirmed':
-        return 'bg-green-500/20 text-green-400 border border-green-500/30'
+        return 'bg-teal-400/20 text-teal-400 border border-teal-400/30'
       case 'pending':
-        return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+        return 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/30'
+      case 'cancelled':
+        return 'bg-orange-400/20 text-orange-400 border border-orange-400/30'
       default:
         return 'bg-gray-800 text-gray-400 border border-gray-700'
     }
@@ -881,8 +891,8 @@ function ArtistDashboard({
     <div className="w-full space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-        <p className="text-gray-400">Welcome back! Here's what's happening today.</p>
+        <h1 className="text-3xl font-bold text-white mb-2">{t('dashboard.title')}</h1>
+        <p className="text-gray-400">{t('dashboard.welcome')}</p>
       </div>
 
       {/* Dashboard Stats */}
@@ -895,7 +905,7 @@ function ArtistDashboard({
         {/* Left Column - Profile, Map, Instagram */}
         <div className="lg:col-span-2 space-y-8">
           {/* Profile Section */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
+          <div className="bg-gray-950 border border-gray-900 rounded-xl p-8">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Profile Picture */}
           <div className="flex-shrink-0">
@@ -1045,16 +1055,19 @@ function ArtistDashboard({
       </div>
 
           {/* Location Map Section */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
+          <div className="bg-gray-950 border border-gray-900 rounded-xl p-8">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white mb-2">Set Your Location</h2>
+              <h2 className="text-xl font-semibold text-white mb-2 flex items-center gap-2">
+                {t('dashboard.setLocation')}
+                <div className="w-1 h-1 rounded-full bg-orange-400"></div>
+              </h2>
               <p className="text-sm text-gray-400">
-                Set your location for clients to find you. Your exact address will only be shared after booking confirmation.
+                {t('dashboard.locationDescription')}
               </p>
             </div>
             {isSavingLocation && (
-              <div className="mb-4 px-4 py-2 bg-blue-900/20 border border-blue-700 rounded-lg text-blue-400 text-sm">
-                Saving location...
+              <div className="mb-4 px-4 py-2 bg-white/10 border border-gray-800 rounded-xl text-gray-300 text-sm">
+                {t('dashboard.savingLocation')}
               </div>
             )}
             <ArtistLocationMap
@@ -1067,7 +1080,7 @@ function ArtistDashboard({
           </div>
 
           {/* Instagram Section */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
+          <div className="bg-gray-950 border border-gray-900 rounded-xl p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-semibold text-white mb-1">Instagram Preview</h2>
@@ -1103,7 +1116,7 @@ function ArtistDashboard({
               {profile.instagramImages.slice(0, 6).map((image) => (
                 <div
                   key={image.id}
-                  className="aspect-square rounded-lg overflow-hidden bg-gray-800 border border-gray-700"
+                        className="aspect-square rounded-xl overflow-hidden bg-gray-800 border border-gray-700"
                 >
                   <img
                     src={image.thumbnail || image.url}
@@ -1140,10 +1153,10 @@ function ArtistDashboard({
 
         {/* Right Column - Upcoming Appointments */}
         <div className="lg:col-span-1">
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 sticky top-8">
+          <div className="bg-gray-950 border border-gray-900 rounded-xl p-6 sticky top-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5 text-white" />
+                <CalendarIcon className="w-5 h-5 text-yellow-400" />
                 <h2 className="text-xl font-bold text-white">Upcoming Appointments</h2>
               </div>
               <Link
@@ -1162,14 +1175,14 @@ function ArtistDashboard({
             ) : upcomingAppointments.length === 0 ? (
               <div className="text-center py-8">
                 <CalendarIcon className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-                <p className="text-gray-400 text-sm">No upcoming appointments</p>
+                <p className="text-gray-400 text-sm">{t('dashboard.noUpcomingAppointments')}</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {upcomingAppointments.map((appointment) => (
                   <div
                     key={appointment.id}
-                    className="bg-black border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors"
+                    className="bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-gray-700 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -1189,11 +1202,11 @@ function ArtistDashboard({
                     
                     <div className="space-y-1 mb-3">
                       <div className="flex items-center gap-2 text-gray-400 text-sm">
-                        <CalendarIcon className="w-4 h-4" />
+                        <CalendarIcon className="w-4 h-4 text-orange-400" />
                         {formatDate(appointment.date)}
                       </div>
                       <div className="flex items-center gap-2 text-gray-400 text-sm">
-                        <ClockIcon className="w-4 h-4" />
+                        <ClockIcon className="w-4 h-4 text-teal-400" />
                         {formatTime(appointment.startTime)}
                       </div>
                     </div>
@@ -1202,21 +1215,21 @@ function ArtistDashboard({
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAppointmentAction(appointment.id, 'accept')}
-                          className="flex-1 px-3 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium flex items-center justify-center gap-1"
+                          className="flex-1 px-3 py-2 bg-white text-black rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium flex items-center justify-center gap-1"
                         >
                           <CheckCircleIcon className="w-4 h-4" />
                           Accept
                         </button>
                         <button
                           onClick={() => handleAppointmentAction(appointment.id, 'decline')}
-                          className="px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium flex items-center justify-center gap-1"
+                          className="px-3 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors text-sm font-medium flex items-center justify-center gap-1"
                         >
                           <XCircleIcon className="w-4 h-4" />
                           Decline
                         </button>
                       </div>
                     ) : (
-                      <button className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium">
+                      <button className="w-full px-3 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors text-sm font-medium">
                         View Details
                       </button>
                     )}

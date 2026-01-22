@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
+import { useI18n } from '@/lib/i18n/context'
 
 export default function SignUpPage() {
+  const { t } = useI18n()
   const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
     name: '',
@@ -85,13 +87,13 @@ export default function SignUpPage() {
 
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match')
+      toast.error(t('auth.passwordsDoNotMatch'))
       setIsLoading(false)
       return
     }
 
     if (formData.password.length < 8) {
-      toast.error('Password must be at least 8 characters long')
+      toast.error(t('auth.passwordTooShort'))
       setIsLoading(false)
       return
     }
@@ -204,7 +206,7 @@ export default function SignUpPage() {
           }
         }
 
-        toast.success('Account created successfully! Please check your email to verify your account.')
+        toast.success(t('auth.accountCreated'))
         router.push('/login')
       } else {
         // Show more specific error messages
@@ -253,12 +255,12 @@ export default function SignUpPage() {
             />
           </Link>
           <h2 className="display text-3xl text-white mb-2">
-            {isArtistSignup ? 'Join as Artist' : 'Join TATU'}
+            {isArtistSignup ? t('auth.joinAsArtist') : t('auth.signUpTitle')}
           </h2>
           <p className="body text-gray-400">
             {isArtistSignup 
-              ? 'Create your artist account to showcase your work' 
-              : 'Create your account to get started'}
+              ? t('auth.createArtistAccount')
+              : t('auth.createAccount')}
           </p>
           {isArtistSignup && (
             <button
@@ -266,7 +268,7 @@ export default function SignUpPage() {
               onClick={handleSwitchToCustomer}
               className="mt-2 text-sm text-gray-400 hover:text-white transition-colors underline"
             >
-              Switch to Customer signup
+              {t('auth.switchToCustomer')}
             </button>
           )}
         </div>
@@ -275,7 +277,7 @@ export default function SignUpPage() {
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
-                Full Name
+                {t('auth.fullName')}
               </label>
               <input
                 id="name"
@@ -283,13 +285,13 @@ export default function SignUpPage() {
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 className="input"
-                placeholder="Enter your full name"
+                placeholder={t('auth.enterFullName')}
               />
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-                Email Address
+                {t('auth.emailAddress')}
               </label>
               <input
                 id="email"
@@ -297,13 +299,13 @@ export default function SignUpPage() {
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 className="input"
-                placeholder="Enter your email"
+                placeholder={t('auth.enterEmail')}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
-                Password
+                {t('auth.password')}
               </label>
               <input
                 id="password"
@@ -313,7 +315,7 @@ export default function SignUpPage() {
                 onFocus={() => setPasswordFocused(true)}
                 onBlur={() => setPasswordFocused(false)}
                 className="input"
-                placeholder="Create a password"
+                placeholder={t('auth.createPassword')}
               />
               {showPasswordIndicator && (
                 <div className="mt-3 p-4 bg-gray-900/50 border border-gray-700 rounded-lg">
@@ -323,7 +325,7 @@ export default function SignUpPage() {
                         {passwordChecks.length ? '✓' : '○'}
                       </span>
                       <span className={passwordChecks.length ? 'text-gray-300' : 'text-gray-500'}>
-                        At least 8 characters
+                        {t('auth.atLeast8Chars')}
                       </span>
                     </div>
                     <div className="flex items-center text-sm">
@@ -331,7 +333,7 @@ export default function SignUpPage() {
                         {passwordChecks.uppercase ? '✓' : '○'}
                       </span>
                       <span className={passwordChecks.uppercase ? 'text-gray-300' : 'text-gray-500'}>
-                        One uppercase letter
+                        {t('auth.oneUppercase')}
                       </span>
                     </div>
                     <div className="flex items-center text-sm">
@@ -339,7 +341,7 @@ export default function SignUpPage() {
                         {passwordChecks.lowercase ? '✓' : '○'}
                       </span>
                       <span className={passwordChecks.lowercase ? 'text-gray-300' : 'text-gray-500'}>
-                        One lowercase letter
+                        {t('auth.oneLowercase')}
                       </span>
                     </div>
                     <div className="flex items-center text-sm">
@@ -347,7 +349,7 @@ export default function SignUpPage() {
                         {passwordChecks.number ? '✓' : '○'}
                       </span>
                       <span className={passwordChecks.number ? 'text-gray-300' : 'text-gray-500'}>
-                        One number
+                        {t('auth.oneNumber')}
                       </span>
                     </div>
                     <div className="flex items-center text-sm">
@@ -355,14 +357,14 @@ export default function SignUpPage() {
                         {passwordChecks.special ? '✓' : '○'}
                       </span>
                       <span className={passwordChecks.special ? 'text-gray-300' : 'text-gray-500'}>
-                        One special character
+                        {t('auth.oneSpecial')}
                       </span>
                     </div>
                   </div>
                   {formData.password.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-gray-700">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-gray-400">Password strength</span>
+                        <span className="text-xs text-gray-400">{t('auth.passwordStrength')}</span>
                         <span className="text-xs text-gray-400">{passwordStrength}/5</span>
                       </div>
                       <div className="w-full bg-gray-800 rounded-full h-2">
@@ -384,7 +386,7 @@ export default function SignUpPage() {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-2">
-                Confirm Password
+                {t('auth.confirmPassword')}
               </label>
               <input
                 id="confirmPassword"
@@ -392,7 +394,7 @@ export default function SignUpPage() {
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                 className="input"
-                placeholder="Confirm your password"
+                placeholder={t('auth.confirmYourPassword')}
               />
             </div>
 
@@ -400,14 +402,14 @@ export default function SignUpPage() {
             {isArtistSignup && (
               <div className="mt-6 pt-6 border-t border-gray-800 space-y-4">
                 <div className="mb-4">
-                  <p className="text-sm text-gray-300 font-medium mb-2">Artist Information</p>
-                  <p className="text-xs text-gray-500">Fill in your professional details</p>
+                  <p className="text-sm text-gray-300 font-medium mb-2">{t('auth.artistInformation')}</p>
+                  <p className="text-xs text-gray-500">{t('auth.fillProfessionalDetails')}</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-white mb-2">
-                      Phone Number
+                      {t('auth.phoneNumber')}
                     </label>
                     <input
                       id="phone"
@@ -421,7 +423,7 @@ export default function SignUpPage() {
 
                   <div>
                     <label htmlFor="city" className="block text-sm font-medium text-white mb-2">
-                      City/Location *
+                      {t('auth.cityLocation')} *
                     </label>
                     <input
                       id="city"
@@ -437,7 +439,7 @@ export default function SignUpPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-white mb-2">
-                    Experience Level
+                    {t('auth.experienceLevel')}
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {experienceLevels.map((level) => (
@@ -459,7 +461,7 @@ export default function SignUpPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-white mb-2">
-                    Your Specialty Styles * (Select all that apply)
+                    {t('auth.specialtyStyles')} * ({t('auth.selectAllThatApply')})
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {tattooStyles.map((style) => (
@@ -482,7 +484,7 @@ export default function SignUpPage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="instagram" className="block text-sm font-medium text-white mb-2">
-                      Instagram Handle
+                      {t('auth.instagramHandle')}
                     </label>
                     <input
                       id="instagram"
@@ -496,7 +498,7 @@ export default function SignUpPage() {
 
                   <div>
                     <label htmlFor="portfolio" className="block text-sm font-medium text-white mb-2">
-                      Portfolio Website
+                      {t('auth.portfolioWebsite')}
                     </label>
                     <input
                       id="portfolio"
@@ -511,7 +513,7 @@ export default function SignUpPage() {
 
                 <div>
                   <label htmlFor="shopName" className="block text-sm font-medium text-white mb-2">
-                    Shop/Studio Name
+                    {t('auth.shopStudioName')}
                   </label>
                   <input
                     id="shopName"
@@ -519,13 +521,13 @@ export default function SignUpPage() {
                     value={formData.shopName}
                     onChange={(e) => handleInputChange('shopName', e.target.value)}
                     className="input"
-                    placeholder="Studio/Shop name (if applicable)"
+                    placeholder={t('auth.shopStudioPlaceholder')}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="aboutMe" className="block text-sm font-medium text-white mb-2">
-                    Tell Us About Your Art
+                    {t('auth.tellUsAboutArt')}
                   </label>
                   <textarea
                     id="aboutMe"
@@ -533,7 +535,7 @@ export default function SignUpPage() {
                     value={formData.aboutMe}
                     onChange={(e) => handleInputChange('aboutMe', e.target.value)}
                     className="input resize-none"
-                    placeholder="Describe your artistic style, approach, and what makes your work unique..."
+                    placeholder={t('auth.describeArtisticStyle')}
                   />
                 </div>
               </div>
@@ -549,19 +551,19 @@ export default function SignUpPage() {
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating Account...
+                  {t('auth.creatingAccount')}
                 </>
               ) : (
-                'Create Account'
+                t('auth.createAccountButton')
               )}
             </button>
             {!isArtistSignup && (
               <button
                 type="button"
                 onClick={handleSwitchToArtist}
-                className="px-6 py-3 bg-transparent border-2 border-gray-400 text-white rounded-lg font-semibold hover:bg-gray-400 hover:text-black transition-all duration-200 whitespace-nowrap"
+                className="px-6 py-3 bg-transparent border-2 border-gray-400 text-white rounded-xl font-semibold hover:bg-gray-400 hover:text-black transition-all duration-200 whitespace-nowrap"
               >
-                Join as Artist
+                {t('auth.joinAsArtist')}
               </button>
             )}
           </div>
@@ -571,7 +573,7 @@ export default function SignUpPage() {
               <div className="w-full border-t" style={{borderColor: '#171717'}} />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-black text-gray-400">Or continue with</span>
+              <span className="px-2 bg-black text-gray-400">{t('auth.orContinueWith')}</span>
             </div>
           </div>
 
@@ -586,14 +588,14 @@ export default function SignUpPage() {
               <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Continue with Google
+            {t('auth.continueWithGoogle')}
           </button>
 
           <div className="text-center">
             <span className="text-sm text-gray-400">
-              Already have an account?{' '}
+              {t('auth.hasAccount')}{' '}
               <Link href="/login" className="text-white hover:text-gray-300 transition-colors font-medium">
-                Sign in
+                {t('auth.signin')}
               </Link>
             </span>
           </div>

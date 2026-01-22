@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function ContactPage() {
+  const { t } = useI18n();
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
@@ -11,10 +13,10 @@ export default function ContactPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="display text-5xl md:text-6xl text-white mb-6">
-              Contact Us
+              {t('contact.title')}
             </h1>
             <p className="body text-xl text-gray-300 max-w-2xl mx-auto">
-              Get in touch with our team. We're here to help with any questions about TATU.
+              {t('contact.description')}
             </p>
           </div>
         </div>
@@ -27,25 +29,25 @@ export default function ContactPage() {
             <div className="grid md:grid-cols-2 gap-12">
               {/* Contact Form */}
               <div className="space-y-6">
-                <h2 className="display text-3xl text-white mb-6">Send us a message</h2>
+                <h2 className="display text-3xl text-white mb-6">{t('contact.sendMessage')}</h2>
                 
                 <form className="space-y-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                      Name
+                      {t('contact.name')}
                     </label>
                     <input
                       type="text"
                       id="name"
                       name="name"
                       className="input w-full"
-                      placeholder="Your full name"
+                      placeholder={t('contact.yourFullName')}
                     />
                   </div>
                   
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                      Email
+                      {t('contact.email')}
                     </label>
                     <input
                       type="email"
@@ -58,32 +60,32 @@ export default function ContactPage() {
                   
                   <div>
                     <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-2">
-                      Subject
+                      {t('contact.subject')}
                     </label>
                     <select
                       id="subject"
                       name="subject"
                       className="input w-full"
                     >
-                      <option value="">Select a subject</option>
-                      <option value="general">General Inquiry</option>
-                      <option value="support">Technical Support</option>
-                      <option value="billing">Billing Question</option>
-                      <option value="partnership">Partnership</option>
-                      <option value="other">Other</option>
+                      <option value="">{t('contact.selectSubject')}</option>
+                      <option value="general">{t('contact.generalInquiry')}</option>
+                      <option value="support">{t('contact.technicalSupport')}</option>
+                      <option value="billing">{t('contact.billingQuestion')}</option>
+                      <option value="partnership">{t('contact.partnership')}</option>
+                      <option value="other">{t('contact.other')}</option>
                     </select>
                   </div>
                   
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
-                      Message
+                      {t('contact.message')}
                     </label>
                     <textarea
                       id="message"
                       name="message"
                       rows={5}
                       className="input w-full resize-none"
-                      placeholder="Tell us how we can help..."
+                      placeholder={t('contact.tellUsHow')}
                     />
                   </div>
                   
@@ -91,7 +93,7 @@ export default function ContactPage() {
                     type="submit"
                     className="btn btn-primary w-full"
                   >
-                    Send Message
+                    {t('contact.sendMessageButton')}
                   </button>
                 </form>
               </div>
@@ -99,9 +101,9 @@ export default function ContactPage() {
               {/* Contact Information */}
               <div className="space-y-8">
                 <div>
-                  <h2 className="display text-3xl text-white mb-6">Get in touch</h2>
+                  <h2 className="display text-3xl text-white mb-6">{t('contact.getInTouch')}</h2>
                   <p className="body text-gray-300 mb-6">
-                    We typically respond within 24 hours during business days.
+                    {t('contact.responseTimeDesc')}
                   </p>
                 </div>
 
@@ -113,9 +115,9 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-white font-medium">Email</h3>
-                      <p className="text-gray-300">support@tatu.com</p>
-                      <p className="text-gray-400 text-sm">For general inquiries and support</p>
+                      <h3 className="text-white font-medium">{t('contact.emailLabel')}</h3>
+                      <p className="text-gray-300">{t('contact.emailValue')}</p>
+                      <p className="text-gray-400 text-sm">{t('contact.emailDesc')}</p>
                     </div>
                   </div>
 
@@ -126,9 +128,9 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-white font-medium">Response Time</h3>
-                      <p className="text-gray-300">Within 24 hours</p>
-                      <p className="text-gray-400 text-sm">Monday - Friday, 9 AM - 6 PM EST</p>
+                      <h3 className="text-white font-medium">{t('contact.responseTime')}</h3>
+                      <p className="text-gray-300">{t('contact.within24Hours')}</p>
+                      <p className="text-gray-400 text-sm">{t('contact.businessHours')}</p>
                     </div>
                   </div>
 
@@ -139,10 +141,10 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-white font-medium">Help Center</h3>
-                      <p className="text-gray-300">Self-service support</p>
+                      <h3 className="text-white font-medium">{t('contact.helpCenter')}</h3>
+                      <p className="text-gray-300">{t('contact.selfService')}</p>
                       <Link href="/help" className="text-gray-400 text-sm hover:text-white transition-colors">
-                        Visit our help center →
+                        {t('contact.visitHelpCenter')}
                       </Link>
                     </div>
                   </div>
@@ -157,22 +159,22 @@ export default function ContactPage() {
       <section className="py-24 bg-surface">
         <div className="container">
           <div className="max-w-3xl mx-auto">
-            <h2 className="display text-4xl text-white text-center mb-12">Frequently Asked Questions</h2>
+            <h2 className="display text-4xl text-white text-center mb-12">{t('contact.faqTitle')}</h2>
             
             <div className="space-y-6">
               <div className="bg-surface-2 p-6 rounded-lg">
-                <h3 className="text-white font-medium mb-2">How do I report an issue with the platform?</h3>
-                <p className="text-gray-300">Use the contact form above or email us directly at support@tatu.com. Please include as much detail as possible about the issue you're experiencing.</p>
+                <h3 className="text-white font-medium mb-2">{t('contact.reportIssue')}</h3>
+                <p className="text-gray-300">{t('contact.reportIssueAnswer')}</p>
               </div>
               
               <div className="bg-surface-2 p-6 rounded-lg">
-                <h3 className="text-white font-medium mb-2">Can I request a new feature?</h3>
-                <p className="text-gray-300">Absolutely! We welcome feature requests. Send us a message with your idea and we'll review it with our development team.</p>
+                <h3 className="text-white font-medium mb-2">{t('contact.requestFeature')}</h3>
+                <p className="text-gray-300">{t('contact.requestFeatureAnswer')}</p>
               </div>
               
               <div className="bg-surface-2 p-6 rounded-lg">
-                <h3 className="text-white font-medium mb-2">How do I become a verified artist?</h3>
-                <p className="text-gray-300">Visit our artist registration page and follow the verification process. Our team will review your portfolio and credentials.</p>
+                <h3 className="text-white font-medium mb-2">{t('contact.becomeArtist')}</h3>
+                <p className="text-gray-300">{t('contact.becomeArtistAnswer')}</p>
               </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { ReactNode, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
+import { useI18n } from '@/lib/i18n/context'
 import {
   HomeIcon,
   CalendarIcon,
@@ -34,16 +35,16 @@ interface NavItem {
   roles: Array<'artist' | 'admin' | 'client' | 'customer'>
 }
 
-const navigation: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, roles: ['artist', 'admin', 'client'] },
-  { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarIcon, roles: ['artist', 'admin'] },
-  { name: 'Upcoming Bookings', href: '/dashboard/bookings', icon: CalendarIcon, roles: ['client'] },
-  { name: 'Portfolio', href: '/dashboard/portfolio', icon: PhotoIcon, roles: ['artist', 'admin'] },
-  { name: 'Messages', href: '/dashboard/messages', icon: ChatBubbleLeftIcon, roles: ['artist', 'admin', 'client'] },
-  { name: 'Payments', href: '/dashboard/payments', icon: CreditCardIcon, roles: ['artist', 'admin'] },
-  { name: 'Artists', href: '/dashboard/artists', icon: UserGroupIcon, roles: ['admin'] },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, roles: ['artist', 'admin'] },
-  { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, roles: ['artist', 'admin', 'client'] },
+const getNavigation = (t: (key: string) => string): NavItem[] => [
+  { name: t('dashboard.nav.dashboard'), href: '/dashboard', icon: HomeIcon, roles: ['artist', 'admin', 'client'] },
+  { name: t('dashboard.nav.calendar'), href: '/dashboard/calendar', icon: CalendarIcon, roles: ['artist', 'admin'] },
+  { name: t('dashboard.nav.upcomingBookings'), href: '/dashboard/bookings', icon: CalendarIcon, roles: ['client'] },
+  { name: t('dashboard.nav.portfolio'), href: '/dashboard/portfolio', icon: PhotoIcon, roles: ['artist', 'admin'] },
+  { name: t('dashboard.nav.messages'), href: '/dashboard/messages', icon: ChatBubbleLeftIcon, roles: ['artist', 'admin', 'client'] },
+  { name: t('dashboard.nav.payments'), href: '/dashboard/payments', icon: CreditCardIcon, roles: ['artist', 'admin'] },
+  { name: t('dashboard.nav.artists'), href: '/dashboard/artists', icon: UserGroupIcon, roles: ['admin'] },
+  { name: t('dashboard.nav.analytics'), href: '/dashboard/analytics', icon: ChartBarIcon, roles: ['artist', 'admin'] },
+  { name: t('dashboard.nav.settings'), href: '/dashboard/settings', icon: Cog6ToothIcon, roles: ['artist', 'admin', 'client'] },
 ]
 
 // Mock notifications
@@ -67,11 +68,13 @@ const mockNotifications: Notification[] = [
 ]
 
 export default function DashboardLayout({ children, userRole = 'artist' }: DashboardLayoutProps) {
+  const { t } = useI18n()
   const pathname = usePathname()
   const { data: session } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [avatar, setAvatar] = useState<string | null>(null)
+  const navigation = getNavigation(t)
 
   // Fetch user avatar
   useEffect(() => {
@@ -228,7 +231,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <UserCircleIcon className="w-8 h-8 text-gray-400" />
+            <UserCircleIcon className="w-8 h-8 text-gray-400" />
               )}
             </div>
             <div className="flex-1 min-w-0">
@@ -241,7 +244,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
             className="w-full mt-2 flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 rounded-full transition-colors"
           >
             <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2" />
-            Sign Out
+            {t('nav.signout')}
           </button>
         </div>
       </aside>
@@ -283,7 +286,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <UserCircleIcon className="w-6 h-6 text-gray-400" />
+              <UserCircleIcon className="w-6 h-6 text-gray-400" />
                 )}
               </div>
             </Link>
@@ -293,7 +296,7 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
         {/* Page Content */}
         <main className="bg-black min-h-screen">
           <div className="w-full h-full p-4 lg:p-8">
-            {children}
+          {children}
           </div>
         </main>
       </div>

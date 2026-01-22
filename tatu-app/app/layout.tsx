@@ -5,6 +5,7 @@ import Footer from './components/Footer'
 import AuthProvider from './components/SessionProvider'
 import MobileNavigation from './components/MobileNavigation'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
+import { I18nProvider } from '@/lib/i18n/context'
 import './globals.css'
 import { Toaster as UiToaster } from "@/components/ui/toaster"
 import { Analytics } from '@vercel/analytics/next'
@@ -54,17 +55,19 @@ export default function RootLayout({
         <div 
           className="fixed inset-0 z-0 bg-black"
         />
-        <AuthProvider>
-          <div className="flex flex-col min-h-screen relative z-10">
-            <Navbar />
-            <MobileNavigation />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <PWAInstallPrompt />
-          <Toaster />
-          <UiToaster />
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <div className="flex flex-col min-h-screen relative z-10">
+              <Navbar />
+              <MobileNavigation />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <PWAInstallPrompt />
+            <Toaster />
+            <UiToaster />
+          </AuthProvider>
+        </I18nProvider>
         <Analytics />
       </body>
     </html>

@@ -175,8 +175,8 @@ export default function ShopDashboard() {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{shop.name}</h1>
-              <p className="text-gray-600 mt-1">Shop Management Dashboard</p>
+              <h1 className="text-3xl font-bold text-white">{shop.name}</h1>
+              <p className="text-gray-400 mt-1">Shop Management Dashboard</p>
             </div>
             <button
               onClick={() => setShowEditModal(true)}
@@ -195,24 +195,24 @@ export default function ShopDashboard() {
           {/* Shop Information */}
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Info Card */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Shop Information</h2>
+            <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Shop Information</h2>
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-medium text-gray-900">{shop.name}</h3>
-                  <p className="text-gray-600">{shop.description}</p>
+                  <h3 className="font-medium text-white">{shop.name}</h3>
+                  <p className="text-gray-400">{shop.description}</p>
                 </div>
                 
                 <div className="flex items-start space-x-3">
                   <MapPinIcon className="h-5 w-5 text-gray-400 mt-0.5" />
                   <div>
-                    <p className="text-gray-900">{shop.address}</p>
+                    <p className="text-white">{shop.address}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
                   <PhoneIcon className="h-5 w-5 text-gray-400" />
-                  <p className="text-gray-900">{shop.phone}</p>
+                  <p className="text-white">{shop.phone}</p>
                 </div>
 
                 {shop.website && (
@@ -222,7 +222,7 @@ export default function ShopDashboard() {
                       href={shop.website} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-indigo-600 hover:text-indigo-500"
+                      className="text-white hover:text-gray-300"
                     >
                       {shop.website}
                     </a>
@@ -236,7 +236,7 @@ export default function ShopDashboard() {
                       href={`https://instagram.com/${shop.instagram}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-indigo-600 hover:text-indigo-500"
+                      className="text-white hover:text-gray-300"
                     >
                       {shop.instagram}
                     </a>
@@ -246,12 +246,12 @@ export default function ShopDashboard() {
             </div>
 
             {/* Hours Card */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Business Hours</h2>
               <div className="space-y-2">
                 {DAYS_OF_WEEK.map(day => (
                   <div key={day} className="flex justify-between">
-                    <span className="font-medium text-gray-900 capitalize">{day}</span>
+                    <span className="font-medium text-white capitalize">{day}</span>
                     <span className="text-gray-600">{shop.hours[day] || 'Closed'}</span>
                   </div>
                 ))}
@@ -259,9 +259,9 @@ export default function ShopDashboard() {
             </div>
 
             {/* Artists Section */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Shop Artists</h2>
+                <h2 className="text-xl font-semibold text-white">Shop Artists</h2>
                 <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition-colors inline-flex items-center">
                   <PlusIcon className="h-4 w-4 mr-2" />
                   Invite Artist
@@ -276,7 +276,7 @@ export default function ShopDashboard() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {artists.map(artist => (
-                    <div key={artist.id} className="border rounded-lg p-4">
+                    <div key={artist.id} className="border border-gray-800 rounded-xl p-4 bg-gray-900">
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300">
                           {artist.avatar ? (
@@ -294,7 +294,7 @@ export default function ShopDashboard() {
                           )}
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium text-gray-900">{artist.name}</h3>
+                          <h3 className="font-medium text-white">{artist.name}</h3>
                           <p className="text-sm text-gray-500">
                             {artist.portfolioCount} portfolio items • {artist.rating.toFixed(1)} rating
                           </p>
@@ -317,8 +317,8 @@ export default function ShopDashboard() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Stats */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
+            <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Quick Stats</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total Artists</span>
@@ -334,7 +334,7 @@ export default function ShopDashboard() {
             </div>
 
             {/* Shop Images */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="bg-gray-950 rounded-xl shadow-sm border border-gray-900 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Shop Photos</h3>
               {shop.images.length === 0 ? (
                 <div className="text-center py-8">

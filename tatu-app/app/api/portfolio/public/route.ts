@@ -105,8 +105,21 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit)
       }
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching public portfolio:', error)
+    
+    // Handle database connection errors specifically
+    if (error?.code === 'P1001') {
+      return NextResponse.json(
+        { 
+          error: 'Database connection failed',
+          message: 'Cannot reach database server. Please check your database configuration.',
+          code: 'DATABASE_CONNECTION_ERROR'
+        },
+        { status: 503 }
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Failed to fetch portfolio items' },
       { status: 500 }

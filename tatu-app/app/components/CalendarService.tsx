@@ -300,7 +300,7 @@ export default function CalendarService({
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('prev')}
-              className="p-2 hover:bg-gray-900 rounded-lg transition-colors text-gray-400 hover:text-white"
+              className="p-2 hover:bg-gray-900 rounded-xl transition-colors text-gray-400 hover:text-white"
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
@@ -314,14 +314,14 @@ export default function CalendarService({
             
             <button
               onClick={() => navigate('next')}
-              className="p-2 hover:bg-gray-900 rounded-lg transition-colors text-gray-400 hover:text-white"
+              className="p-2 hover:bg-gray-900 rounded-xl transition-colors text-gray-400 hover:text-white"
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>
 
             <button
               onClick={goToToday}
-              className="ml-4 px-4 py-2 bg-white hover:bg-gray-200 text-black rounded-lg text-sm font-medium transition-colors"
+              className="ml-4 px-4 py-2 bg-white hover:bg-gray-200 text-black rounded-xl text-sm font-medium transition-colors"
             >
               Today
             </button>
@@ -336,7 +336,7 @@ export default function CalendarService({
               <button
                 key={v.type}
                 onClick={() => setView({ ...view, type: v.type as any })}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
                   view.type === v.type
                     ? 'bg-white text-black'
                     : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white border border-gray-800'
@@ -538,7 +538,7 @@ export default function CalendarService({
                           <button
                             key={event.id}
                             onClick={() => onEventClick?.(event)}
-                            className="w-full text-left p-3 rounded-lg transition-colors border mb-2"
+                            className="w-full text-left p-3 rounded-xl transition-colors border mb-2 hover:border-teal-400/50"
                             style={{
                               backgroundColor: eventColor.backgroundColor,
                               borderColor: eventColor.borderColor,
@@ -554,7 +554,7 @@ export default function CalendarService({
                       })
                     ) : (
                       <div 
-                        className="p-3 text-gray-600 border-2 border-dashed border-gray-800 rounded-lg cursor-pointer hover:border-gray-700 transition-colors"
+                        className="p-3 text-gray-600 border-2 border-dashed border-gray-800 rounded-xl cursor-pointer hover:border-gray-700 transition-colors"
                         onClick={() => onTimeSlotClick?.(view.currentDate, time)}
                         onDoubleClick={() => onTimeSlotClick?.(view.currentDate, time)}
                       >

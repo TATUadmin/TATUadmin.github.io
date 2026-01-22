@@ -4,12 +4,15 @@ import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { useI18n } from '@/lib/i18n/context'
+import LanguageToggle from './LanguageToggle'
 
 export default function Navbar() {
   const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [avatar, setAvatar] = useState<string | null>(null)
   const pathname = usePathname()
+  const { t } = useI18n()
 
   // Fetch user avatar
   useEffect(() => {
@@ -54,25 +57,26 @@ export default function Navbar() {
               href="/about" 
               className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
-              About
+              {t('footer.about')}
             </Link>
             <Link 
               href="/explore" 
               className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
-              Browse
+              {t('nav.explore')}
             </Link>
           </div>
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
+            <LanguageToggle />
             {session ? (
               <div className="flex items-center space-x-4">
                 <Link 
                   href="/dashboard" 
                   className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
                 >
-                  Dashboard
+                  {t('nav.dashboard')}
                 </Link>
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center overflow-hidden">
@@ -92,7 +96,7 @@ export default function Navbar() {
                     onClick={() => signOut()}
                     className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
                   >
-                    Sign Out
+                    {t('nav.signout')}
                   </button>
                 </div>
               </div>
@@ -102,13 +106,13 @@ export default function Navbar() {
                   href="/login" 
                   className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
                 >
-                  Sign In
+                  {t('nav.signin')}
                 </Link>
                 <Link 
                   href="/signup" 
                   className="text-xs bg-white text-black px-3 py-1.5 rounded-full font-medium hover:bg-gray-200 transition-colors"
                 >
-                  Sign Up
+                  {t('nav.signup')}
                 </Link>
               </div>
             )}
@@ -141,14 +145,14 @@ export default function Navbar() {
               className="block text-gray-400 hover:text-white transition-colors font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
-              About
+              {t('footer.about')}
             </Link>
             <Link 
               href="/explore" 
               className="block text-gray-400 hover:text-white transition-colors font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
-              Browse
+              {t('nav.explore')}
             </Link>
             
             <div className="border-t pt-4" style={{borderColor: '#171717'}}>
@@ -179,7 +183,7 @@ export default function Navbar() {
                     className="block text-gray-400 hover:text-white transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                   <button
                     onClick={() => {
@@ -188,7 +192,7 @@ export default function Navbar() {
                     }}
                     className="block text-gray-400 hover:text-white transition-colors font-medium"
                   >
-                    Sign Out
+                    {t('nav.signout')}
                   </button>
                 </div>
               ) : (
@@ -198,14 +202,14 @@ export default function Navbar() {
                     className="block text-gray-400 hover:text-white transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Sign In
+                    {t('nav.signin')}
                   </Link>
                   <Link 
                     href="/signup" 
                     className="block text-white font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Sign Up
+                    {t('nav.signup')}
                   </Link>
                 </div>
               )}
