@@ -14,8 +14,6 @@ import {
   PhoneIcon,
   GlobeAltIcon
 } from '@heroicons/react/24/outline'
-import { ALL_ARTISTS } from '@/lib/all-artists-data'
-
 interface PortfolioItem {
   id: string
   title: string
@@ -62,17 +60,74 @@ export default function ArtistPortfolioPage() {
 
   const fetchArtistData = async () => {
     try {
-      // Find artist from centralized database
-      const foundArtist = ALL_ARTISTS.find(a => a.id === artistId)
-      
-      // Convert to Artist interface with additional fields
-      const mockArtist: Artist = foundArtist ? {
-        ...foundArtist,
-        experience: "5+ years", // Default value, could be enhanced later
-        studio: "Local Tattoo Studio", // Default value
-        phone: "+1 (555) 000-0000", // Default value
-        website: `https://${foundArtist.instagram.replace('@', '')}.com`
-      } : {
+      // Fetch artist from API
+      const response = await fetch(`/api/artists?id=${artistId}`)
+      if (response.ok) {
+        const data = await response.json()
+        const artistData = data.artists?.[0] || data.artist
+        
+        if (artistData) {
+          const fetchedArtist: Artist = {
+            id: artistData.id,
+            name: artistData.name || "Artist Profile",
+            bio: artistData.bio || "Talented tattoo artist with a unique style and dedication to the craft.",
+            avatar: artistData.avatar || "/api/placeholder/150/150",
+            location: artistData.location || "United States",
+            specialties: artistData.specialties || ["Custom", "Various Styles"],
+            instagram: artistData.instagram || "@artist_tattoo",
+            portfolioCount: artistData.portfolioCount || 0,
+            rating: artistData.rating || 4.5,
+            reviewCount: artistData.reviewCount || 0,
+            experience: "5+ years", // Default value, could be enhanced later
+            studio: "Local Tattoo Studio", // Default value
+            phone: "+1 (555) 000-0000", // Default value
+            website: artistData.instagram ? `https://${artistData.instagram.replace('@', '')}.com` : "https://artist.com",
+            featured: artistData.featured || false
+          }
+          setArtist(fetchedArtist)
+        } else {
+          // Fallback if artist not found
+          setArtist({
+            id: artistId,
+            name: "Artist Profile",
+            bio: "Talented tattoo artist with a unique style and dedication to the craft.",
+            avatar: "/api/placeholder/150/150",
+            location: "United States",
+            specialties: ["Custom", "Various Styles"],
+            instagram: "@artist_tattoo",
+            portfolioCount: 15,
+            rating: 4.5,
+            reviewCount: 50,
+            experience: "5+ years",
+            studio: "Local Tattoo Studio",
+            phone: "+1 (555) 000-0000",
+            website: "https://artist.com"
+          })
+        }
+      } else {
+        // Fallback if API fails
+        setArtist({
+          id: artistId,
+          name: "Artist Profile",
+          bio: "Talented tattoo artist with a unique style and dedication to the craft.",
+          avatar: "/api/placeholder/150/150",
+          location: "United States",
+          specialties: ["Custom", "Various Styles"],
+          instagram: "@artist_tattoo",
+          portfolioCount: 15,
+          rating: 4.5,
+          reviewCount: 50,
+          experience: "5+ years",
+          studio: "Local Tattoo Studio",
+          phone: "+1 (555) 000-0000",
+          website: "https://artist.com"
+        })
+      }
+      setIsLoading(false)
+    } catch (error) {
+      console.error('Error fetching artist:', error)
+      // Fallback on error
+      setArtist({
         id: artistId,
         name: "Artist Profile",
         bio: "Talented tattoo artist with a unique style and dedication to the craft.",
@@ -87,12 +142,7 @@ export default function ArtistPortfolioPage() {
         studio: "Local Tattoo Studio",
         phone: "+1 (555) 000-0000",
         website: "https://artist.com"
-      }
-      
-      setArtist(mockArtist)
-      setIsLoading(false)
-    } catch (error) {
-      console.error('Error fetching artist:', error)
+      })
       setIsLoading(false)
     }
   }
