@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const where: any = {
       // Filter by user role - only get items from artists
-      user: {
+      User: {
         role: {
           in: ['ARTIST', 'SHOP_OWNER']
         }
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       prisma.portfolioItem.findMany({
         where,
         include: {
-          user: {
+          User: {
             select: {
               id: true,
               name: true,
@@ -87,9 +87,9 @@ export async function GET(request: NextRequest) {
       views: 0, // We don't track views in the current schema
       createdAt: item.createdAt.toISOString(),
       artist: {
-        id: item.user.id,
-        name: item.user.name,
-        avatar: item.user.artistProfile?.avatar || undefined
+        id: item.User.id,
+        name: item.User.name,
+        avatar: item.User.artistProfile?.avatar || undefined
       }
     }))
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import DashboardLayout from '../components/DashboardLayout'
 import { CameraIcon, PencilIcon, LinkIcon, XMarkIcon, StarIcon, MapPinIcon, CalendarIcon, ClockIcon, CheckCircleIcon, XCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
@@ -402,8 +402,8 @@ export default function DashboardPage() {
                 )}
               </div>
               </div>
-            </div>
           </div>
+        </div>
 
         {/* Instagram Section */}
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
@@ -519,28 +519,7 @@ function ArtistDashboard({
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([])
   const [isLoadingAppointments, setIsLoadingAppointments] = useState(true)
 
-  // Fetch artist stats (reviews/ratings)
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetch('/api/artists/stats')
-        .then(res => res.json())
-        .then(data => {
-          if (data.reviewCount !== undefined) {
-            setArtistStats(data)
-          }
-        })
-        .catch(err => console.error('Failed to fetch artist stats:', err))
-    }
-  }, [session?.user?.id])
-
-  // Fetch upcoming appointments
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetchUpcomingAppointments()
-    }
-  }, [session?.user?.id])
-
-  const fetchUpcomingAppointments = async () => {
+  const fetchUpcomingAppointments = useCallback(async () => {
     setIsLoadingAppointments(true)
     try {
       const response = await fetch('/api/appointments')
@@ -567,14 +546,35 @@ function ArtistDashboard({
     } finally {
       setIsLoadingAppointments(false)
     }
-  }
+  }, [])
+
+  // Fetch artist stats (reviews/ratings)
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/artists/stats')
+        .then(res => res.json())
+        .then(data => {
+          if (data.reviewCount !== undefined) {
+            setArtistStats(data)
+          }
+        })
+        .catch(err => console.error('Failed to fetch artist stats:', err))
+    }
+  }, [session?.user?.id])
+
+  // Fetch upcoming appointments
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchUpcomingAppointments()
+    }
+  }, [session?.user?.id, fetchUpcomingAppointments])
 
   const handleLocationChange = async (locationData: {
     latitude: number
     longitude: number
     locationRadius: number
     actualAddress: string
-  }) => {
+  }): Promise<void> => {
     setIsSavingLocation(true)
     try {
       const response = await fetch('/api/profile', {
@@ -655,54 +655,6 @@ function ArtistDashboard({
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </div>
     )
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
-  }
-
-  const formatTime = (timeString: string) => {
-    // Handle both "HH:MM" and "HH:MM:SS" formats
-    const [hours, minutes] = timeString.split(':')
-    const hour = parseInt(hours)
-    const ampm = hour >= 12 ? 'PM' : 'AM'
-    const displayHour = hour % 12 || 12
-    return `${displayHour}:${minutes} ${ampm}`
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'confirmed':
-        return 'bg-green-500/20 text-green-400 border border-green-500/30'
-      case 'pending':
-        return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-      default:
-        return 'bg-gray-800 text-gray-400 border border-gray-700'
-    }
-  }
-
-  const handleAppointmentAction = async (appointmentId: string, action: 'accept' | 'decline') => {
-    try {
-      const endpoint = action === 'accept' ? '/api/bookings/approve' : '/api/bookings/decline'
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appointmentId }),
-      })
-
-      if (!response.ok) throw new Error(`Failed to ${action} appointment`)
-
-      toast.success(`Appointment ${action === 'accept' ? 'accepted' : 'declined'}`)
-      fetchUpcomingAppointments() // Refresh list
-    } catch (error) {
-      console.error(`Error ${action}ing appointment:`, error)
-      toast.error(`Failed to ${action} appointment`)
-    }
   }
 
   return (
@@ -963,6 +915,7 @@ function ArtistDashboard({
             </button>
           </div>
         )}
+        </div>
         </div>
 
         {/* Right Column - Upcoming Appointments */}
