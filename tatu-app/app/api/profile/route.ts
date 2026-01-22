@@ -25,6 +25,16 @@ export async function GET(req: Request) {
       const profile = await prisma.artistProfile.findUnique({
         where: { userId: session.user.id },
       })
+      
+      // Auto-fix: If user has location data but completedRegistration is false, fix it
+      if (profile && profile.latitude !== null && profile.longitude !== null && !profile.completedRegistration) {
+        const fixedProfile = await prisma.artistProfile.update({
+          where: { userId: session.user.id },
+          data: { completedRegistration: true }
+        })
+        return NextResponse.json(fixedProfile)
+      }
+      
       return NextResponse.json(profile)
     } else if (user.role === 'CUSTOMER') {
       const profile = await prisma.customerProfile.findUnique({
@@ -117,6 +127,12 @@ export async function PUT(req: Request) {
         }
       }
 
+      // Always check current profile to ensure completedRegistration is set correctly
+      const currentProfile = await prisma.artistProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { latitude: true, longitude: true, completedRegistration: true }
+      })
+
       // If artist is setting their location (latitude and longitude), make profile visible
       // This ensures the artist becomes discoverable once they set their location on the map
       // Artists with completedRegistration: true appear in search results and on the map
@@ -142,18 +158,20 @@ export async function PUT(req: Request) {
         if (isSettingLocation) {
           updateData.completedRegistration = true
         }
-      } else {
-        // If not updating location, check if user already has location data
-        // and ensure completedRegistration is set to true
-        const currentProfile = await prisma.artistProfile.findUnique({
-          where: { userId: session.user.id },
-          select: { latitude: true, longitude: true, completedRegistration: true }
-        })
-        
-        if (currentProfile?.latitude && currentProfile?.longitude && !currentProfile.completedRegistration) {
-          // User has location data but completedRegistration is false - fix it
-          updateData.completedRegistration = true
-        }
+      }
+      
+      // Always ensure completedRegistration is true if user has location data
+      // This fixes cases where location was set but completedRegistration wasn't updated
+      const finalLatitude = updateData.latitude !== undefined ? updateData.latitude : currentProfile?.latitude
+      const finalLongitude = updateData.longitude !== undefined ? updateData.longitude : currentProfile?.longitude
+      
+      if (finalLatitude !== null && finalLatitude !== undefined &&
+          finalLongitude !== null && finalLongitude !== undefined &&
+          !isNaN(finalLatitude) && !isNaN(finalLongitude) &&
+          finalLatitude >= -90 && finalLatitude <= 90 &&
+          finalLongitude >= -180 && finalLongitude <= 180) {
+        // User has valid location data - ensure completedRegistration is true
+        updateData.completedRegistration = true
       }
 
       const profile = await prisma.artistProfile.update({

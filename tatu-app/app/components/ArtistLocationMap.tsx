@@ -526,20 +526,20 @@ export default function ArtistLocationMap({
               }
             }}
             placeholder="Enter your address or click on the map"
-            className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-600"
+            className="w-full px-4 py-2 bg-black border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-600"
           />
         </div>
         <button
           onClick={handleAddressSearch}
           disabled={isLoading || !addressInput.trim()}
-          className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-white text-black rounded-xl hover:bg-gray-200 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Search
         </button>
         <button
           onClick={handleUseCurrentLocation}
           disabled={isLoading}
-          className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <MapPinIcon className="w-5 h-5" />
           Use My Location
@@ -547,12 +547,12 @@ export default function ArtistLocationMap({
       </div>
 
       {error && (
-        <div className="px-4 py-2 bg-red-900/20 border border-red-700 rounded-lg text-red-400 text-sm">
+        <div className="px-4 py-2 bg-red-900/20 border border-red-700 rounded-xl text-red-400 text-sm">
           {error}
         </div>
       )}
 
-      <div className="relative w-full h-96 bg-black rounded-lg border border-gray-700 overflow-hidden">
+      <div className="relative w-full h-96 bg-black rounded-xl border border-gray-700 overflow-hidden">
         <div
           ref={mapRef}
           className="w-full h-full relative z-0"

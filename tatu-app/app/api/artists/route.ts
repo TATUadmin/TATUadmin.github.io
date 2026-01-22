@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { optionalAuth } from '@/lib/auth-middleware'
 import { ValidationSchemas } from '@/lib/validation'
 import { ApiResponse, withErrorHandling } from '@/lib/api-response'
@@ -9,8 +9,6 @@ import { cacheService } from '@/lib/cache'
 import { CacheTags, CacheKeyGenerators } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
-
-const prisma = new PrismaClient()
 
 // Fallback mock data for when database is unavailable
 const mockArtists = [

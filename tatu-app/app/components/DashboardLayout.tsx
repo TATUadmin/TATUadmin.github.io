@@ -236,7 +236,9 @@ export default function DashboardLayout({ children, userRole = 'artist' }: Dashb
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{userName}</p>
-              <p className="text-xs text-gray-500 truncate capitalize">{roleDisplayName}</p>
+              {roleDisplayName && roleDisplayName.toLowerCase() !== 'customer' && (
+                <p className="text-xs text-gray-500 truncate capitalize">{roleDisplayName}</p>
+              )}
             </div>
           </Link>
           <button 
