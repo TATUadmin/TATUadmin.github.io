@@ -531,12 +531,36 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
         
         console.log('Fetched artists from API:', artistsArray.length, 'total artists')
         
+        // Debug: Check for specific user
+        const ppcrzart = artistsArray.find((a: any) => a.email === 'ppcrzart@gmail.com' || a.id?.includes('ppcrzart'))
+        if (ppcrzart) {
+          console.log('✅ Found ppcrzart in API response:', {
+            id: ppcrzart.id,
+            name: ppcrzart.name,
+            email: ppcrzart.email,
+            latitude: ppcrzart.latitude,
+            longitude: ppcrzart.longitude,
+            location: ppcrzart.location
+          })
+        }
+        
         // Transform API data to match component's Artist interface
         const transformedArtists = artistsArray
           .filter((artist: any) => {
             const hasLocation = artist.latitude && artist.longitude
             if (!hasLocation) {
-              console.log('Filtered out artist (no location):', artist.name, artist.id)
+              console.log('Filtered out artist (no location):', artist.name, artist.id, {
+                latitude: artist.latitude,
+                longitude: artist.longitude
+              })
+            }
+            // Debug specific user
+            if ((artist.email === 'ppcrzart@gmail.com' || artist.id?.includes('ppcrzart')) && !hasLocation) {
+              console.log('❌ ppcrzart filtered out - missing location data:', {
+                latitude: artist.latitude,
+                longitude: artist.longitude,
+                location: artist.location
+              })
             }
             return hasLocation
           })

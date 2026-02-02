@@ -51,6 +51,9 @@ model Appointment {
   status                          AppointmentStatus @default(PENDING)
   // Link to CalendarEvent when booking is confirmed
   calendarEventId                 String?           @unique
+  // Payment hold reference
+  paymentHoldId                   String?           @unique
+  Payment                         Payment?          @relation("AppointmentPaymentHold", fields: [paymentHoldId], references: [id])
   CalendarEvent                   CalendarEvent?    @relation(fields: [calendarEventId], references: [id])
   User_Appointment_artistIdToUser User              @relation("Appointment_artistIdToUser", fields: [artistId], references: [id])
   User_Appointment_clientIdToUser User              @relation("Appointment_clientIdToUser", fields: [clientId], references: [id])
@@ -62,6 +65,7 @@ model Appointment {
   @@index([serviceId])
   @@index([shopId])
   @@index([calendarEventId])
+  @@index([paymentHoldId])
 }
 
 model Comment {
@@ -281,6 +285,61 @@ model Review {
   User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Payment {
+  id                    String            @id @default(cuid())
+  appointmentId         String?
+  artistId              String
+  clientId              String
+  amount                Int               // Amount in cents
+  currency              String            @default("usd")
+  platformFee           Int               // Platform fee in cents
+  artistAmount          Int               // Amount to artist in cents
+  type                  PaymentType       @default(FULL_PAYMENT)
+  status                PaymentStatus     @default(PENDING)
+  description           String?
+  stripePaymentId       String?           @unique // Stripe PaymentIntent ID
+  stripeSessionId       String?           @unique // Stripe Checkout Session ID
+  metadata              Json?
+  completedAt           DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  // Relations
+  Appointment           Appointment?      @relation("AppointmentPaymentHold", fields: [appointmentId], references: [id])
+  User_Payment_artistId User              @relation("Payment_artistId", fields: [artistId], references: [id])
+  User_Payment_clientId User              @relation("Payment_clientId", fields: [clientId], references: [id])
+
+  @@index([appointmentId])
+  @@index([artistId])
+  @@index([clientId])
+  @@index([status])
+  @@index([stripePaymentId])
+  @@index([stripeSessionId])
+}
+
+model Donation {
+  id                    String            @id @default(cuid())
+  appointmentId         String
+  artistId              String
+  clientId              String
+  amount                Int               // Amount in cents
+  currency              String            @default("usd")
+  message               String?
+  status                DonationStatus    @default(PENDING)
+  stripePaymentIntentId String?           @unique
+  metadata              Json?
+  createdAt             DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  // Relations
+  User_Donation_artistId User             @relation("Donation_artistId", fields: [artistId], references: [id])
+  User_Donation_clientId User             @relation("Donation_clientId", fields: [clientId], references: [id])
+
+  @@index([appointmentId])
+  @@index([artistId])
+  @@index([clientId])
+  @@index([status])
+  @@index([stripePaymentIntentId])
+}
+
 model Service {
   id          String        @id
   name        String
@@ -407,6 +466,10 @@ model User {
   Shop                                   Shop[]
   ShopsOnArtists                         ShopsOnArtists[]
   UnifiedMessage                         UnifiedMessage[]
+  Payment_Payment_artistId                Payment[]         @relation("Payment_artistId")
+  Payment_Payment_clientId                Payment[]         @relation("Payment_clientId")
+  Donation_Donation_artistId              Donation[]        @relation("Donation_artistId")
+  Donation_Donation_clientId              Donation[]        @relation("Donation_clientId")
 
   // Calendar relations
   calendars      Calendar[]
@@ -448,6 +511,31 @@ enum AppointmentStatus {
   CONFIRMED
   CANCELLED
   COMPLETED
+}
+
+enum PaymentType {
+  CONSULTATION
+  DEPOSIT
+  FULL_PAYMENT
+  REFUND
+  APPOINTMENT_HOLD
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+  HELD
+}
+
+enum DonationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }
 
 enum MessagePlatform {
