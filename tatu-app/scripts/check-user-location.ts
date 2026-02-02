@@ -48,3 +48,4 @@ async function checkUserLocation(email: string) {
 // Check the specific user
 checkUserLocation('ppcrzart@gmail.com')
 
+

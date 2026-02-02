@@ -160,37 +160,52 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     // Build where conditions
     // Only show artists who have completed registration AND have set their location
     // This ensures only artists with location data appear in search results and on the map
-    const whereConditions: any = {
-      role: 'ARTIST',
-      artistProfile: {
-        completedRegistration: true,
-        latitude: { not: null },
-        longitude: { not: null }
-      }
-    }
-
-    // Text search across name and bio
-    if (query) {
-      whereConditions.OR = [
-        { name: { contains: query, mode: 'insensitive' } },
-        { artistProfile: { bio: { contains: query, mode: 'insensitive' } } }
-      ]
+    const artistProfileConditions: any = {
+      completedRegistration: true,
+      latitude: { not: null },
+      longitude: { not: null }
     }
 
     // Location filter
     if (location) {
-      whereConditions.artistProfile = {
-        ...whereConditions.artistProfile,
-        location: { contains: location, mode: 'insensitive' }
-      }
+      artistProfileConditions.location = { contains: location, mode: 'insensitive' }
     }
 
     // Style/specialty filter
     if (style) {
-      whereConditions.artistProfile = {
-        ...whereConditions.artistProfile,
-        specialties: { has: style }
-      }
+      artistProfileConditions.specialties = { has: style }
+    }
+
+    // Build where conditions
+    // Base conditions: role and artistProfile requirements
+    const whereConditions: any = {
+      role: 'ARTIST',
+      artistProfile: artistProfileConditions
+    }
+
+    // Text search across name and bio
+    // When query exists, add search condition using AND to combine with base filters
+    if (query && query.trim()) {
+      const searchQuery = query.trim()
+      // Include all artistProfile conditions (including location/style filters) in the bio search branch
+      whereConditions.AND = [
+        {
+          role: 'ARTIST',
+          artistProfile: artistProfileConditions
+        },
+        {
+          OR: [
+            { name: { contains: searchQuery, mode: 'insensitive' } },
+            { artistProfile: { 
+              ...artistProfileConditions, // Include all filters (location, style, etc.)
+              bio: { contains: searchQuery, mode: 'insensitive' } 
+            } }
+          ]
+        }
+      ]
+      // Remove top-level conditions since they're now in AND
+      delete whereConditions.role
+      delete whereConditions.artistProfile
     }
 
     // Note: hourlyRate and experience are not in ArtistProfile schema
@@ -198,7 +213,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
     // Rating filter
     if (rating !== undefined) {
-      whereConditions.reviews = {
+      whereConditions.Review = {
         some: {
           rating: { gte: rating }
         }
@@ -206,16 +221,15 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     }
 
     // Determine sort order
+    // Note: Prisma doesn't support ordering by relation count directly
+    // We'll fetch all and sort in memory for rating/reviews/portfolio
     let orderBy: any = []
     switch (sortBy) {
       case 'rating':
-        orderBy = [{ reviews: { _count: 'desc' } }]
-        break
       case 'reviews':
-        orderBy = [{ reviews: { _count: 'desc' } }]
-        break
       case 'portfolio':
-        orderBy = [{ portfolioItems: { _count: 'desc' } }]
+        // Will sort in memory after fetching
+        orderBy = [{ createdAt: 'desc' }]
         break
       case 'price':
         // Note: hourlyRate not in ArtistProfile schema - would need to add if needed
@@ -228,49 +242,99 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         orderBy = [{ createdAt: 'desc' }]
     }
 
-    const [artists, total] = await Promise.all([
-      prisma.user.findMany({
-        where: whereConditions,
-        include: {
-          artistProfile: true,
-          shop: {
-            select: {
-              id: true,
-              name: true,
-              address: true,
-              verified: true
+    // Log the query for debugging (remove in production)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Querying artists with conditions:', JSON.stringify(whereConditions, null, 2))
+    }
+    
+    let artists, total
+    try {
+      [artists, total] = await Promise.all([
+        prisma.user.findMany({
+          where: whereConditions,
+          include: {
+            artistProfile: true,
+            Shop: {
+              take: 1, // Get first shop if user has multiple
+            },
+            PortfolioItem: {
+              take: 3,
+              orderBy: { createdAt: 'desc' },
+            },
+            Review: {
+              select: { rating: true }
+            },
+            _count: {
+              select: {
+                PortfolioItem: true,
+                Review: true
+              }
             }
           },
-          portfolioItems: {
-            take: 3,
-            orderBy: { createdAt: 'desc' },
-            select: { 
-              id: true,
-              title: true,
-              images: true,
-              style: true
-            }
-          },
-          reviews: {
-            select: { rating: true }
-          },
-          _count: {
-            select: {
-              portfolioItems: true,
-              reviews: true
+          orderBy,
+          take: Math.min(limit, 1000), // Cap at 1000 to prevent timeout
+          skip: offset
+        }),
+        prisma.user.count({ where: whereConditions })
+      ])
+      
+      // Debug logging: Check for specific user (wrapped in try-catch to prevent errors)
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          const ppcrzart = artists.find(a => a.email === 'ppcrzart@gmail.com')
+          if (ppcrzart) {
+            console.log('✅ Found ppcrzart@gmail.com in results:', {
+              id: ppcrzart.id,
+              name: ppcrzart.name,
+              email: ppcrzart.email,
+              role: ppcrzart.role,
+              completedRegistration: ppcrzart.artistProfile?.completedRegistration,
+              latitude: ppcrzart.artistProfile?.latitude,
+              longitude: ppcrzart.artistProfile?.longitude,
+              location: ppcrzart.artistProfile?.location
+            })
+          } else {
+            console.log('❌ ppcrzart@gmail.com NOT found in query results')
+            // Check if user exists at all (only in development, wrapped in try-catch)
+            try {
+              const userCheck = await prisma.user.findUnique({
+                where: { email: 'ppcrzart@gmail.com' },
+                include: { artistProfile: true }
+              })
+              if (userCheck) {
+                console.log('⚠️ User exists but not matching query:', {
+                  role: userCheck.role,
+                  completedRegistration: userCheck.artistProfile?.completedRegistration,
+                  latitude: userCheck.artistProfile?.latitude,
+                  longitude: userCheck.artistProfile?.longitude
+                })
+              } else {
+                console.log('❌ User does not exist in database')
+              }
+            } catch (debugError) {
+              // Silently fail debug logging
+              console.log('Debug check failed (non-critical)')
             }
           }
-        },
-        orderBy,
-        take: limit,
-        skip: offset
-      }),
-      prisma.user.count({ where: whereConditions })
-    ])
+        } catch (debugError) {
+          // Silently fail debug logging to prevent breaking the API
+          console.log('Debug logging failed (non-critical)')
+        }
+      }
+    } catch (dbError: any) {
+      console.error('Prisma query error:', dbError)
+      console.error('Error details:', {
+        message: dbError?.message,
+        code: dbError?.code,
+        meta: dbError?.meta,
+        stack: dbError?.stack
+      })
+      throw dbError // Re-throw to be caught by outer catch block
+    }
 
     // Transform data for frontend
-    const transformedArtists = artists.map(artist => {
-      const ratings = artist.reviews.map(r => r.rating)
+    let transformedArtists = artists.map(artist => {
+      const ratings = artist.Review?.map(r => r.rating) || []
       const avgRating = ratings.length > 0 
         ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length 
         : 0
@@ -284,21 +348,30 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         specialties: artist.artistProfile?.specialties || [],
         instagram: artist.artistProfile?.instagram || '',
         website: artist.artistProfile?.website || '',
-        portfolioCount: artist._count.portfolioItems,
+        portfolioCount: artist._count.PortfolioItem || 0,
         rating: Math.round(avgRating * 10) / 10,
-        reviewCount: artist._count.reviews,
+        reviewCount: artist._count.Review || 0,
         hourlyRate: 0, // Not in ArtistProfile schema - would need to add if needed
         experience: 0, // Not in ArtistProfile schema - would need to add if needed
         verified: false, // Not in ArtistProfile schema - would need to add if needed
         featured: artist.artistProfile?.featuredListingActive || false,
-        shop: artist.shop,
-        recentWork: artist.portfolioItems,
+        shop: artist.Shop?.[0] || null, // Get first shop if multiple exist
+        recentWork: artist.PortfolioItem || [],
         // Include location data for map display
         latitude: artist.artistProfile?.latitude || null,
         longitude: artist.artistProfile?.longitude || null,
         locationRadius: artist.artistProfile?.locationRadius || null
       }
     })
+
+    // Sort in memory for rating/reviews/portfolio (Prisma doesn't support relation count ordering)
+    if (sortBy === 'rating') {
+      transformedArtists.sort((a, b) => b.rating - a.rating)
+    } else if (sortBy === 'reviews') {
+      transformedArtists.sort((a, b) => b.reviewCount - a.reviewCount)
+    } else if (sortBy === 'portfolio') {
+      transformedArtists.sort((a, b) => b.portfolioCount - a.portfolioCount)
+    }
 
     const result = {
       artists: transformedArtists,
@@ -333,8 +406,11 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     }, { requestId: authContext?.requestId })
 
   } catch (error) {
+    console.error('Database error in /api/artists:', error)
     logger.error('Database error, returning mock data', {
       error: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined,
+      errorName: error instanceof Error ? error.name : undefined,
       query,
       location,
       style
