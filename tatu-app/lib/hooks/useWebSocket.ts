@@ -65,16 +65,25 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
   }>({})
 
   const connect = useCallback(() => {
+    // WebSocket server not yet implemented - skip connection for now
+    // This prevents errors in development when no WS server is running
+    if (typeof window === 'undefined') return
     if (socketRef.current?.readyState === WebSocket.OPEN) return
     if (!session?.user?.id) return
+
+    // Check if WebSocket server URL is configured
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL
+    if (!wsUrl) {
+      // WebSocket not configured - silently skip
+      console.log('WebSocket server not configured, skipping connection')
+      return
+    }
 
     setIsConnecting(true)
     setError(null)
 
     try {
-      // In a real implementation, you'd connect to your WebSocket server
-      // For now, we'll simulate the connection
-      const ws = new WebSocket(`ws://localhost:3001/ws?token=${session.user.id}`)
+      const ws = new WebSocket(`${wsUrl}?token=${session.user.id}`)
       
       ws.onopen = () => {
         console.log('WebSocket connected')
@@ -120,28 +129,24 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         setIsConnected(false)
         setIsConnecting(false)
         
-        // Attempt to reconnect
-        if (reconnectAttemptsRef.current < reconnectAttempts) {
+        // Attempt to reconnect only if we had a successful connection before
+        if (reconnectAttemptsRef.current < reconnectAttempts && reconnectAttemptsRef.current > 0) {
           reconnectAttemptsRef.current++
           reconnectTimeoutRef.current = setTimeout(() => {
             console.log(`Attempting to reconnect (${reconnectAttemptsRef.current}/${reconnectAttempts})`)
             connect()
           }, reconnectInterval)
-        } else {
-          setError('Failed to reconnect after multiple attempts')
         }
       }
 
-      ws.onerror = (err) => {
-        console.error('WebSocket error:', err)
-        setError('WebSocket connection error')
+      ws.onerror = () => {
+        // Silently handle WebSocket errors in development
         setIsConnecting(false)
       }
 
       socketRef.current = ws
     } catch (err) {
-      console.error('Error creating WebSocket connection:', err)
-      setError('Failed to create WebSocket connection')
+      // Silently handle connection errors
       setIsConnecting(false)
     }
   }, [session?.user?.id, reconnectAttempts, reconnectInterval])

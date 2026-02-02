@@ -22,6 +22,11 @@ const TattooBackgroundCycler = () => {
   )
   const [isLoaded, setIsLoaded] = useState(false)
   const [debugMode, setDebugMode] = useState(false)
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
+
+  // Filter out failed images (must be before hooks)
+  const availableImages = tattooImages.filter(img => !failedImages.has(img))
+  const availableImagesLength = availableImages.length
 
   useEffect(() => {
     // Start the component
@@ -38,15 +43,21 @@ const TattooBackgroundCycler = () => {
 
     // Start the cycling after component mounts
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => 
-        (prevIndex + 1) % tattooImages.length
-      )
+      setCurrentImageIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % availableImagesLength
+        return nextIndex
+      })
     }, 3000) // Change every 3 seconds
 
     return () => clearInterval(interval)
-  }, [tattooImages.length])
+  }, [availableImagesLength])
 
-  if (!isLoaded) return null
+  // Adjust current index if needed
+  useEffect(() => {
+    if (currentImageIndex >= availableImagesLength && availableImagesLength > 0) {
+      setCurrentImageIndex(0)
+    }
+  }, [availableImagesLength, currentImageIndex])
 
   // Function to determine filter based on image and screen size
   const getImageFilter = (imageSrc: string, isMobile: boolean) => {
@@ -81,64 +92,80 @@ const TattooBackgroundCycler = () => {
     }
   }
 
+  if (!isLoaded) return null
+
+  const handleImageError = (imageSrc: string) => {
+    console.error(`Failed to load image: ${imageSrc}`)
+    setFailedImages(prev => new Set([...prev, imageSrc]))
+  }
+
+  if (availableImages.length === 0) {
+    return null // Don't render if all images failed
+  }
+
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden tattoo-background-cycler flex items-center">
-      {tattooImages.map((imageSrc, index) => (
-        <div
-          key={imageSrc}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{
-            zIndex: 1
-          }}
-        >
-          <div 
-            className="relative w-full h-full flex items-center justify-center"
+      {availableImages.map((imageSrc, index) => {
+        const originalIndex = tattooImages.indexOf(imageSrc)
+        const isCurrent = index === currentImageIndex
+        
+        return (
+          <div
+            key={imageSrc}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              isCurrent ? 'opacity-100' : 'opacity-0'
+            }`}
             style={{
-              transform: 'scale(0.85) translateY(-10%)', // Mobile positioning
-              transformOrigin: 'center center'
+              zIndex: 1
             }}
           >
-            {/* Mobile version */}
-            <Image
-              src={imageSrc}
-              alt={`Tattoo design ${index + 1}`}
-              fill
-              priority={index === currentImageIndex} // Prioritize loading the current image
-              className="object-contain object-center tattoo-background-image lg:hidden"
+            <div 
+              className="relative w-full h-full flex items-center justify-center"
               style={{
-                filter: getImageFilter(imageSrc, true), // Mobile styling
-                mixBlendMode: 'normal',
-                objectPosition: 'center center'
+                transform: 'scale(0.85) translateY(-10%)', // Mobile positioning
+                transformOrigin: 'center center'
               }}
-              sizes="50vw"
-              quality={85}
-              onLoad={() => console.log(`Loaded: ${imageSrc}`)}
-              onError={() => console.error(`Failed to load: ${imageSrc}`)}
-            />
-            
-            {/* Desktop version */}
-            <Image
-              src={imageSrc}
-              alt={`Tattoo design ${index + 1}`}
-              fill
-              priority={index === currentImageIndex} // Prioritize loading the current image
-              className="object-contain object-center tattoo-background-image hidden lg:block"
-              style={{
-                filter: getImageFilter(imageSrc, false), // Desktop styling
-                mixBlendMode: 'normal',
-                objectPosition: 'center center',
-                transform: 'scale(0.85) translateY(10%)' // Desktop: moved down
-              }}
-              sizes="50vw"
-              quality={85}
-              onLoad={() => console.log(`Loaded: ${imageSrc}`)}
-              onError={() => console.error(`Failed to load: ${imageSrc}`)}
-            />
+            >
+              {/* Mobile version */}
+              <Image
+                src={imageSrc}
+                alt={`Tattoo design ${originalIndex + 1}`}
+                fill
+                priority={isCurrent} // Prioritize loading the current image
+                className="object-contain object-center tattoo-background-image lg:hidden"
+                style={{
+                  filter: getImageFilter(imageSrc, true), // Mobile styling
+                  mixBlendMode: 'normal',
+                  objectPosition: 'center center'
+                }}
+                sizes="50vw"
+                quality={85}
+                unoptimized={true} // Disable optimization to prevent errors
+                onError={() => handleImageError(imageSrc)}
+              />
+              
+              {/* Desktop version */}
+              <Image
+                src={imageSrc}
+                alt={`Tattoo design ${originalIndex + 1}`}
+                fill
+                priority={isCurrent} // Prioritize loading the current image
+                className="object-contain object-center tattoo-background-image hidden lg:block"
+                style={{
+                  filter: getImageFilter(imageSrc, false), // Desktop styling
+                  mixBlendMode: 'normal',
+                  objectPosition: 'center center',
+                  transform: 'scale(0.85) translateY(10%)' // Desktop: moved down
+                }}
+                sizes="50vw"
+                quality={85}
+                unoptimized={true} // Disable optimization to prevent errors
+                onError={() => handleImageError(imageSrc)}
+              />
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
       
       {/* Debug indicator */}
       {debugMode && (

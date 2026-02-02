@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { Tab } from '@headlessui/react'
 import { MapPinIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
 import { sendShopStatusUpdateNotification } from '@/lib/email'
+import DashboardLayout from '../../../components/DashboardLayout'
 
 interface ShopWithDetails extends Shop {
   owner: {
@@ -21,7 +22,7 @@ interface ShopWithDetails extends Shop {
       id: string
       name: string | null
       email: string
-      profile: {
+      artistProfile: {
         avatar: string | null
         specialties: string[]
       } | null
@@ -40,7 +41,10 @@ interface ShopWithDetails extends Shop {
     user: {
       id: string
       name: string | null
-      profile: {
+      artistProfile: {
+        avatar: string | null
+      } | null
+      customerProfile: {
         avatar: string | null
       } | null
     }
@@ -156,25 +160,30 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
+      </DashboardLayout>
     )
   }
 
   if (!shop) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Shop not found</h2>
-          <p className="mt-2 text-gray-600">The shop you're looking for doesn't exist or you don't have permission to view it.</p>
+      <DashboardLayout userRole="artist">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white">Shop not found</h2>
+            <p className="mt-2 text-gray-400">The shop you're looking for doesn't exist or you don't have permission to view it.</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <DashboardLayout userRole="artist">
+      <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <div className="flex justify-between items-start">
           <div>
@@ -196,13 +205,13 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
       </div>
 
       <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
-        <Tab.List className="flex space-x-1 rounded-xl bg-indigo-900/20 p-1">
+        <Tab.List className="flex space-x-1 rounded-xl bg-gray-900/50 border border-gray-800 p-1">
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -210,10 +219,10 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab>
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -221,10 +230,10 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab>
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -232,10 +241,10 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab>
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -243,10 +252,10 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab>
           <Tab
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors
               ${selected
-                ? 'bg-white text-indigo-700 shadow'
-                : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                ? 'bg-white text-black shadow'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`
             }
           >
@@ -356,9 +365,9 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
                     <div key={artist.id} className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center space-x-3">
-                          {artist.profile?.avatar ? (
+                          {artist.artistProfile?.avatar ? (
                             <Image
-                              src={artist.profile.avatar}
+                              src={artist.artistProfile.avatar}
                               alt={artist.name || ''}
                               width={40}
                               height={40}
@@ -383,11 +392,11 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
                           Remove
                         </button>
                       </div>
-                      {artist.profile?.specialties && artist.profile.specialties.length > 0 && (
+                      {artist.artistProfile?.specialties && artist.artistProfile.specialties.length > 0 && (
                         <div className="mt-3">
                           <p className="text-sm font-medium text-gray-500">Specialties</p>
                           <div className="mt-1 flex flex-wrap gap-1">
-                            {artist.profile.specialties.map((specialty, index) => (
+                            {artist.artistProfile.specialties.map((specialty, index) => (
                               <span
                                 key={index}
                                 className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800"
@@ -535,9 +544,9 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
                     {shop.reviews.map((review) => (
                       <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0 last:pb-0">
                         <div className="flex items-start space-x-3">
-                          {review.user.profile?.avatar ? (
+                          {(review.user.artistProfile?.avatar || review.user.customerProfile?.avatar) ? (
                             <Image
-                              src={review.user.profile.avatar}
+                              src={review.user.artistProfile?.avatar || review.user.customerProfile?.avatar || ''}
                               alt={review.user.name || ''}
                               width={40}
                               height={40}
@@ -583,6 +592,7 @@ export default function ShopDetailsPage({ params }: { params: { shopId: string }
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
-    </div>
+      </div>
+    </DashboardLayout>
   )
 } 

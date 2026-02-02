@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { MessagePlatform, MessageStatus } from '@prisma/client'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const messageQuerySchema = z.object({
   platform: z.enum(['EMAIL', 'INSTAGRAM', 'FACEBOOK', 'X_TWITTER', 'INTERNAL']).optional(),
   status: z.enum(['UNREAD', 'READ', 'ARCHIVED', 'DELETED']).optional(),

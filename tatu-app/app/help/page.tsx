@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useI18n } from '@/lib/i18n/context';
 
 interface FAQItem {
   question: string;
@@ -53,6 +54,7 @@ const faqData: FAQItem[] = [
 ];
 
 export default function HelpPage() {
+  const { t } = useI18n();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -72,10 +74,10 @@ export default function HelpPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="display text-5xl md:text-6xl text-white mb-6">
-              Help Center
+              {t('help.title')}
             </h1>
             <p className="body text-xl text-gray-300 max-w-2xl mx-auto">
-              Find answers to common questions and get the support you need.
+              {t('help.description')}
             </p>
           </div>
         </div>
@@ -90,7 +92,7 @@ export default function HelpPage() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search for help..."
+                  placeholder={t('help.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="input w-full"
@@ -114,7 +116,7 @@ export default function HelpPage() {
                       : 'bg-surface-2 text-gray-300 hover:text-white'
                   }`}
                 >
-                  {category === 'all' ? 'All Categories' : category}
+                  {category === 'all' ? t('help.allCategories') : t(`help.categories.${category.toLowerCase()}`)}
                 </button>
               ))}
             </div>
@@ -127,7 +129,7 @@ export default function HelpPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <h2 className="display text-4xl text-white text-center mb-12">
-              Frequently Asked Questions
+              {t('help.faqTitle')}
             </h2>
             
             {filteredFAQs.length > 0 ? (
@@ -140,7 +142,7 @@ export default function HelpPage() {
                         <p className="text-gray-300">{faq.answer}</p>
                       </div>
                       <span className="ml-4 px-3 py-1 bg-surface-2 text-gray-400 text-xs rounded-full">
-                        {faq.category}
+                        {t(`help.categories.${faq.category.toLowerCase()}`)}
                       </span>
                     </div>
                   </div>
@@ -148,7 +150,7 @@ export default function HelpPage() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-400 text-lg">No questions found matching your search.</p>
+                <p className="text-gray-400 text-lg">{t('help.noResults')}</p>
                 <button
                   onClick={() => {
                     setSearchQuery('');
@@ -156,7 +158,7 @@ export default function HelpPage() {
                   }}
                   className="mt-4 text-white hover:text-gray-300 underline"
                 >
-                  Clear filters
+                  {t('help.clearFilters')}
                 </button>
               </div>
             )}
@@ -169,7 +171,7 @@ export default function HelpPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <h2 className="display text-4xl text-white text-center mb-12">
-              Still need help?
+              {t('help.stillNeedHelp')}
             </h2>
             
             <div className="grid md:grid-cols-3 gap-8">
@@ -179,10 +181,10 @@ export default function HelpPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h3 className="text-white font-medium mb-2">Email Support</h3>
-                <p className="text-gray-300 text-sm mb-4">Get a response within 24 hours</p>
+                <h3 className="text-white font-medium mb-2">{t('help.emailSupport')}</h3>
+                <p className="text-gray-300 text-sm mb-4">{t('help.emailSupportDesc')}</p>
                 <Link href="/contact" className="btn btn-secondary">
-                  Send Email
+                  {t('help.sendEmail')}
                 </Link>
               </div>
 
@@ -192,11 +194,8 @@ export default function HelpPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="text-white font-medium mb-2">Help Articles</h3>
-                <p className="text-gray-300 text-sm mb-4">Browse detailed guides and tutorials</p>
-                <Link href="/styles" className="btn btn-secondary">
-                  View Guides
-                </Link>
+                <h3 className="text-white font-medium mb-2">{t('help.helpArticles')}</h3>
+                <p className="text-gray-300 text-sm mb-4">{t('help.helpArticlesDesc')}</p>
               </div>
 
               <div className="text-center">
@@ -205,10 +204,10 @@ export default function HelpPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="text-white font-medium mb-2">Live Chat</h3>
-                <p className="text-gray-300 text-sm mb-4">Coming soon - real-time support</p>
+                <h3 className="text-white font-medium mb-2">{t('help.liveChat')}</h3>
+                <p className="text-gray-300 text-sm mb-4">{t('help.liveChatDesc')}</p>
                 <button className="btn btn-secondary opacity-50 cursor-not-allowed">
-                  Coming Soon
+                  {t('help.comingSoon')}
                 </button>
               </div>
             </div>
@@ -221,13 +220,13 @@ export default function HelpPage() {
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="display text-4xl text-white mb-6">
-              Can't find what you're looking for?
+              {t('help.cantFind')}
             </h2>
             <p className="body text-xl text-gray-300 mb-8">
-              Our support team is here to help with any specific questions or issues.
+              {t('help.supportTeam')}
             </p>
             <Link href="/contact" className="btn btn-primary">
-              Contact Support
+              {t('help.contactSupport')}
             </Link>
           </div>
         </div>

@@ -55,7 +55,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     },
     include: {
       artist: {
-        include: { profile: true }
+        include: { artistProfile: true }
       }
     }
   })

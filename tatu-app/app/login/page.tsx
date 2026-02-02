@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
+import { useI18n } from '@/lib/i18n/context'
 
-export default function LoginPage() {
+function LoginContent() {
+  const { t } = useI18n()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -15,6 +17,15 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+
+  // Show success message if redirected from email verification
+  useEffect(() => {
+    if (searchParams.get('verified') === 'true') {
+      toast.success(t('auth.emailVerified'))
+      // Clean up the URL
+      router.replace('/login', { scroll: false })
+    }
+  }, [searchParams, router, t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,9 +39,9 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        toast.error('Invalid credentials. Please try again.')
+        toast.error(t('auth.invalidCredentials'))
       } else if (result?.ok) {
-        toast.success('Signed in successfully!')
+        toast.success(t('auth.signedInSuccess'))
         router.push(callbackUrl)
       }
     } catch (error) {
@@ -74,25 +85,16 @@ export default function LoginPage() {
               className="h-12 w-auto mx-auto"
             />
           </Link>
-          <h2 className="display text-3xl text-white mb-2">
-            Welcome Back
-          </h2>
           <p className="body text-gray-400">
-            Sign in to your TATU account
+            {t('auth.signInTitle')}
           </p>
-        </div>
-
-        {/* Authentication Status */}
-        <div className="bg-surface border border-gray-600 rounded-lg p-4 text-center">
-          <p className="text-white text-sm font-medium">🔐 Secure Authentication</p>
-          <p className="text-gray-400 text-xs mt-1">Sign in with your TATU account</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-                Email Address
+                {t('auth.emailAddress')}
               </label>
               <input
                 id="email"
@@ -100,13 +102,13 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 className="input"
-                placeholder="Enter your email"
+                placeholder={t('auth.enterEmail')}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
-                Password
+                {t('auth.password')}
               </label>
               <input
                 id="password"
@@ -114,7 +116,7 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 className="input"
-                placeholder="Enter your password"
+                placeholder={t('auth.enterPassword')}
               />
             </div>
           </div>
@@ -122,7 +124,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <Link href="/forgot-password" className="text-gray-400 hover:text-white transition-colors">
-                Forgot your password?
+                {t('auth.forgotPassword')}
               </Link>
             </div>
           </div>
@@ -136,10 +138,10 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing In...
+                  {t('auth.signingIn')}
                 </>
               ) : (
-                'Sign In'
+                t('auth.signin')
               )}
             </button>
 
@@ -148,7 +150,7 @@ export default function LoginPage() {
                 <div className="w-full border-t" style={{borderColor: '#171717'}} />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-black text-gray-400">Or continue with</span>
+                <span className="px-2 bg-black text-gray-400">{t('auth.orContinueWith')}</span>
               </div>
             </div>
 
@@ -164,20 +166,35 @@ export default function LoginPage() {
                 <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              Continue with Google
+              {t('auth.continueWithGoogle')}
             </button>
           </div>
 
           <div className="text-center">
             <span className="text-sm text-gray-400">
-              Don't have an account?{' '}
+              {t('auth.noAccount')}{' '}
               <Link href="/signup" className="text-white hover:text-gray-300 transition-colors font-medium">
-                Sign up
+                {t('auth.signup')}
               </Link>
             </span>
           </div>
         </form>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 } 

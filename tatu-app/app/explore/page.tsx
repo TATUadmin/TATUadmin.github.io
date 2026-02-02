@@ -1,29 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import dynamicImport from 'next/dynamic'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { MagnifyingGlassIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
 import { classifySearch, formatSearchClassification } from '@/lib/smart-search'
-import { ALL_ARTISTS, Artist } from '@/lib/all-artists-data'
+import PortfolioGallery from '@/app/components/PortfolioGallery'
+import { useI18n } from '@/lib/i18n/context'
 
-// Force dynamic rendering to prevent build-time errors
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
-// Dynamically import LeafletMap to prevent build-time window errors
-const LeafletMap = dynamicImport(() => import('../components/LeafletMap'), {
-  ssr: false, // Disable server-side rendering for the map component
-  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg flex items-center justify-center">
-    <p className="text-gray-500">Loading map...</p>
-  </div>
+// Lazy load the map component to improve initial page load
+const LeafletMap = dynamic(() => import('../components/LeafletMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[600px] bg-black"></div>
+  )
 })
 
 export default function ExplorePage() {
+  const { t } = useI18n()
   const searchParams = useSearchParams()
   const [artists, setArtists] = useState<Artist[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -35,6 +33,8 @@ export default function ExplorePage() {
   const [favoriteArtists, setFavoriteArtists] = useState<string[]>([])
   const [mapLocation, setMapLocation] = useState('') // Separate state for map panning
   const [lastSearchClassification, setLastSearchClassification] = useState<any>(null) // Track what was detected
+  const [portfolioItems, setPortfolioItems] = useState<any[]>([])
+  const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(true)
   
   // Track whether user manually edited filter boxes (resets on each search)
   const [manualLocationEdit, setManualLocationEdit] = useState(false)
@@ -47,7 +47,13 @@ export default function ExplorePage() {
 
   useEffect(() => {
     fetchArtists()
+    fetchPortfolioItems()
   }, [])
+
+  // Fetch portfolio items when filters change
+  useEffect(() => {
+    fetchPortfolioItems()
+  }, [styleFilter])
 
   // Only trigger search on initial load if there's a URL search param
   useEffect(() => {
@@ -143,93 +149,24 @@ export default function ExplorePage() {
     })
   }
 
-  // Use centralized artist data
-  const mockArtists: Artist[] = ALL_ARTISTS
-
   const fetchArtists = async () => {
     setIsLoading(true)
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const params = new URLSearchParams()
+      if (searchQuery) params.set('query', searchQuery)
+      if (locationFilter) params.set('location', locationFilter)
+      if (styleFilter) params.set('style', styleFilter)
+      if (sortBy) params.set('sortBy', sortBy)
+      params.set('limit', '100')
       
-      let filteredArtists = [...mockArtists]
+      const response = await fetch(`/api/artists?${params.toString()}`)
+      if (!response.ok) throw new Error('Failed to fetch artists')
       
-      // Enhanced search by name, bio, specialties, or location
-      if (searchQuery) {
-        const searchTerms = searchQuery.toLowerCase().trim().split(/\s+/).filter(term => term.length > 0)
-        
-        if (searchTerms.length > 0) {
-          filteredArtists = filteredArtists.filter(artist => {
-            // Check if ALL search terms match somewhere in the artist's profile
-            return searchTerms.every(term => 
-              artist.name.toLowerCase().includes(term) ||
-              artist.bio.toLowerCase().includes(term) ||
-              artist.specialties.some(specialty => specialty.toLowerCase().includes(term)) ||
-              artist.location.toLowerCase().includes(term) ||
-              artist.instagram.toLowerCase().includes(term)
-            )
-          })
-        }
-      }
-      
-      // Filter by location (more flexible matching)
-      if (locationFilter) {
-        const searchLocation = locationFilter.toLowerCase().trim()
-        filteredArtists = filteredArtists.filter(artist => {
-          // Check if the artist's location contains the searched city or state
-          const artistLocation = artist.location.toLowerCase()
-          const cityMatch = artistLocation.includes(searchLocation)
-          const stateMatch = artistLocation.includes(searchLocation)
-          return cityMatch || stateMatch
-        })
-      }
-      
-      // Filter by style (more flexible matching)
-      if (styleFilter) {
-        const style = styleFilter.toLowerCase()
-        console.log('Filtering by style:', style)
-        const beforeCount = filteredArtists.length
-        filteredArtists = filteredArtists.filter(artist => {
-          const hasStyle = artist.specialties.some(specialty => 
-            specialty.toLowerCase().includes(style) ||
-            specialty.toLowerCase().replace(/\s+/g, '').includes(style.replace(/\s+/g, ''))
-          )
-          console.log(`Artist ${artist.name} has style ${style}:`, hasStyle, 'Specialties:', artist.specialties)
-          return hasStyle
-        })
-        console.log(`Style filter applied: ${beforeCount} -> ${filteredArtists.length} artists`)
-      }
-      
-      // Note: When both locationFilter and styleFilter are specified,
-      // the filtering above will show only artists that meet BOTH criteria
-      // because the filters are applied sequentially (AND logic)
-      
-      // Sort artists
-      if (sortBy) {
-        switch (sortBy) {
-          case 'rating':
-            filteredArtists.sort((a, b) => b.rating - a.rating)
-            break
-          case 'reviews':
-            filteredArtists.sort((a, b) => b.reviewCount - a.reviewCount)
-            break
-          case 'portfolio':
-            filteredArtists.sort((a, b) => b.portfolioCount - a.portfolioCount)
-            break
-          case 'recent':
-            // For demo purposes, sort by ID (newer artists have higher IDs)
-            filteredArtists.sort((a, b) => parseInt(b.id) - parseInt(a.id))
-            break
-          default:
-            break
-        }
-      }
-      
-      setArtists(filteredArtists)
+      const data = await response.json()
+      setArtists(data.artists || [])
     } catch (error) {
       console.error('Error fetching artists:', error)
-      // Fallback to mock data on error
-      setArtists(mockArtists)
+      setArtists([])
     } finally {
       setIsLoading(false)
     }
@@ -290,15 +227,34 @@ export default function ExplorePage() {
     setManualLocationEdit(false)
     setManualStyleEdit(false)
 
-    // Small delay to ensure state updates are applied, then fetch
-    setTimeout(() => {
-      fetchArtists()
-    }, 50)
+    // Fetch immediately without delay
+    fetchArtists()
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch()
+    }
+  }
+
+  const fetchPortfolioItems = async () => {
+    setIsLoadingPortfolio(true)
+    try {
+      const params = new URLSearchParams()
+      if (styleFilter) {
+        params.set('style', styleFilter)
+      }
+      
+      const response = await fetch(`/api/portfolio/public?${params.toString()}`)
+      if (!response.ok) throw new Error('Failed to fetch portfolio items')
+      
+      const data = await response.json()
+      setPortfolioItems(data.items || [])
+    } catch (error) {
+      console.error('Error fetching portfolio items:', error)
+      setPortfolioItems([])
+    } finally {
+      setIsLoadingPortfolio(false)
     }
   }
 
@@ -322,30 +278,42 @@ export default function ExplorePage() {
     }
   }
 
+  const handlePortfolioLike = async (itemId: string) => {
+    // TODO: Implement like functionality
+    console.log('Like portfolio item:', itemId)
+  }
+
+  const handlePortfolioShare = async (itemId: string) => {
+    // TODO: Implement share functionality
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Check out this tattoo art',
+          url: `${window.location.origin}/portfolio/${itemId}`
+        })
+      } catch (error) {
+        console.error('Error sharing:', error)
+      }
+    }
+  }
+
+  const handlePortfolioView = (itemId: string) => {
+    // TODO: Navigate to portfolio item detail or open lightbox
+    console.log('View portfolio item:', itemId)
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header Section */}
-      <section className="pt-20 pb-8">
-        <div className="container">
-          <h1 className="display text-4xl md:text-5xl text-white mb-4">
-            Browse Artists
-          </h1>
-          <p className="body text-lg text-gray-400 max-w-2xl">
-            Discover verified tattoo artists from around the world. Browse portfolios, read reviews, and book your next session.
-          </p>
-        </div>
-      </section>
-
       {/* Map Section - Full Width Edge to Edge */}
-      <section className="relative">
+      <section className="relative z-0 pt-16 overflow-visible">
         {/* Full Width Interactive Map - Edge to Edge */}
-        <div className="w-full">
+        <div className="w-full h-[calc(100vh-20rem)] min-h-[500px] overflow-visible">
           <LeafletMap searchLocation={mapLocation} styleFilter={styleFilter} minReviews={minReviews} />
         </div>
       </section>
 
-      {/* Search Section */}
-      <section className="py-10 -mt-8 bg-black relative z-10">
+      {/* Search Section - Map Filters */}
+      <section className="py-10 bg-black relative z-10">
         <div className="container">
           {/* First Row - Search input and Sort By */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -354,7 +322,7 @@ export default function ExplorePage() {
               <MagnifyingGlassIcon className="absolute left-4 w-5 h-5 text-gray-400 pointer-events-none z-10" style={{top: '50%', transform: 'translateY(-50%)'}} />
               <input
                 type="text"
-                placeholder="Search artists, styles, keywords..."
+                placeholder={t('explore.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -365,7 +333,7 @@ export default function ExplorePage() {
             {/* Min Reviews Slider */}
             <div className="relative px-2">
               <label className="block text-sm text-gray-400 font-medium mb-2">
-                Min Reviews: {minReviews}+
+                {t('explore.minReviews')}: {minReviews}+
               </label>
               <input
                 type="range"
@@ -392,7 +360,7 @@ export default function ExplorePage() {
               <MapPinIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
               <input
                 type="text"
-                placeholder="Enter a location"
+                placeholder={t('explore.enterLocation')}
                 value={locationFilter}
                 onChange={(e) => {
                   setLocationFilter(e.target.value)
@@ -415,7 +383,7 @@ export default function ExplorePage() {
                 className="w-full px-4 py-3 bg-transparent border-2 border-gray-400 rounded-full text-white focus:outline-none focus:ring-2 focus:ring-gray-400/50 focus:border-gray-400 transition-all duration-200 appearance-none cursor-pointer"
                 style={{paddingRight: '3rem'}}
               >
-                <option value="" className="bg-gray-800 text-white">All Styles</option>
+                <option value="" className="bg-gray-800 text-white">{t('explore.allStyles')}</option>
                 {styles.map((style) => (
                   <option key={style} value={style.toLowerCase()} className="bg-gray-800 text-white">
                     {style}
@@ -435,7 +403,7 @@ export default function ExplorePage() {
                 onClick={handleSearch}
                 className="w-full px-8 py-3 bg-white border-2 border-gray-400 text-black rounded-full font-semibold hover:bg-gray-100 transition-all duration-200 text-center"
               >
-                Search
+                {t('common.search')}
               </button>
             </div>
 
@@ -455,7 +423,7 @@ export default function ExplorePage() {
                 }}
                 className="w-full px-8 py-3 bg-transparent border-2 border-gray-400 text-white rounded-full font-semibold hover:bg-gray-700 transition-all duration-200 text-center"
               >
-                Clear Filters
+                {t('explore.clearFilters')}
               </button>
             </div>
           </div>
@@ -464,20 +432,20 @@ export default function ExplorePage() {
           {lastSearchClassification && lastSearchClassification.type !== 'general' && (
             <div className="mt-3 py-2 px-3 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg">
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-400">Smart Search detected:</span>
+                <span className="text-gray-400">{t('explore.smartSearchDetected')}:</span>
                 {lastSearchClassification.type === 'location' && (
                   <span className="text-orange-400 font-medium">
-                    📍 Location: {lastSearchClassification.location}
+                    📍 {t('explore.location')}: {lastSearchClassification.location}
                   </span>
                 )}
                 {lastSearchClassification.type === 'style' && (
                   <span className="text-yellow-400 font-medium">
-                    🎨 Style: {lastSearchClassification.style}
+                    🎨 {t('explore.style')}: {lastSearchClassification.style}
                   </span>
                 )}
                 {lastSearchClassification.type === 'artist_name' && (
                   <span className="text-teal-400 font-medium">
-                    👤 Artist: {lastSearchClassification.artistName}
+                    👤 {t('explore.artist')}: {lastSearchClassification.artistName}
                   </span>
                 )}
                 {lastSearchClassification.type === 'combined' && (
@@ -506,6 +474,46 @@ export default function ExplorePage() {
             </div>
           )}
 
+        </div>
+      </section>
+
+      {/* Portfolio Gallery Section */}
+      <section className="py-20 bg-black">
+        <div className="container">
+          <div className="mb-8">
+            <h2 className="display text-3xl md:text-4xl text-white mb-2">
+              Featured Portfolio
+            </h2>
+            <p className="body text-lg text-gray-400 max-w-2xl">
+              Browse stunning tattoo artwork from our verified artists. Filter by style, search by tags, and discover your next piece.
+            </p>
+          </div>
+          
+          {isLoadingPortfolio ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="card p-6 animate-pulse">
+                  <div className="w-full h-64 bg-gray-800 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <PortfolioGallery
+              items={portfolioItems}
+              onLike={handlePortfolioLike}
+              onShare={handlePortfolioShare}
+              onView={handlePortfolioView}
+              showFilters={true}
+              showStats={true}
+              layout="grid"
+              columns={3}
+              enableLightbox={true}
+              enableSocial={true}
+              className="bg-transparent"
+            />
+          )}
         </div>
       </section>
 

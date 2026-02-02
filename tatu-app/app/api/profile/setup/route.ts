@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
     // Find the user
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      include: { profile: true }
+      include: { 
+        artistProfile: true,
+        customerProfile: true
+      }
     })
 
     if (!user) {
@@ -49,33 +52,62 @@ export async function POST(request: NextRequest) {
       data: { role }
     })
 
-    // Create or update profile
-    const profileUpdate = {
-      bio: profileData.bio || null,
-      phone: profileData.phone || null,
-      instagram: profileData.instagram || null,
-      website: profileData.website || null,
-      location: profileData.location || null,
-      specialties: profileData.specialties || [],
-      completedRegistration: true,
-      subscriptionTier: validSubscriptionTier,
-      subscriptionStatus: 'ACTIVE'
-    }
+    // Create or update role-specific profile
+    if (role === 'ARTIST' || role === 'SHOP_OWNER') {
+      const artistProfileData = {
+        bio: profileData.bio || null,
+        phone: profileData.phone || null,
+        instagram: profileData.instagram || null,
+        website: profileData.website || null,
+        location: profileData.location || null,
+        specialties: profileData.specialties || [],
+        completedRegistration: true,
+        subscriptionTier: validSubscriptionTier,
+        subscriptionStatus: 'ACTIVE'
+      }
 
-    if (user.profile) {
-      // Update existing profile
-      await prisma.profile.update({
-        where: { userId: user.id },
-        data: profileUpdate
-      })
-    } else {
-      // Create new profile
-      await prisma.profile.create({
-        data: {
-          ...profileUpdate,
-          userId: user.id
+      if (user.artistProfile) {
+        await prisma.artistProfile.update({
+          where: { userId: user.id },
+          data: artistProfileData
+        })
+      } else {
+        // Delete customer profile if exists (user changed role)
+        if (user.customerProfile) {
+          await prisma.customerProfile.delete({ where: { userId: user.id } })
         }
-      })
+        await prisma.artistProfile.create({
+          data: {
+            ...artistProfileData,
+            userId: user.id
+          }
+        })
+      }
+    } else if (role === 'CUSTOMER') {
+      const customerProfileData = {
+        phone: profileData.phone || null,
+        completedRegistration: true,
+        preferredStyles: profileData.preferredStyles || [],
+        locationPreferences: profileData.locationPreferences || null
+      }
+
+      if (user.customerProfile) {
+        await prisma.customerProfile.update({
+          where: { userId: user.id },
+          data: customerProfileData
+        })
+      } else {
+        // Delete artist profile if exists (user changed role)
+        if (user.artistProfile) {
+          await prisma.artistProfile.delete({ where: { userId: user.id } })
+        }
+        await prisma.customerProfile.create({
+          data: {
+            ...customerProfileData,
+            userId: user.id
+          }
+        })
+      }
     }
 
     // Create FREE subscription record for all users

@@ -74,9 +74,9 @@ export default function DraggablePortfolioItem({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`bg-white shadow rounded-lg overflow-hidden ${
+          className={`bg-white shadow rounded-2xl overflow-hidden ${
             view === 'masonry' ? 'row-span-1' : ''
-          } ${isSelected ? 'ring-2 ring-indigo-500' : ''}`}
+          } ${isSelected ? 'ring-2 ring-white' : ''}`}
         >
           <div className="relative">
             <div className="aspect-w-3 aspect-h-2">
@@ -94,7 +94,7 @@ export default function DraggablePortfolioItem({
                 type="checkbox"
                 checked={isSelected}
                 onChange={(e) => onSelect(item.id, e.target.checked)}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                className="h-4 w-4 text-white focus:ring-white border-gray-300 rounded-full"
               />
             </div>
           </div>

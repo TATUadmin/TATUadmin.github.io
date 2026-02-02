@@ -72,11 +72,34 @@ input[type="range"].slider::-moz-range-thumb {
 /* Override Leaflet styles that might cause blue backgrounds */
 .leaflet-container {
   background: #000000 !important;
+  position: relative !important;
+  z-index: 0 !important;
 }
 
 .leaflet-tile {
   /* Brighten the lighter gray elements while keeping dark areas unchanged */
   filter: brightness(2.6) !important;
+}
+
+/* Ensure map fade overlays appear above Leaflet tiles */
+.leaflet-map-pane {
+  z-index: 0 !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 0 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 100 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 200 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 300 !important;
 }
 
 /* Ensure all sections have proper black background */
@@ -151,29 +174,27 @@ section {
   background: #6a6a6a;
 }
 
-/* Form input styling */
+/* Input field styling - black background with white text */
 .input {
   width: 100%;
   padding: 0.75rem 1rem;
-  background-color: rgba(23, 23, 23, 0.8);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(115, 115, 115, 0.3);
+  background-color: #1a1a1a;
+  border: 1px solid #374151;
   border-radius: 0.5rem;
   color: #ffffff;
   font-size: 0.875rem;
-  line-height: 1.25rem;
-  outline: none;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s;
 }
 
 .input::placeholder {
-  color: rgba(156, 163, 175, 0.6);
+  color: #6b7280;
 }
 
 .input:focus {
-  border-color: rgba(115, 115, 115, 0.5);
-  ring: 2px solid rgba(115, 115, 115, 0.3);
-  background-color: rgba(23, 23, 23, 0.9);
+  outline: none;
+  border-color: #ffffff;
+  ring: 2px;
+  ring-color: rgba(255, 255, 255, 0.2);
 }
 
 .input:disabled {
@@ -181,7 +202,20 @@ section {
   cursor: not-allowed;
 }
 
-/* Textarea variant */
-.input.resize-none {
-  resize: none;
+/* Textarea styling */
+textarea.input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Select styling */
+select.input {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+select.input option {
+  background-color: #1a1a1a;
+  color: #ffffff;
 }

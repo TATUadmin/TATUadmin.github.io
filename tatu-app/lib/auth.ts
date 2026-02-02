@@ -100,4 +100,7 @@ export const config = {
   secret: process.env.NEXTAUTH_SECRET,
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth(config) 
+export const { handlers, auth, signIn, signOut } = NextAuth(config)
+
+// Export authOptions for compatibility with files expecting v4 API
+export const authOptions = config 

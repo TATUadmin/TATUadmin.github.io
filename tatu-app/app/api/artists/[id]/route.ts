@@ -24,7 +24,7 @@ export async function GET(
         role: 'ARTIST'
       },
       include: {
-        profile: true,
+        artistProfile: true,
         portfolioItems: {
           orderBy: { createdAt: 'desc' }
         },
@@ -41,7 +41,7 @@ export async function GET(
       }
     })
 
-    if (!artist || !artist.profile) {
+    if (!artist || !artist.artistProfile) {
       return NextResponse.json(
         { error: 'Artist not found' },
         { status: 404 }
@@ -81,19 +81,19 @@ export async function GET(
     const response = {
       id: artist.id,
       name: artist.name || 'Unknown Artist',
-      bio: artist.profile.bio || '',
-      avatar: artist.profile.avatar || '',
-      location: artist.profile.location || '',
-      specialties: artist.profile.specialties,
-      instagram: artist.profile.instagram || '',
-      website: artist.profile.website || '',
-      phone: artist.profile.phone || '',
+      bio: artist.artistProfile.bio || '',
+      avatar: artist.artistProfile.avatar || '',
+      location: artist.artistProfile.location || '',
+      specialties: artist.artistProfile.specialties,
+      instagram: artist.artistProfile.instagram || '',
+      website: artist.artistProfile.website || '',
+      phone: artist.artistProfile.phone || '',
       portfolioCount,
       rating: Math.round(rating * 10) / 10, // Round to 1 decimal
       reviewCount,
       portfolioItems,
       reviews,
-      featured: false // TODO: Add featured field to profile
+      featured: artist.artistProfile.featuredListingActive || false
     }
 
     return NextResponse.json(response)

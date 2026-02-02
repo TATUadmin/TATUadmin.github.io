@@ -10,6 +10,88 @@ import { addAppointmentReminderJob } from '@/lib/background-jobs'
 
 const prisma = new PrismaClient()
 
+// GET - Fetch appointments for the current user
+export async function GET(request: NextRequest) {
+  try {
+    const authContext = await requireAuth(request)
+    const { user } = authContext
+
+    // Fetch appointments based on user role
+    const whereClause = user.role === 'ARTIST' 
+      ? { artistId: user.id }
+      : { clientId: user.id }
+
+    const appointments = await prisma.appointment.findMany({
+      where: whereClause,
+      include: {
+        Appointment_artistIdToUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            ArtistProfile: {
+              select: {
+                avatar: true,
+                phone: true
+              }
+            }
+          }
+        },
+        Appointment_clientIdToUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            CustomerProfile: {
+              select: {
+                phone: true
+              }
+            }
+          }
+        },
+        Service: true
+      },
+      orderBy: {
+        startTime: 'desc'
+      }
+    })
+
+    // Transform the data for the frontend
+    const transformedAppointments = appointments.map(apt => ({
+      id: apt.id,
+      artistId: apt.artistId,
+      artistName: apt.Appointment_artistIdToUser?.name || 'Unknown Artist',
+      artistEmail: apt.Appointment_artistIdToUser?.email || '',
+      artistAvatar: apt.Appointment_artistIdToUser?.ArtistProfile?.avatar || null,
+      clientId: apt.clientId,
+      clientName: apt.Appointment_clientIdToUser?.name || 'Unknown Client',
+      clientEmail: apt.Appointment_clientIdToUser?.email || '',
+      clientPhone: apt.Appointment_clientIdToUser?.CustomerProfile?.phone || '',
+      serviceName: apt.Service?.name || apt.notes || 'Tattoo Session',
+      serviceType: apt.Service?.name || 'Tattoo',
+      date: apt.startTime.toISOString().split('T')[0],
+      startTime: apt.startTime.toISOString().split('T')[1].substring(0, 5),
+      endTime: apt.endTime.toISOString().split('T')[1].substring(0, 5),
+      duration: Math.round((apt.endTime.getTime() - apt.startTime.getTime()) / 60000),
+      status: apt.status.toLowerCase(),
+      amount: 0,
+      notes: apt.notes,
+      isFirstTime: false,
+      createdAt: apt.createdAt.toISOString()
+    }))
+
+    return NextResponse.json(transformedAppointments)
+  } catch (error: any) {
+    console.error('Error fetching appointments:', error)
+    
+    if (error.message === 'Authentication required') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 })
+  }
+}
+
 export const POST = withErrorHandling(async (request: NextRequest) => {
   return Sentry.startSpan(
     {
@@ -70,8 +152,8 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
               role: 'ARTIST'
             },
             include: {
-              profile: true,
-              shop: true
+              ArtistProfile: true,
+              Shop: true
             }
           })
         }
@@ -141,13 +223,13 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
               status: 'PENDING'
             },
             include: {
-              artist: {
+              Appointment_artistIdToUser: {
                 include: {
-                  profile: true,
-                  shop: true
+                  ArtistProfile: true,
+                  Shop: true
                 }
               },
-              client: true
+              Appointment_clientIdToUser: true
             }
           })
         }
@@ -183,6 +265,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       }, request)
 
       span.setAttribute('status', 'success')
+      const appointmentArtist = appointment.Appointment_artistIdToUser
       return ApiResponse.success({
         appointmentId: appointment.id,
         status: appointment.status,
@@ -190,8 +273,8 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         appointment: {
           id: appointment.id,
           artist: {
-            name: appointment.artist.profile?.name || appointment.artist.name,
-            shop: appointment.artist.shop?.name
+            name: appointmentArtist?.ArtistProfile?.bio || appointmentArtist?.name || 'Artist',
+            shop: appointmentArtist?.Shop?.[0]?.name
           },
           date: appointment.preferredDate,
           time: appointment.preferredTime,

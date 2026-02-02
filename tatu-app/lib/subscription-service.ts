@@ -60,8 +60,8 @@ export class SubscriptionService {
           }
         })
 
-        // Update profile cache
-        await prisma.profile.update({
+        // Update artist profile cache (subscriptions are artist-only)
+        await prisma.artistProfile.update({
           where: { userId },
           data: {
             subscriptionTier: tier,
@@ -158,8 +158,8 @@ export class SubscriptionService {
         }
       })
 
-      // Update profile cache
-      await prisma.profile.update({
+      // Update artist profile cache (subscriptions are artist-only)
+      await prisma.artistProfile.update({
         where: { userId },
         data: {
           subscriptionTier: tier,
@@ -224,7 +224,7 @@ export class SubscriptionService {
 
       // If cancelled immediately, downgrade to FREE
       if (immediately) {
-        await prisma.profile.update({
+        await prisma.artistProfile.update({
           where: { userId },
           data: {
             subscriptionTier: 'FREE',
@@ -255,7 +255,7 @@ export class SubscriptionService {
       include: {
         user: {
           include: {
-            profile: true
+            artistProfile: true
           }
         }
       }
@@ -266,7 +266,7 @@ export class SubscriptionService {
    * Check if user has access to a feature
    */
   async hasFeatureAccess(userId: string, feature: string): Promise<boolean> {
-    const profile = await prisma.profile.findUnique({
+    const profile = await prisma.artistProfile.findUnique({
       where: { userId }
     })
 
@@ -344,7 +344,7 @@ export class SubscriptionService {
     })
 
     // Downgrade to FREE tier
-    await prisma.profile.update({
+    await prisma.artistProfile.update({
       where: { userId },
       data: {
         subscriptionTier: 'FREE',
@@ -394,7 +394,7 @@ export class SubscriptionService {
       }
     })
 
-    await prisma.profile.update({
+    await prisma.artistProfile.update({
       where: { userId },
       data: {
         subscriptionStatus: 'PAST_DUE',

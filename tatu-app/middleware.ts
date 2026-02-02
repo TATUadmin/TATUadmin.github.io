@@ -22,7 +22,6 @@ const publicPaths = [
   '/explore',
   '/search',
   '/artist',
-  '/styles',
   '/api/artists',
   '/api/auth',
   '/api/portfolio',
@@ -49,6 +48,12 @@ try {
       const { nextUrl, nextauth } = req
       const isLoggedIn = !!nextauth?.token
       const path = nextUrl.pathname
+      const upgradeHeader = req.headers.get('upgrade')
+
+      // Ignore WebSocket upgrade requests to avoid dev-server upgrade errors
+      if (upgradeHeader && upgradeHeader.toLowerCase() === 'websocket') {
+        return NextResponse.next()
+      }
 
       // Allow public paths first - skip all middleware logic for public paths
       if (publicPaths.some(p => path.startsWith(p))) {
@@ -138,6 +143,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    '/((?!_next/static|_next/image|_next/webpack-hmr|favicon.ico|public/).*)',
   ],
 } 

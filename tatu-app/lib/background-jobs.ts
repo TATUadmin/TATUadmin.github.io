@@ -524,7 +524,7 @@ export class AppointmentReminderProcessor implements JobProcessor {
       where: { id: appointmentId },
       include: {
         artist: {
-          include: { profile: true }
+          include: { artistProfile: true }
         },
         client: true
       }
@@ -539,7 +539,7 @@ export class AppointmentReminderProcessor implements JobProcessor {
       appointment.client.email,
       appointment.client.name || 'Valued Customer',
       {
-        artistName: appointment.artist.profile?.name || appointment.artist.name || 'Artist',
+        artistName: appointment.artist.name || 'Artist',
         date: appointment.preferredDate,
         time: appointment.preferredTime,
         service: appointment.serviceType,
@@ -559,7 +559,7 @@ export class ReviewRequestProcessor implements JobProcessor {
       where: { id: appointmentId },
       include: {
         artist: {
-          include: { profile: true }
+          include: { artistProfile: true }
         },
         client: true
       }

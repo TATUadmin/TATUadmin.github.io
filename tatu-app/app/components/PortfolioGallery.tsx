@@ -186,7 +186,7 @@ export default function PortfolioGallery({
     <div className={`space-y-6 ${className}`}>
       {/* Filters and Controls */}
       {showFilters && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Search */}
             <div className="flex-1 max-w-md">
@@ -197,23 +197,31 @@ export default function PortfolioGallery({
                   placeholder="Search portfolio..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full pl-10 pr-4 py-2 bg-black border border-gray-700 rounded-full text-white placeholder-gray-400 focus:ring-2 focus:ring-gray-600 focus:border-gray-600"
                 />
               </div>
             </div>
 
             {/* View Controls */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center bg-gray-100 rounded-md p-1">
+              <div className="flex items-center bg-gray-800 rounded-full p-1 border border-gray-700">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                  className={`p-2 rounded transition-colors ${
+                    viewMode === 'grid' 
+                      ? 'bg-white text-black' 
+                      : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  }`}
                 >
                   <Squares2X2Icon className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('masonry')}
-                  className={`p-2 rounded ${viewMode === 'masonry' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+                  className={`p-2 rounded transition-colors ${
+                    viewMode === 'masonry' 
+                      ? 'bg-white text-black' 
+                      : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  }`}
                 >
                   <QueueListIcon className="h-4 w-4" />
                 </button>
@@ -222,12 +230,12 @@ export default function PortfolioGallery({
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="px-3 py-2 bg-black border border-gray-700 rounded-full text-white focus:ring-2 focus:ring-gray-600 focus:border-gray-600"
               >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="popular">Most Popular</option>
-                <option value="likes">Most Liked</option>
+                <option value="newest" className="bg-gray-900">Newest First</option>
+                <option value="oldest" className="bg-gray-900">Oldest First</option>
+                <option value="popular" className="bg-gray-900">Most Popular</option>
+                <option value="likes" className="bg-gray-900">Most Liked</option>
               </select>
             </div>
           </div>
@@ -236,14 +244,14 @@ export default function PortfolioGallery({
           <div className="mt-4 space-y-4">
             {/* Style Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Style</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">Style</label>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedStyle('')}
                   className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                     selectedStyle === '' 
-                      ? 'bg-indigo-100 text-indigo-800' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-white text-black' 
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
                   }`}
                 >
                   All Styles
@@ -254,8 +262,8 @@ export default function PortfolioGallery({
                     onClick={() => setSelectedStyle(style)}
                     className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                       selectedStyle === style 
-                        ? 'bg-indigo-100 text-indigo-800' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-white text-black' 
+                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
                     }`}
                   >
                     {style}
@@ -266,7 +274,7 @@ export default function PortfolioGallery({
 
             {/* Tag Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">Tags</label>
               <div className="flex flex-wrap gap-2">
                 {availableTags.slice(0, 10).map(tag => (
                   <button
@@ -274,8 +282,8 @@ export default function PortfolioGallery({
                     onClick={() => toggleTag(tag)}
                     className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                       selectedTags.includes(tag)
-                        ? 'bg-indigo-100 text-indigo-800' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-white text-black' 
+                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
                     }`}
                   >
                     {tag}
@@ -293,7 +301,7 @@ export default function PortfolioGallery({
             {(selectedStyle || selectedTags.length > 0 || searchQuery) && (
               <button
                 onClick={clearFilters}
-                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                className="text-sm text-gray-400 hover:text-white font-medium transition-colors"
               >
                 Clear all filters
               </button>
@@ -304,7 +312,7 @@ export default function PortfolioGallery({
 
       {/* Results Count */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-400">
           Showing {filteredItems.length} of {items.length} items
         </p>
       </div>
@@ -312,11 +320,11 @@ export default function PortfolioGallery({
       {/* Gallery Grid */}
       {filteredItems.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
             <EyeIcon className="h-8 w-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
-          <p className="text-gray-600 mb-4">
+          <h3 className="text-lg font-medium text-white mb-2">No items found</h3>
+          <p className="text-gray-400 mb-4">
             {searchQuery || selectedStyle || selectedTags.length > 0 
               ? 'Try adjusting your filters or search terms'
               : 'No portfolio items available'
@@ -325,7 +333,7 @@ export default function PortfolioGallery({
           {(searchQuery || selectedStyle || selectedTags.length > 0) && (
             <button
               onClick={clearFilters}
-              className="text-indigo-600 hover:text-indigo-700 font-medium"
+              className="text-gray-400 hover:text-white font-medium transition-colors"
             >
               Clear filters
             </button>
@@ -336,11 +344,11 @@ export default function PortfolioGallery({
           {filteredItems.map((item, index) => (
             <div
               key={item.id}
-              className="group bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+              className="group bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden hover:border-gray-700 transition-all duration-300 cursor-pointer"
               onClick={() => openLightbox(index)}
             >
               {/* Image */}
-              <div className="relative aspect-square overflow-hidden">
+              <div className="relative aspect-square overflow-hidden bg-gray-800">
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
@@ -350,10 +358,10 @@ export default function PortfolioGallery({
                 />
                 
                 {/* Overlay */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                   <div className="flex items-center space-x-2">
                     <button className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors">
-                      <EyeIcon className="h-4 w-4 text-gray-700" />
+                      <EyeIcon className="h-4 w-4 text-black" />
                     </button>
                     {enableSocial && (
                       <>
@@ -361,13 +369,13 @@ export default function PortfolioGallery({
                           onClick={(e) => handleLike(item.id, e)}
                           className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
                         >
-                          <HeartIcon className="h-4 w-4 text-gray-700" />
+                          <HeartIcon className="h-4 w-4 text-black" />
                         </button>
                         <button 
                           onClick={(e) => handleShare(item.id, e)}
                           className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
                         >
-                          <ShareIcon className="h-4 w-4 text-gray-700" />
+                          <ShareIcon className="h-4 w-4 text-black" />
                         </button>
                       </>
                     )}
@@ -377,7 +385,7 @@ export default function PortfolioGallery({
                 {/* Featured Badge */}
                 {item.featured && (
                   <div className="absolute top-2 left-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white text-black border border-gray-700">
                       <StarSolidIcon className="h-3 w-3 mr-1" />
                       Featured
                     </span>
@@ -388,9 +396,9 @@ export default function PortfolioGallery({
               {/* Content */}
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900 line-clamp-1">{item.title}</h3>
+                  <h3 className="font-semibold text-white line-clamp-1">{item.title}</h3>
                   {showStats && (
-                    <div className="flex items-center space-x-3 text-xs text-gray-500 ml-2">
+                    <div className="flex items-center space-x-3 text-xs text-gray-400 ml-2">
                       <span className="flex items-center">
                         <EyeIcon className="h-3 w-3 mr-1" />
                         {item.views}
@@ -403,13 +411,13 @@ export default function PortfolioGallery({
                   )}
                 </div>
 
-                <div className="flex items-center text-sm text-gray-600 mb-2">
+                <div className="flex items-center text-sm text-gray-400 mb-2">
                   <TagIcon className="h-4 w-4 mr-1" />
                   <span>{item.style}</span>
                 </div>
 
                 {item.description && (
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-3">{item.description}</p>
+                  <p className="text-sm text-gray-300 line-clamp-2 mb-3">{item.description}</p>
                 )}
 
                 {/* Tags */}
@@ -418,7 +426,7 @@ export default function PortfolioGallery({
                     {item.tags.slice(0, 3).map(tag => (
                       <span
                         key={tag}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
+                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-800 text-gray-300 border border-gray-700"
                       >
                         {tag}
                       </span>
@@ -433,17 +441,17 @@ export default function PortfolioGallery({
 
                 {/* Artist Info */}
                 {item.artist && (
-                  <div className="flex items-center mt-3 pt-3 border-t border-gray-100">
+                  <div className="flex items-center mt-3 pt-3 border-t border-gray-800">
                     {item.artist.avatar && (
                       <Image
                         src={item.artist.avatar}
                         alt={item.artist.name}
                         width={24}
                         height={24}
-                        className="rounded-full mr-2"
+                        className="rounded-full mr-2 border border-gray-700"
                       />
                     )}
-                    <span className="text-sm text-gray-600">{item.artist.name}</span>
+                    <span className="text-sm text-gray-400">{item.artist.name}</span>
                   </div>
                 )}
               </div>

@@ -2,57 +2,39 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function AboutPage() {
+  const { t } = useI18n();
   const [activeSection, setActiveSection] = useState('mission');
+  const [activeTab, setActiveTab] = useState<'clients' | 'artists'>('clients');
 
   const sections = [
     {
       id: 'mission',
-      title: 'Our Mission',
-      content: 'To create the world\'s most trusted platform connecting tattoo artists with clients, fostering creativity, and building lasting relationships in the tattoo community.',
+      title: t('about.mission.title'),
+      content: t('about.mission.content'),
       icon: '🎯'
     },
     {
       id: 'story',
-      title: 'Our Story',
-      content: 'Founded by tattoo enthusiasts who experienced the challenges of finding quality artists, TATU was born from a simple idea: make great tattoo art accessible to everyone while supporting talented artists.',
+      title: t('about.story.title'),
+      content: t('about.story.content'),
       icon: '📖'
     },
     {
       id: 'values',
-      title: 'Our Values',
-      content: 'Quality, authenticity, community, and innovation. We believe every tattoo tells a story, and every artist deserves a platform to showcase their unique vision.',
+      title: t('about.values.title'),
+      content: t('about.values.content'),
       icon: '💎'
-    },
-    {
-      id: 'team',
-      title: 'Our Team',
-      content: 'A diverse group of designers, developers, and tattoo industry professionals passionate about revolutionizing how people discover and connect with tattoo artists worldwide.',
-      icon: '👥'
     }
   ];
 
   const stats = [
-    { number: '50K+', label: 'Happy Clients', description: 'Satisfied customers worldwide' },
-    { number: '15K+', label: 'Verified Artists', description: 'Professional tattoo artists' },
-    { number: '2.5M+', label: 'Artworks', description: 'Portfolio pieces shared' },
-    { number: '180+', label: 'Countries', description: 'Global artist network' }
-  ];
-
-  const team = [
-    {
-      name: 'Kelso Norden',
-      role: 'CEO & Co-Founder',
-      bio: 'Former tattoo artist with 15+ years in the industry. Passionate about supporting artists and connecting them with clients.',
-      image: '/Kelso Headshot.jpg'
-    },
-    {
-      name: 'Pedro Perin',
-      role: 'CTO & Co-Founder',
-      bio: 'Tech entrepreneur with expertise in marketplace platforms. Believes technology can enhance human connections.',
-      image: '/Profile Pic BW.jpg'
-    }
+    { number: '50K+', label: t('about.stats.happyClients'), description: t('about.stats.happyClientsDesc') },
+    { number: '15K+', label: t('about.stats.verifiedArtists'), description: t('about.stats.verifiedArtistsDesc') },
+    { number: '2.5M+', label: t('about.stats.artworks'), description: t('about.stats.artworksDesc') },
+    { number: '180+', label: t('about.stats.countries'), description: t('about.stats.countriesDesc') }
   ];
 
   return (
@@ -62,7 +44,7 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="display text-4xl md:text-5xl text-white mb-6">
-              TATU is a professional tattoo artist marketplace. We're building the future of tattoo art discovery and artist-client connections.
+              {t('about.hero')}
             </h1>
           </div>
         </div>
@@ -123,32 +105,250 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* How It Works Section */}
       <section className="py-24 bg-surface">
+        <div className="container">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h2 className="display text-4xl md:text-5xl text-white mb-4">
+              {t('about.howItWorks.title')}
+            </h2>
+            <p className="body text-xl text-gray-300">
+              {t('about.howItWorks.description')}
+            </p>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="max-w-2xl mx-auto mb-16">
+            <div className="flex bg-surface-2 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab('clients')}
+                className={`flex-1 py-3 px-6 rounded-md font-medium transition-all ${
+                  activeTab === 'clients'
+                    ? 'bg-white text-black'
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                {t('about.tabs.client')}
+              </button>
+              <button
+                onClick={() => setActiveTab('artists')}
+                className={`flex-1 py-3 px-6 rounded-md font-medium transition-all ${
+                  activeTab === 'artists'
+                    ? 'bg-white text-black'
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                {t('about.tabs.artist')}
+              </button>
+            </div>
+          </div>
+
+          {/* Clients Process */}
+          {activeTab === 'clients' && (
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-16">
+                <h3 className="display text-3xl md:text-4xl text-white mb-4">
+                  {t('about.clients.title')}
+                </h3>
+                <p className="body text-xl text-gray-300">
+                  {t('about.clients.description')}
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {[
+                  {
+                    step: '1',
+                    title: t('about.clients.step1.title'),
+                    description: t('about.clients.step1.description'),
+                    icon: '🔍'
+                  },
+                  {
+                    step: '2',
+                    title: t('about.clients.step2.title'),
+                    description: t('about.clients.step2.description'),
+                    icon: '📅'
+                  },
+                  {
+                    step: '3',
+                    title: t('about.clients.step3.title'),
+                    description: t('about.clients.step3.description'),
+                    icon: '✏️'
+                  },
+                  {
+                    step: '4',
+                    title: t('about.clients.step4.title'),
+                    description: t('about.clients.step4.description'),
+                    icon: '🎨'
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="card card-hover p-6 text-center animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                    <div className="mb-6">
+                      <div className="bg-white text-black text-lg font-bold px-3 py-1 rounded-full inline-block mb-4">
+                        {item.step}
+                      </div>
+                    </div>
+                    <div className="text-3xl mb-4">{item.icon}</div>
+                    <h4 className="headline text-xl text-white mb-3">{item.title}</h4>
+                    <p className="body text-gray-400">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Artists Process */}
+          {activeTab === 'artists' && (
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-16">
+                <h3 className="display text-3xl md:text-4xl text-white mb-4">
+                  {t('about.artists.title')}
+                </h3>
+                <p className="body text-xl text-gray-300">
+                  {t('about.artists.description')}
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {[
+                  {
+                    step: '1',
+                    title: t('about.artists.step1.title'),
+                    description: t('about.artists.step1.description'),
+                    icon: '✅'
+                  },
+                  {
+                    step: '2',
+                    title: t('about.artists.step2.title'),
+                    description: t('about.artists.step2.description'),
+                    icon: '👤'
+                  },
+                  {
+                    step: '3',
+                    title: t('about.artists.step3.title'),
+                    description: t('about.artists.step3.description'),
+                    icon: '📱'
+                  },
+                  {
+                    step: '4',
+                    title: t('about.artists.step4.title'),
+                    description: t('about.artists.step4.description'),
+                    icon: '💰'
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="card card-hover p-6 text-center animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                    <div className="mb-6">
+                      <div className="bg-white text-black text-lg font-bold px-3 py-1 rounded-full inline-block mb-4">
+                        {item.step}
+                      </div>
+                    </div>
+                    <div className="text-3xl mb-4">{item.icon}</div>
+                    <h4 className="headline text-xl text-white mb-3">{item.title}</h4>
+                    <p className="body text-gray-400">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24">
         <div className="container">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="display text-4xl md:text-5xl text-white mb-4">
-                Meet Our Team
+                {t('about.features.title')}
               </h2>
               <p className="body text-xl text-gray-300">
-                The passionate people behind TATU
+                {t('about.features.description')}
               </p>
             </div>
-            
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {team.map((member, index) => (
-                <div key={index} className="text-center">
-                  <div className="relative mb-6">
-                    <img 
-                      src={member.image} 
-                      alt={member.name}
-                      className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-gray-600"
-                    />
-                  </div>
-                  <h3 className="headline text-xl text-white mb-2">{member.name}</h3>
-                  <p className="label text-gray-300 mb-3">{member.role}</p>
-                  <p className="body text-gray-300 text-sm leading-relaxed">{member.bio}</p>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  title: t('about.features.verifiedArtists.title'),
+                  description: t('about.features.verifiedArtists.description'),
+                  icon: '🛡️'
+                },
+                {
+                  title: t('about.features.securePayments.title'),
+                  description: t('about.features.securePayments.description'),
+                  icon: '🔒'
+                },
+                {
+                  title: t('about.features.qualityGuarantee.title'),
+                  description: t('about.features.qualityGuarantee.description'),
+                  icon: '⭐'
+                },
+                {
+                  title: t('about.features.support.title'),
+                  description: t('about.features.support.description'),
+                  icon: '📞'
+                },
+                {
+                  title: t('about.features.portfolio.title'),
+                  description: t('about.features.portfolio.description'),
+                  icon: '🖼️'
+                },
+                {
+                  title: t('about.features.analytics.title'),
+                  description: t('about.features.analytics.description'),
+                  icon: '📊'
+                }
+              ].map((feature, index) => (
+                <div key={index} className="card card-hover p-6 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                  <div className="text-3xl mb-4">{feature.icon}</div>
+                  <h3 className="headline text-xl text-white mb-3">{feature.title}</h3>
+                  <p className="body text-gray-400">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 bg-surface">
+        <div className="container">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="display text-4xl md:text-5xl text-white mb-4">
+                {t('about.faq.title')}
+              </h2>
+              <p className="body text-xl text-gray-300">
+                {t('about.faq.description')}
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {[
+                {
+                  question: t('about.faq.q1.question'),
+                  answer: t('about.faq.q1.answer')
+                },
+                {
+                  question: t('about.faq.q2.question'),
+                  answer: t('about.faq.q2.answer')
+                },
+                {
+                  question: t('about.faq.q3.question'),
+                  answer: t('about.faq.q3.answer')
+                },
+                {
+                  question: t('about.faq.q4.question'),
+                  answer: t('about.faq.q4.answer')
+                },
+                {
+                  question: t('about.faq.q5.question'),
+                  answer: t('about.faq.q5.answer')
+                }
+              ].map((faq, index) => (
+                <div key={index} className="card p-6 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                  <h3 className="headline text-lg text-white mb-3">{faq.question}</h3>
+                  <p className="body text-gray-400">{faq.answer}</p>
                 </div>
               ))}
             </div>
@@ -161,18 +361,17 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="display text-4xl md:text-5xl text-white mb-6">
-              Join the TATU Community
+              {t('about.cta.title')}
             </h2>
             <p className="body text-xl text-gray-300 mb-8">
-              Whether you're an artist looking to showcase your work or a client seeking the perfect tattoo, 
-              we're here to help you connect and create.
+              {t('about.cta.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/explore" className="btn btn-primary">
-                Browse Artists
+                {t('about.cta.browseArtists')}
               </Link>
               <Link href="/register-artist" className="btn btn-ghost">
-                Apply as Artist
+                {t('about.cta.applyArtist')}
               </Link>
             </div>
           </div>
@@ -180,4 +379,4 @@ export default function AboutPage() {
       </section>
     </div>
   );
-} 
+}

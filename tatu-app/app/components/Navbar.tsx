@@ -2,11 +2,36 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
+import { useI18n } from '@/lib/i18n/context'
+import LanguageToggle from './LanguageToggle'
 
 export default function Navbar() {
   const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [avatar, setAvatar] = useState<string | null>(null)
+  const pathname = usePathname()
+  const { t } = useI18n()
+
+  // Fetch user avatar
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/profile')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.avatar) {
+            setAvatar(data.avatar)
+          }
+        })
+        .catch(err => console.error('Failed to fetch avatar:', err))
+    }
+  }, [session?.user?.id])
+
+  // Hide navbar on dashboard pages (they have their own navigation)
+  if (pathname?.startsWith('/dashboard')) {
+    return null
+  }
 
   return (
     <nav className="fixed top-0 w-full z-50 backdrop-blur-sm border-b bg-black/80" style={{borderColor: '#171717'}}>
@@ -32,53 +57,62 @@ export default function Navbar() {
               href="/about" 
               className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
-              About
+              {t('footer.about')}
             </Link>
             <Link 
               href="/explore" 
               className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
-              Browse
-            </Link>
-            <Link 
-              href="/how-it-works" 
-              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
-            >
-              How it Works
+              {t('nav.explore')}
             </Link>
           </div>
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
+            <LanguageToggle />
             {session ? (
               <div className="flex items-center space-x-4">
                 <Link 
                   href="/dashboard" 
                   className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
                 >
-                  Dashboard
+                  {t('nav.dashboard')}
                 </Link>
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">
-                      {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
-                    </span>
+                  <div className="w-8 h-8 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center overflow-hidden">
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt={session.user?.name || 'User'}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white text-sm font-medium">
+                        {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
+                      </span>
+                    )}
                   </div>
                   <button
                     onClick={() => signOut()}
-                    className="btn btn-ghost text-sm px-4 py-2"
+                    className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
                   >
-                    Sign Out
+                    {t('nav.signout')}
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
-                <Link href="/auth/signin" className="btn btn-ghost">
-                  Sign In
+              <div className="flex items-center space-x-6">
+                <Link 
+                  href="/login" 
+                  className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
+                >
+                  {t('nav.signin')}
                 </Link>
-                <Link href="/auth/signup" className="btn btn-primary">
-                  Join
+                <Link 
+                  href="/signup" 
+                  className="text-xs bg-white text-black px-3 py-1.5 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                >
+                  {t('nav.signup')}
                 </Link>
               </div>
             )}
@@ -111,32 +145,45 @@ export default function Navbar() {
               className="block text-gray-400 hover:text-white transition-colors font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
-              About
+              {t('footer.about')}
             </Link>
             <Link 
               href="/explore" 
               className="block text-gray-400 hover:text-white transition-colors font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
-              Browse
-            </Link>
-            <Link 
-              href="/how-it-works" 
-              className="block text-gray-400 hover:text-white transition-colors font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              How it Works
+              {t('nav.explore')}
             </Link>
             
             <div className="border-t pt-4" style={{borderColor: '#171717'}}>
               {session ? (
                 <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-4">
+                    <div className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center overflow-hidden">
+                      {avatar ? (
+                        <img
+                          src={avatar}
+                          alt={session.user?.name || 'User'}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-sm font-medium">
+                          {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">
+                        {session.user?.name || session.user?.email}
+                      </p>
+                    </div>
+                  </div>
                   <Link 
                     href="/dashboard" 
                     className="block text-gray-400 hover:text-white transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                   <button
                     onClick={() => {
@@ -145,24 +192,24 @@ export default function Navbar() {
                     }}
                     className="block text-gray-400 hover:text-white transition-colors font-medium"
                   >
-                    Sign Out
+                    {t('nav.signout')}
                   </button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <Link 
-                    href="/auth/signin" 
+                    href="/login" 
                     className="block text-gray-400 hover:text-white transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Sign In
+                    {t('nav.signin')}
                   </Link>
                   <Link 
-                    href="/auth/signup" 
+                    href="/signup" 
                     className="block text-white font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Join
+                    {t('nav.signup')}
                   </Link>
                 </div>
               )}

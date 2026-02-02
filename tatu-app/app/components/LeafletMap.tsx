@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Link from 'next/link'
 import { MapPinIcon, StarIcon } from '@heroicons/react/24/solid'
-import { ALL_ARTISTS } from '@/lib/all-artists-data'
 
 // Fix for default markers in Leaflet with Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -144,245 +143,13 @@ const cityData = {
   'Grand Junction': { lat: 39.0639, lng: -108.5506, state: 'CO' }
 }
 
-// Mock artist data across top 20 US cities (5+ artists per city)
-const mockArtists = [
-  // New York City
-  { id: '1', name: 'Alex Rivera', specialty: 'Traditional American', rating: 4.8, reviewCount: 127, bio: 'Professional tattoo artist with over 8 years of experience.', latitude: 40.7128, longitude: -74.0060, location: 'Lower Manhattan, NY', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '2', name: 'Sarah Chen', specialty: 'Watercolor', rating: 4.9, reviewCount: 89, bio: 'Watercolor and minimalist tattoo specialist.', latitude: 40.7580, longitude: -73.9855, location: 'Times Square, NY', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '3', name: 'Marcus Johnson', specialty: 'Realism', rating: 4.7, reviewCount: 156, bio: 'Realism and portrait artist known for detailed work.', latitude: 40.7061, longitude: -74.0113, location: 'Financial District, NY', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '4', name: 'Elena Rodriguez', specialty: 'Japanese Traditional', rating: 4.6, reviewCount: 94, bio: 'Japanese traditional and geometric tattoo artist.', latitude: 40.7831, longitude: -73.9712, location: 'Upper West Side, NY', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '5', name: 'David Kim', specialty: 'Neo-Traditional', rating: 4.8, reviewCount: 112, bio: 'Neo-traditional and new school artist.', latitude: 40.7291, longitude: -73.9965, location: 'East Village, NY', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'New York' },
-  
-  // NYC Metro Area - Additional 30 Artists
-  { id: '901', name: 'Brooklyn Carter', specialty: 'Blackwork', rating: 4.7, reviewCount: 98, bio: 'Bold blackwork and dotwork designs.', latitude: 40.6782, longitude: -73.9442, location: 'Brooklyn, NY', age: 29, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '902', name: 'Queens Rivera', specialty: 'Geometric', rating: 4.5, reviewCount: 76, bio: 'Sacred geometry specialist.', latitude: 40.7282, longitude: -73.7949, location: 'Queens, NY', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '903', name: 'Bronx Martinez', specialty: 'Traditional American', rating: 4.8, reviewCount: 145, bio: 'Classic American traditional with bold colors.', latitude: 40.8448, longitude: -73.8648, location: 'Bronx, NY', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '904', name: 'Staten Thompson', specialty: 'Realism', rating: 4.6, reviewCount: 82, bio: 'Photorealistic portraits and wildlife.', latitude: 40.5795, longitude: -74.1502, location: 'Staten Island, NY', age: 32, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '905', name: 'Harlem Williams', specialty: 'Japanese Traditional', rating: 4.9, reviewCount: 134, bio: 'Traditional Japanese irezumi artist.', latitude: 40.8116, longitude: -73.9465, location: 'Harlem, NY', age: 38, yearsExperience: 15, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '906', name: 'Chelsea Park', specialty: 'Watercolor', rating: 4.7, reviewCount: 91, bio: 'Vibrant watercolor tattoos.', latitude: 40.7465, longitude: -74.0014, location: 'Chelsea, NY', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '907', name: 'SoHo Lee', specialty: 'Minimalist', rating: 4.8, reviewCount: 107, bio: 'Clean minimalist designs.', latitude: 40.7233, longitude: -74.0030, location: 'SoHo, NY', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '908', name: 'TriBeCa Anderson', specialty: 'Neo-Traditional', rating: 4.6, reviewCount: 88, bio: 'Modern neo-traditional style.', latitude: 40.7163, longitude: -74.0086, location: 'TriBeCa, NY', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '909', name: 'Williamsburg Chen', specialty: 'Geometric', rating: 4.9, reviewCount: 156, bio: 'Intricate geometric patterns.', latitude: 40.7081, longitude: -73.9571, location: 'Williamsburg, Brooklyn', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '910', name: 'Astoria Davis', specialty: 'Blackwork', rating: 4.7, reviewCount: 119, bio: 'Bold blackwork tattoos.', latitude: 40.7644, longitude: -73.9235, location: 'Astoria, Queens', age: 31, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '911', name: 'Flushing Wang', specialty: 'Traditional American', rating: 4.5, reviewCount: 73, bio: 'Classic American traditional.', latitude: 40.7673, longitude: -73.8330, location: 'Flushing, Queens', age: 29, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '912', name: 'Park Slope Garcia', specialty: 'Realism', rating: 4.8, reviewCount: 142, bio: 'Hyper-realistic portrait work.', latitude: 40.6710, longitude: -73.9778, location: 'Park Slope, Brooklyn', age: 36, yearsExperience: 13, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '913', name: 'Red Hook Miller', specialty: 'Watercolor', rating: 4.6, reviewCount: 85, bio: 'Watercolor and abstract designs.', latitude: 40.6753, longitude: -74.0121, location: 'Red Hook, Brooklyn', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '914', name: 'Bushwick Rodriguez', specialty: 'Japanese Traditional', rating: 4.9, reviewCount: 167, bio: 'Traditional Japanese art.', latitude: 40.6942, longitude: -73.9208, location: 'Bushwick, Brooklyn', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '915', name: 'Crown Heights Taylor', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 103, bio: 'Neo-traditional specialist.', latitude: 40.6682, longitude: -73.9442, location: 'Crown Heights, Brooklyn', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '916', name: 'LIC Johnson', specialty: 'Minimalist', rating: 4.8, reviewCount: 126, bio: 'Minimalist fine line work.', latitude: 40.7447, longitude: -73.9485, location: 'Long Island City, Queens', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '917', name: 'Battery Park White', specialty: 'Geometric', rating: 4.6, reviewCount: 94, bio: 'Geometric and sacred designs.', latitude: 40.7033, longitude: -74.0170, location: 'Battery Park, NY', age: 32, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '918', name: 'Gramercy Brown', specialty: 'Blackwork', rating: 4.9, reviewCount: 138, bio: 'Bold and intricate blackwork.', latitude: 40.7374, longitude: -73.9851, location: 'Gramercy, NY', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '919', name: 'Murray Hill Kim', specialty: 'Traditional American', rating: 4.7, reviewCount: 111, bio: 'Classic traditional tattoos.', latitude: 40.7479, longitude: -73.9782, location: 'Murray Hill, NY', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '920', name: 'Kips Bay Lopez', specialty: 'Realism', rating: 4.8, reviewCount: 149, bio: 'Photorealistic tattoo art.', latitude: 40.7428, longitude: -73.9768, location: 'Kips Bay, NY', age: 37, yearsExperience: 14, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '921', name: 'Midtown Martinez', specialty: 'Watercolor', rating: 4.6, reviewCount: 87, bio: 'Vibrant watercolor specialist.', latitude: 40.7549, longitude: -73.9840, location: 'Midtown, NY', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '922', name: 'UWS Anderson', specialty: 'Japanese Traditional', rating: 4.9, reviewCount: 176, bio: 'Japanese traditional master.', latitude: 40.7870, longitude: -73.9754, location: 'Upper West Side, NY', age: 40, yearsExperience: 17, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '923', name: 'UES Thompson', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 105, bio: 'Modern neo-traditional work.', latitude: 40.7736, longitude: -73.9566, location: 'Upper East Side, NY', age: 31, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '924', name: 'Hell\'s Kitchen Davis', specialty: 'Minimalist', rating: 4.8, reviewCount: 122, bio: 'Clean minimalist tattoos.', latitude: 40.7638, longitude: -73.9918, location: 'Hell\'s Kitchen, NY', age: 29, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '925', name: 'Morningside Wilson', specialty: 'Geometric', rating: 4.6, reviewCount: 91, bio: 'Sacred geometry designs.', latitude: 40.8089, longitude: -73.9615, location: 'Morningside Heights, NY', age: 28, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '926', name: 'Washington Heights Cruz', specialty: 'Blackwork', rating: 4.9, reviewCount: 158, bio: 'Bold blackwork and tribal.', latitude: 40.8501, longitude: -73.9357, location: 'Washington Heights, NY', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '927', name: 'Inwood Ramirez', specialty: 'Traditional American', rating: 4.7, reviewCount: 96, bio: 'Classic American style.', latitude: 40.8677, longitude: -73.9212, location: 'Inwood, NY', age: 32, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '928', name: 'Fort Greene Harris', specialty: 'Realism', rating: 4.8, reviewCount: 133, bio: 'Realistic portrait artist.', latitude: 40.6891, longitude: -73.9742, location: 'Fort Greene, Brooklyn', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '929', name: 'Sunset Park Chen', specialty: 'Watercolor', rating: 4.6, reviewCount: 78, bio: 'Watercolor and color realism.', latitude: 40.6463, longitude: -74.0109, location: 'Sunset Park, Brooklyn', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'New York' },
-  { id: '930', name: 'Bay Ridge O\'Brien', specialty: 'Japanese Traditional', rating: 4.9, reviewCount: 164, bio: 'Japanese traditional expert.', latitude: 40.6259, longitude: -74.0304, location: 'Bay Ridge, Brooklyn', age: 38, yearsExperience: 15, avatar: '/api/placeholder/80/80', city: 'New York' },
-  
-  // Jersey City & Newark Area - 30 Artists
-  { id: '931', name: 'Jersey City Jackson', specialty: 'Traditional American', rating: 4.8, reviewCount: 118, bio: 'Classic American traditional tattoos.', latitude: 40.7178, longitude: -74.0431, location: 'Downtown Jersey City, NJ', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '932', name: 'Grove Street Adams', specialty: 'Realism', rating: 4.7, reviewCount: 95, bio: 'Photorealistic portrait work.', latitude: 40.7195, longitude: -74.0387, location: 'Grove Street, Jersey City, NJ', age: 31, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '933', name: 'Newport Miller', specialty: 'Watercolor', rating: 4.9, reviewCount: 142, bio: 'Vibrant watercolor specialist.', latitude: 40.7270, longitude: -74.0338, location: 'Newport, Jersey City, NJ', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '934', name: 'Paulus Hook Davis', specialty: 'Geometric', rating: 4.6, reviewCount: 87, bio: 'Sacred geometry and mandalas.', latitude: 40.7143, longitude: -74.0338, location: 'Paulus Hook, Jersey City, NJ', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '935', name: 'Journal Square Rodriguez', specialty: 'Blackwork', rating: 4.8, reviewCount: 131, bio: 'Bold blackwork designs.', latitude: 40.7334, longitude: -74.0631, location: 'Journal Square, Jersey City, NJ', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '936', name: 'Heights Martinez', specialty: 'Japanese Traditional', rating: 4.9, reviewCount: 159, bio: 'Traditional Japanese irezumi.', latitude: 40.7473, longitude: -74.0563, location: 'The Heights, Jersey City, NJ', age: 37, yearsExperience: 14, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '937', name: 'Bergen Lafayette Wilson', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 103, bio: 'Modern neo-traditional style.', latitude: 40.7000, longitude: -74.0690, location: 'Bergen-Lafayette, Jersey City, NJ', age: 29, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '938', name: 'Hamilton Park Chen', specialty: 'Minimalist', rating: 4.8, reviewCount: 114, bio: 'Clean minimalist line work.', latitude: 40.7246, longitude: -74.0450, location: 'Hamilton Park, Jersey City, NJ', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '939', name: 'Newark Downtown Thomas', specialty: 'Traditional American', rating: 4.6, reviewCount: 92, bio: 'Classic American traditional.', latitude: 40.7357, longitude: -74.1724, location: 'Downtown Newark, NJ', age: 32, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '940', name: 'Ironbound Silva', specialty: 'Realism', rating: 4.9, reviewCount: 167, bio: 'Hyper-realistic portraits.', latitude: 40.7428, longitude: -74.1568, location: 'Ironbound, Newark, NJ', age: 36, yearsExperience: 13, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '941', name: 'Branch Brook Garcia', specialty: 'Watercolor', rating: 4.7, reviewCount: 98, bio: 'Watercolor and abstract art.', latitude: 40.7649, longitude: -74.1850, location: 'Branch Brook Park, Newark, NJ', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '942', name: 'University Heights Kim', specialty: 'Geometric', rating: 4.8, reviewCount: 125, bio: 'Geometric pattern specialist.', latitude: 40.7420, longitude: -74.1805, location: 'University Heights, Newark, NJ', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '943', name: 'Clinton Hill Anderson', specialty: 'Blackwork', rating: 4.6, reviewCount: 84, bio: 'Bold blackwork tattoos.', latitude: 40.7220, longitude: -74.1900, location: 'Clinton Hill, Newark, NJ', age: 31, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '944', name: 'Weequahic Brown', specialty: 'Japanese Traditional', rating: 4.9, reviewCount: 148, bio: 'Japanese traditional master.', latitude: 40.7047, longitude: -74.2090, location: 'Weequahic, Newark, NJ', age: 39, yearsExperience: 16, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '945', name: 'Vailsburg Lopez', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 106, bio: 'Neo-traditional artwork.', latitude: 40.7330, longitude: -74.2230, location: 'Vailsburg, Newark, NJ', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '946', name: 'Forest Hill White', specialty: 'Minimalist', rating: 4.8, reviewCount: 119, bio: 'Minimalist fine line tattoos.', latitude: 40.7720, longitude: -74.2010, location: 'Forest Hill, Newark, NJ', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '947', name: 'McGinley Square Taylor', specialty: 'Traditional American', rating: 4.7, reviewCount: 101, bio: 'American traditional style.', latitude: 40.7250, longitude: -74.0800, location: 'McGinley Square, Jersey City, NJ', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '948', name: 'Greenville Johnson', specialty: 'Realism', rating: 4.8, reviewCount: 136, bio: 'Realistic tattoo artist.', latitude: 40.7050, longitude: -74.0810, location: 'Greenville, Jersey City, NJ', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '949', name: 'West Side Harris', specialty: 'Watercolor', rating: 4.6, reviewCount: 89, bio: 'Colorful watercolor designs.', latitude: 40.7200, longitude: -74.0600, location: 'West Side, Jersey City, NJ', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '950', name: 'Liberty Harbor Lee', specialty: 'Geometric', rating: 4.9, reviewCount: 153, bio: 'Sacred geometry expert.', latitude: 40.7080, longitude: -74.0520, location: 'Liberty Harbor, Jersey City, NJ', age: 32, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '951', name: 'Newark Penn Moore', specialty: 'Blackwork', rating: 4.7, reviewCount: 97, bio: 'Intricate blackwork art.', latitude: 40.7347, longitude: -74.1643, location: 'Penn Station Area, Newark, NJ', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '952', name: 'Prudential Center Martin', specialty: 'Japanese Traditional', rating: 4.8, reviewCount: 128, bio: 'Japanese traditional tattoos.', latitude: 40.7335, longitude: -74.1710, location: 'Near Prudential Center, Newark, NJ', age: 38, yearsExperience: 15, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '953', name: 'Military Park Robinson', specialty: 'Neo-Traditional', rating: 4.6, reviewCount: 82, bio: 'Neo-traditional specialist.', latitude: 40.7380, longitude: -74.1720, location: 'Military Park, Newark, NJ', age: 29, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '954', name: 'Lincoln Park Cruz', specialty: 'Minimalist', rating: 4.9, reviewCount: 144, bio: 'Clean minimalist tattoos.', latitude: 40.7550, longitude: -74.1980, location: 'Lincoln Park, Newark, NJ', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  { id: '955', name: 'Exchange Place Rivera', specialty: 'Traditional American', rating: 4.8, reviewCount: 122, bio: 'Bold American traditional.', latitude: 40.7165, longitude: -74.0330, location: 'Exchange Place, Jersey City, NJ', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '956', name: 'Hoboken Turner', specialty: 'Realism', rating: 4.7, reviewCount: 108, bio: 'Photo-realistic work.', latitude: 40.7439, longitude: -74.0324, location: 'Hoboken, NJ', age: 31, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '957', name: 'North Bergen Sanchez', specialty: 'Watercolor', rating: 4.6, reviewCount: 76, bio: 'Watercolor tattoo artist.', latitude: 40.8042, longitude: -74.0121, location: 'North Bergen, NJ', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '958', name: 'Union City Ramirez', specialty: 'Geometric', rating: 4.9, reviewCount: 161, bio: 'Geometric design master.', latitude: 40.7662, longitude: -74.0260, location: 'Union City, NJ', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '959', name: 'West New York Patel', specialty: 'Blackwork', rating: 4.7, reviewCount: 93, bio: 'Bold blackwork specialist.', latitude: 40.7879, longitude: -74.0143, location: 'West New York, NJ', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Jersey City' },
-  { id: '960', name: 'Kearny Murphy', specialty: 'Japanese Traditional', rating: 4.8, reviewCount: 135, bio: 'Japanese irezumi expert.', latitude: 40.7684, longitude: -74.1454, location: 'Kearny, NJ', age: 37, yearsExperience: 14, avatar: '/api/placeholder/80/80', city: 'Newark' },
-  
-  // Los Angeles
-  { id: '6', name: 'Maria Garcia', specialty: 'Blackwork', rating: 4.7, reviewCount: 134, bio: 'Traditional American and neo-traditional styles.', latitude: 34.0522, longitude: -118.2437, location: 'Downtown LA, CA', age: 30, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Los Angeles' },
-  { id: '7', name: 'James Wilson', specialty: 'Geometric', rating: 4.9, reviewCount: 67, bio: 'Fine line and minimalist specialist.', latitude: 34.0736, longitude: -118.4004, location: 'Hollywood, CA', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'Los Angeles' },
-  { id: '8', name: 'Lisa Thompson', specialty: 'Minimalist', rating: 4.6, reviewCount: 89, bio: 'Geometric designs and minimalist blackwork.', latitude: 34.0195, longitude: -118.4912, location: 'Santa Monica, CA', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Los Angeles' },
-  { id: '9', name: 'Michael Brown', specialty: 'Realism', rating: 4.8, reviewCount: 145, bio: 'Photorealistic portraits and nature scenes.', latitude: 34.0928, longitude: -118.3287, location: 'West Hollywood, CA', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Los Angeles' },
-  { id: '10', name: 'Jessica Lee', specialty: 'Watercolor', rating: 4.9, reviewCount: 78, bio: 'Vibrant watercolor and abstract designs.', latitude: 34.0522, longitude: -118.2437, location: 'Venice, CA', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Los Angeles' },
-  
-  // Chicago
-  { id: '11', name: 'Robert Davis', specialty: 'Traditional American', rating: 4.7, reviewCount: 98, bio: 'Classic American traditional tattoos.', latitude: 41.8781, longitude: -87.6298, location: 'Loop, IL', age: 36, yearsExperience: 13, avatar: '/api/placeholder/80/80', city: 'Chicago' },
-  { id: '12', name: 'Amanda White', specialty: 'Japanese Traditional', rating: 4.8, reviewCount: 112, bio: 'Authentic Japanese Irezumi and traditional designs.', latitude: 41.8998, longitude: -87.6244, location: 'River North, IL', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Chicago' },
-  { id: '13', name: 'Carlos Martinez', specialty: 'Blackwork', rating: 4.6, reviewCount: 76, bio: 'Bold blackwork and dotwork designs.', latitude: 41.8500, longitude: -87.6500, location: 'Pilsen, IL', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Chicago' },
-  { id: '14', name: 'Rachel Green', specialty: 'Neo-Traditional', rating: 4.9, reviewCount: 89, bio: 'Modern twist on traditional tattooing.', latitude: 41.8781, longitude: -87.6298, location: 'Wicker Park, IL', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Chicago' },
-  { id: '15', name: 'Kevin Taylor', specialty: 'Geometric', rating: 4.7, reviewCount: 103, bio: 'Precision geometric patterns and sacred geometry.', latitude: 41.8781, longitude: -87.6298, location: 'Lincoln Park, IL', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Chicago' },
-  
-  // Houston
-  { id: '16', name: 'Jennifer Lopez', specialty: 'Realism', rating: 4.8, reviewCount: 125, bio: 'Photorealistic portraits and wildlife.', latitude: 29.7604, longitude: -95.3698, location: 'Downtown Houston, TX', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Houston' },
-  { id: '17', name: 'Daniel Rodriguez', specialty: 'Traditional American', rating: 4.6, reviewCount: 87, bio: 'Classic American traditional with bold lines.', latitude: 29.7604, longitude: -95.3698, location: 'Montrose, TX', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Houston' },
-  { id: '18', name: 'Stephanie Kim', specialty: 'Watercolor', rating: 4.9, reviewCount: 94, bio: 'Vibrant watercolor and abstract art.', latitude: 29.7604, longitude: -95.3698, location: 'Heights, TX', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'Houston' },
-  { id: '19', name: 'Anthony Garcia', specialty: 'Blackwork', rating: 4.7, reviewCount: 78, bio: 'Bold blackwork and geometric patterns.', latitude: 29.7604, longitude: -95.3698, location: 'Midtown, TX', age: 30, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Houston' },
-  { id: '20', name: 'Nicole Anderson', specialty: 'Minimalist', rating: 4.8, reviewCount: 65, bio: 'Clean lines and subtle, elegant designs.', latitude: 29.7604, longitude: -95.3698, location: 'Rice Village, TX', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Houston' },
-  
-  // Phoenix
-  { id: '21', name: 'Brandon Scott', specialty: 'Geometric', rating: 4.7, reviewCount: 92, bio: 'Sacred geometry and mandala designs.', latitude: 33.4484, longitude: -112.0740, location: 'Downtown Phoenix, AZ', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Phoenix' },
-  { id: '22', name: 'Ashley Miller', specialty: 'Traditional American', rating: 4.6, reviewCount: 73, bio: 'Classic American traditional tattoos.', latitude: 33.4484, longitude: -112.0740, location: 'Scottsdale, AZ', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Phoenix' },
-  { id: '23', name: 'Ryan Johnson', specialty: 'Realism', rating: 4.8, reviewCount: 108, bio: 'Photorealistic portraits and nature scenes.', latitude: 33.4484, longitude: -112.0740, location: 'Tempe, AZ', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Phoenix' },
-  { id: '24', name: 'Megan Davis', specialty: 'Watercolor', rating: 4.9, reviewCount: 81, bio: 'Vibrant watercolor and abstract designs.', latitude: 33.4484, longitude: -112.0740, location: 'Mesa, AZ', age: 25, yearsExperience: 3, avatar: '/api/placeholder/80/80', city: 'Phoenix' },
-  { id: '25', name: 'Tyler Wilson', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 96, bio: 'Modern twist on traditional tattooing.', latitude: 33.4484, longitude: -112.0740, location: 'Chandler, AZ', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Phoenix' },
-  
-  // Philadelphia
-  { id: '26', name: 'Samantha Brown', specialty: 'Japanese Traditional', rating: 4.8, reviewCount: 115, bio: 'Authentic Japanese Irezumi and traditional designs.', latitude: 39.9526, longitude: -75.1652, location: 'Center City, PA', age: 30, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Philadelphia' },
-  { id: '27', name: 'Christopher Lee', specialty: 'Blackwork', rating: 4.6, reviewCount: 84, bio: 'Bold blackwork and dotwork designs.', latitude: 39.9526, longitude: -75.1652, location: 'Fishtown, PA', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Philadelphia' },
-  { id: '28', name: 'Victoria Taylor', specialty: 'Realism', rating: 4.9, reviewCount: 127, bio: 'Photorealistic portraits and wildlife.', latitude: 39.9526, longitude: -75.1652, location: 'Rittenhouse, PA', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Philadelphia' },
-  { id: '29', name: 'Jonathan Martinez', specialty: 'Traditional American', rating: 4.7, reviewCount: 98, bio: 'Classic American traditional with bold lines.', latitude: 39.9526, longitude: -75.1652, location: 'Northern Liberties, PA', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Philadelphia' },
-  { id: '30', name: 'Amanda Garcia', specialty: 'Minimalist', rating: 4.8, reviewCount: 72, bio: 'Clean lines and subtle, elegant designs.', latitude: 39.9526, longitude: -75.1652, location: 'Queen Village, PA', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'Philadelphia' },
-  
-  // San Antonio
-  { id: '31', name: 'Matthew Rodriguez', specialty: 'Geometric', rating: 4.7, reviewCount: 89, bio: 'Sacred geometry and mandala designs.', latitude: 29.4241, longitude: -98.4936, location: 'Downtown San Antonio, TX', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'San Antonio' },
-  { id: '32', name: 'Isabella White', specialty: 'Watercolor', rating: 4.9, reviewCount: 76, bio: 'Vibrant watercolor and abstract art.', latitude: 29.4241, longitude: -98.4936, location: 'Alamo Heights, TX', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'San Antonio' },
-  { id: '33', name: 'Andrew Kim', specialty: 'Realism', rating: 4.6, reviewCount: 102, bio: 'Photorealistic portraits and nature scenes.', latitude: 29.4241, longitude: -98.4936, location: 'Stone Oak, TX', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'San Antonio' },
-  { id: '34', name: 'Olivia Davis', specialty: 'Neo-Traditional', rating: 4.8, reviewCount: 94, bio: 'Modern twist on traditional tattooing.', latitude: 29.4241, longitude: -98.4936, location: 'Southtown, TX', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'San Antonio' },
-  { id: '35', name: 'Nathan Wilson', specialty: 'Blackwork', rating: 4.7, reviewCount: 87, bio: 'Bold blackwork and geometric patterns.', latitude: 29.4241, longitude: -98.4936, location: 'Pearl District, TX', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'San Antonio' },
-  
-  // San Diego
-  { id: '36', name: 'Sophia Anderson', specialty: 'Minimalist', rating: 4.9, reviewCount: 68, bio: 'Clean lines and subtle, elegant designs.', latitude: 32.7157, longitude: -117.1611, location: 'Downtown San Diego, CA', age: 25, yearsExperience: 3, avatar: '/api/placeholder/80/80', city: 'San Diego' },
-  { id: '37', name: 'Ethan Thompson', specialty: 'Traditional American', rating: 4.6, reviewCount: 91, bio: 'Classic American traditional tattoos.', latitude: 32.7157, longitude: -117.1611, location: 'Pacific Beach, CA', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'San Diego' },
-  { id: '38', name: 'Emma Garcia', specialty: 'Japanese Traditional', rating: 4.8, reviewCount: 113, bio: 'Authentic Japanese Irezumi and traditional designs.', latitude: 32.7157, longitude: -117.1611, location: 'North Park, CA', age: 30, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'San Diego' },
-  { id: '39', name: 'Liam Johnson', specialty: 'Realism', rating: 4.7, reviewCount: 105, bio: 'Photorealistic portraits and wildlife.', latitude: 32.7157, longitude: -117.1611, location: 'La Jolla, CA', age: 36, yearsExperience: 13, avatar: '/api/placeholder/80/80', city: 'San Diego' },
-  { id: '40', name: 'Ava Martinez', specialty: 'Watercolor', rating: 4.9, reviewCount: 79, bio: 'Vibrant watercolor and abstract designs.', latitude: 32.7157, longitude: -117.1611, location: 'Hillcrest, CA', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'San Diego' },
-  
-  // Dallas
-  { id: '41', name: 'Noah Brown', specialty: 'Geometric', rating: 4.7, reviewCount: 96, bio: 'Sacred geometry and mandala designs.', latitude: 32.7767, longitude: -96.7970, location: 'Downtown Dallas, TX', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Dallas' },
-  { id: '42', name: 'Mia Davis', specialty: 'Blackwork', rating: 4.6, reviewCount: 82, bio: 'Bold blackwork and dotwork designs.', latitude: 32.7767, longitude: -96.7970, location: 'Deep Ellum, TX', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Dallas' },
-  { id: '43', name: 'William Taylor', specialty: 'Realism', rating: 4.8, reviewCount: 118, bio: 'Photorealistic portraits and nature scenes.', latitude: 32.7767, longitude: -96.7970, location: 'Uptown, TX', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Dallas' },
-  { id: '44', name: 'Charlotte Wilson', specialty: 'Neo-Traditional', rating: 4.9, reviewCount: 87, bio: 'Modern twist on traditional tattooing.', latitude: 32.7767, longitude: -96.7970, location: 'Bishop Arts, TX', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Dallas' },
-  { id: '45', name: 'James Rodriguez', specialty: 'Traditional American', rating: 4.7, reviewCount: 101, bio: 'Classic American traditional with bold lines.', latitude: 32.7767, longitude: -96.7970, location: 'Oak Cliff, TX', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Dallas' },
-  
-  // San Jose
-  { id: '46', name: 'Amelia Garcia', specialty: 'Minimalist', rating: 4.8, reviewCount: 74, bio: 'Clean lines and subtle, elegant designs.', latitude: 37.3382, longitude: -121.8863, location: 'Downtown San Jose, CA', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'San Jose' },
-  { id: '47', name: 'Benjamin Lee', specialty: 'Japanese Traditional', rating: 4.7, reviewCount: 109, bio: 'Authentic Japanese Irezumi and traditional designs.', latitude: 37.3382, longitude: -121.8863, location: 'Willow Glen, CA', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'San Jose' },
-  { id: '48', name: 'Harper Kim', specialty: 'Watercolor', rating: 4.9, reviewCount: 85, bio: 'Vibrant watercolor and abstract art.', latitude: 37.3382, longitude: -121.8863, location: 'Santana Row, CA', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'San Jose' },
-  { id: '49', name: 'Lucas Anderson', specialty: 'Geometric', rating: 4.6, reviewCount: 93, bio: 'Sacred geometry and mandala designs.', latitude: 37.3382, longitude: -121.8863, location: 'Campbell, CA', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'San Jose' },
-  { id: '50', name: 'Evelyn Thompson', specialty: 'Realism', rating: 4.8, reviewCount: 126, bio: 'Photorealistic portraits and wildlife.', latitude: 37.3382, longitude: -121.8863, location: 'Los Gatos, CA', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'San Jose' },
-  
-  // Austin
-  { id: '51', name: 'Alexander Martinez', specialty: 'Traditional American', rating: 4.7, reviewCount: 97, bio: 'Classic American traditional tattoos.', latitude: 30.2672, longitude: -97.7431, location: 'Downtown Austin, TX', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Austin' },
-  { id: '52', name: 'Abigail Wilson', specialty: 'Blackwork', rating: 4.8, reviewCount: 88, bio: 'Bold blackwork and geometric patterns.', latitude: 30.2672, longitude: -97.7431, location: 'South Austin, TX', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Austin' },
-  { id: '53', name: 'Henry Davis', specialty: 'Neo-Traditional', rating: 4.9, reviewCount: 95, bio: 'Modern twist on traditional tattooing.', latitude: 30.2672, longitude: -97.7431, location: 'East Austin, TX', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Austin' },
-  { id: '54', name: 'Emily Rodriguez', specialty: 'Minimalist', rating: 4.6, reviewCount: 71, bio: 'Clean lines and subtle, elegant designs.', latitude: 30.2672, longitude: -97.7431, location: 'West Austin, TX', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Austin' },
-  { id: '55', name: 'Sebastian Garcia', specialty: 'Realism', rating: 4.8, reviewCount: 112, bio: 'Photorealistic portraits and nature scenes.', latitude: 30.2672, longitude: -97.7431, location: 'North Austin, TX', age: 36, yearsExperience: 13, avatar: '/api/placeholder/80/80', city: 'Austin' },
-  
-  // Jacksonville
-  { id: '56', name: 'Madison Brown', specialty: 'Watercolor', rating: 4.7, reviewCount: 83, bio: 'Vibrant watercolor and abstract designs.', latitude: 30.3322, longitude: -81.6557, location: 'Downtown Jacksonville, FL', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Jacksonville' },
-  { id: '57', name: 'Jackson Taylor', specialty: 'Japanese Traditional', rating: 4.6, reviewCount: 106, bio: 'Authentic Japanese Irezumi and traditional designs.', latitude: 30.3322, longitude: -81.6557, location: 'Riverside, FL', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Jacksonville' },
-  { id: '58', name: 'Sofia Anderson', specialty: 'Geometric', rating: 4.8, reviewCount: 91, bio: 'Sacred geometry and mandala designs.', latitude: 30.3322, longitude: -81.6557, location: 'San Marco, FL', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Jacksonville' },
-  { id: '59', name: 'Aiden Wilson', specialty: 'Traditional American', rating: 4.7, reviewCount: 99, bio: 'Classic American traditional with bold lines.', latitude: 30.3322, longitude: -81.6557, location: 'Avondale, FL', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Jacksonville' },
-  { id: '60', name: 'Chloe Martinez', specialty: 'Realism', rating: 4.9, reviewCount: 117, bio: 'Photorealistic portraits and wildlife.', latitude: 30.3322, longitude: -81.6557, location: 'Beaches, FL', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Jacksonville' },
-  
-  // Fort Worth
-  { id: '61', name: 'Carter Johnson', specialty: 'Blackwork', rating: 4.6, reviewCount: 86, bio: 'Bold blackwork and dotwork designs.', latitude: 32.7555, longitude: -97.3308, location: 'Downtown Fort Worth, TX', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Fort Worth' },
-  { id: '62', name: 'Grace Davis', specialty: 'Minimalist', rating: 4.8, reviewCount: 73, bio: 'Clean lines and subtle, elegant designs.', latitude: 32.7555, longitude: -97.3308, location: 'Cultural District, TX', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'Fort Worth' },
-  { id: '63', name: 'Owen Rodriguez', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 94, bio: 'Modern twist on traditional tattooing.', latitude: 32.7555, longitude: -97.3308, location: 'Stockyards, TX', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Fort Worth' },
-  { id: '64', name: 'Victoria Garcia', specialty: 'Realism', rating: 4.9, reviewCount: 124, bio: 'Photorealistic portraits and nature scenes.', latitude: 32.7555, longitude: -97.3308, location: 'West 7th, TX', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Fort Worth' },
-  { id: '65', name: 'Wyatt Wilson', specialty: 'Traditional American', rating: 4.6, reviewCount: 88, bio: 'Classic American traditional tattoos.', latitude: 32.7555, longitude: -97.3308, location: 'Magnolia, TX', age: 37, yearsExperience: 14, avatar: '/api/placeholder/80/80', city: 'Fort Worth' },
-  
-  // Columbus
-  { id: '66', name: 'Scarlett Anderson', specialty: 'Watercolor', rating: 4.8, reviewCount: 81, bio: 'Vibrant watercolor and abstract art.', latitude: 39.9612, longitude: -82.9988, location: 'Downtown Columbus, OH', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Columbus' },
-  { id: '67', name: 'Luke Brown', specialty: 'Japanese Traditional', rating: 4.7, reviewCount: 103, bio: 'Authentic Japanese Irezumi and traditional designs.', latitude: 39.9612, longitude: -82.9988, location: 'Short North, OH', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Columbus' },
-  { id: '68', name: 'Zoey Taylor', specialty: 'Geometric', rating: 4.6, reviewCount: 89, bio: 'Sacred geometry and mandala designs.', latitude: 39.9612, longitude: -82.9988, location: 'German Village, OH', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Columbus' },
-  { id: '69', name: 'Gabriel Martinez', specialty: 'Realism', rating: 4.9, reviewCount: 115, bio: 'Photorealistic portraits and wildlife.', latitude: 39.9612, longitude: -82.9988, location: 'Clintonville, OH', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Columbus' },
-  { id: '70', name: 'Lily Wilson', specialty: 'Minimalist', rating: 4.7, reviewCount: 76, bio: 'Clean lines and subtle, elegant designs.', latitude: 39.9612, longitude: -82.9988, location: 'Brewery District, OH', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Columbus' },
-  
-  // Charlotte
-  { id: '71', name: 'Jack Davis', specialty: 'Traditional American', rating: 4.6, reviewCount: 92, bio: 'Classic American traditional with bold lines.', latitude: 35.2271, longitude: -80.8431, location: 'Downtown Charlotte, NC', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Charlotte' },
-  { id: '72', name: 'Nora Rodriguez', specialty: 'Blackwork', rating: 4.8, reviewCount: 97, bio: 'Bold blackwork and geometric patterns.', latitude: 35.2271, longitude: -80.8431, location: 'NoDa, NC', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Charlotte' },
-  { id: '73', name: 'Eli Garcia', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 85, bio: 'Modern twist on traditional tattooing.', latitude: 35.2271, longitude: -80.8431, location: 'South End, NC', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Charlotte' },
-  { id: '74', name: 'Hannah Anderson', specialty: 'Watercolor', rating: 4.9, reviewCount: 78, bio: 'Vibrant watercolor and abstract designs.', latitude: 35.2271, longitude: -80.8431, location: 'Plaza Midwood, NC', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'Charlotte' },
-  { id: '75', name: 'Mason Wilson', specialty: 'Realism', rating: 4.8, reviewCount: 109, bio: 'Photorealistic portraits and nature scenes.', latitude: 35.2271, longitude: -80.8431, location: 'Dilworth, NC', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Charlotte' },
-  
-  // San Francisco
-  { id: '76', name: 'Aria Brown', specialty: 'Minimalist', rating: 4.9, reviewCount: 69, bio: 'Clean lines and subtle, elegant designs.', latitude: 37.7749, longitude: -122.4194, location: 'Downtown San Francisco, CA', age: 25, yearsExperience: 3, avatar: '/api/placeholder/80/80', city: 'San Francisco' },
-  { id: '77', name: 'Logan Taylor', specialty: 'Japanese Traditional', rating: 4.7, reviewCount: 111, bio: 'Authentic Japanese Irezumi and traditional designs.', latitude: 37.7749, longitude: -122.4194, location: 'Mission District, CA', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'San Francisco' },
-  { id: '78', name: 'Layla Martinez', specialty: 'Geometric', rating: 4.8, reviewCount: 95, bio: 'Sacred geometry and mandala designs.', latitude: 37.7749, longitude: -122.4194, location: 'Castro, CA', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'San Francisco' },
-  { id: '79', name: 'Caleb Wilson', specialty: 'Realism', rating: 4.6, reviewCount: 102, bio: 'Photorealistic portraits and wildlife.', latitude: 37.7749, longitude: -122.4194, location: 'Haight-Ashbury, CA', age: 36, yearsExperience: 13, avatar: '/api/placeholder/80/80', city: 'San Francisco' },
-  { id: '80', name: 'Zoe Davis', specialty: 'Traditional American', rating: 4.7, reviewCount: 88, bio: 'Classic American traditional tattoos.', latitude: 37.7749, longitude: -122.4194, location: 'North Beach, CA', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'San Francisco' },
-  
-  // Indianapolis
-  { id: '81', name: 'Hunter Rodriguez', specialty: 'Blackwork', rating: 4.6, reviewCount: 84, bio: 'Bold blackwork and dotwork designs.', latitude: 39.7684, longitude: -86.1581, location: 'Downtown Indianapolis, IN', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Indianapolis' },
-  { id: '82', name: 'Natalie Garcia', specialty: 'Watercolor', rating: 4.8, reviewCount: 82, bio: 'Vibrant watercolor and abstract art.', latitude: 39.7684, longitude: -86.1581, location: 'Broad Ripple, IN', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Indianapolis' },
-  { id: '83', name: 'Connor Anderson', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 91, bio: 'Modern twist on traditional tattooing.', latitude: 39.7684, longitude: -86.1581, location: 'Fountain Square, IN', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Indianapolis' },
-  { id: '84', name: 'Brooklyn Wilson', specialty: 'Minimalist', rating: 4.9, reviewCount: 67, bio: 'Clean lines and subtle, elegant designs.', latitude: 39.7684, longitude: -86.1581, location: 'Mass Ave, IN', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'Indianapolis' },
-  { id: '85', name: 'Jordan Brown', specialty: 'Realism', rating: 4.8, reviewCount: 113, bio: 'Photorealistic portraits and nature scenes.', latitude: 39.7684, longitude: -86.1581, location: 'Irvington, IN', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Indianapolis' },
-  
-  // Seattle
-  { id: '86', name: 'Samantha Taylor', specialty: 'Japanese Traditional', rating: 4.7, reviewCount: 107, bio: 'Authentic Japanese Irezumi and traditional designs.', latitude: 47.6062, longitude: -122.3321, location: 'Downtown Seattle, WA', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Seattle' },
-  { id: '87', name: 'Tyler Martinez', specialty: 'Geometric', rating: 4.6, reviewCount: 93, bio: 'Sacred geometry and mandala designs.', latitude: 47.6062, longitude: -122.3321, location: 'Capitol Hill, WA', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Seattle' },
-  { id: '88', name: 'Avery Wilson', specialty: 'Watercolor', rating: 4.9, reviewCount: 79, bio: 'Vibrant watercolor and abstract designs.', latitude: 47.6062, longitude: -122.3321, location: 'Fremont, WA', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Seattle' },
-  { id: '89', name: 'Blake Davis', specialty: 'Traditional American', rating: 4.8, reviewCount: 96, bio: 'Classic American traditional with bold lines.', latitude: 47.6062, longitude: -122.3321, location: 'Ballard, WA', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Seattle' },
-  { id: '90', name: 'Riley Anderson', specialty: 'Realism', rating: 4.7, reviewCount: 104, bio: 'Photorealistic portraits and wildlife.', latitude: 47.6062, longitude: -122.3321, location: 'Queen Anne, WA', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Seattle' },
-  
-  // Tacoma, WA - 15 Artists
-  { id: '961', name: 'Tacoma Downtown Pierce', specialty: 'Traditional American', rating: 4.8, reviewCount: 115, bio: 'Classic American traditional tattoos.', latitude: 47.2529, longitude: -122.4443, location: 'Downtown Tacoma, WA', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '962', name: 'Stadium District Shaw', specialty: 'Realism', rating: 4.7, reviewCount: 98, bio: 'Photorealistic portrait artist.', latitude: 47.2632, longitude: -122.4472, location: 'Stadium District, Tacoma, WA', age: 31, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '963', name: 'Proctor Nelson', specialty: 'Watercolor', rating: 4.9, reviewCount: 143, bio: 'Vibrant watercolor specialist.', latitude: 47.2658, longitude: -122.4785, location: 'Proctor District, Tacoma, WA', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '964', name: '6th Avenue Wright', specialty: 'Geometric', rating: 4.6, reviewCount: 86, bio: 'Sacred geometry designs.', latitude: 47.2598, longitude: -122.4615, location: '6th Avenue, Tacoma, WA', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '965', name: 'Hilltop Rodriguez', specialty: 'Blackwork', rating: 4.8, reviewCount: 127, bio: 'Bold blackwork tattoos.', latitude: 47.2420, longitude: -122.4598, location: 'Hilltop, Tacoma, WA', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '966', name: 'Old Town Harper', specialty: 'Japanese Traditional', rating: 4.9, reviewCount: 156, bio: 'Traditional Japanese irezumi.', latitude: 47.2461, longitude: -122.4360, location: 'Old Town, Tacoma, WA', age: 37, yearsExperience: 14, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '967', name: 'Point Defiance Mitchell', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 102, bio: 'Neo-traditional artwork.', latitude: 47.3065, longitude: -122.5210, location: 'Near Point Defiance, Tacoma, WA', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '968', name: 'Ruston Way Carter', specialty: 'Minimalist', rating: 4.8, reviewCount: 118, bio: 'Clean minimalist designs.', latitude: 47.2890, longitude: -122.4915, location: 'Ruston Way, Tacoma, WA', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '969', name: 'Lincoln District Brooks', specialty: 'Traditional American', rating: 4.6, reviewCount: 91, bio: 'Classic American style.', latitude: 47.2358, longitude: -122.4215, location: 'Lincoln District, Tacoma, WA', age: 32, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '970', name: 'South Tacoma Foster', specialty: 'Realism', rating: 4.9, reviewCount: 149, bio: 'Hyper-realistic tattoo art.', latitude: 47.1895, longitude: -122.4443, location: 'South Tacoma, WA', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '971', name: 'Fern Hill Powell', specialty: 'Watercolor', rating: 4.7, reviewCount: 97, bio: 'Watercolor and abstract designs.', latitude: 47.2142, longitude: -122.4015, location: 'Fern Hill, Tacoma, WA', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '972', name: 'North End Bailey', specialty: 'Geometric', rating: 4.8, reviewCount: 124, bio: 'Geometric pattern specialist.', latitude: 47.2838, longitude: -122.4632, location: 'North End, Tacoma, WA', age: 31, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '973', name: 'Salishan Reed', specialty: 'Blackwork', rating: 4.6, reviewCount: 83, bio: 'Bold blackwork specialist.', latitude: 47.1642, longitude: -122.4598, location: 'Salishan, Tacoma, WA', age: 29, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '974', name: 'McKinley Myers', specialty: 'Japanese Traditional', rating: 4.9, reviewCount: 161, bio: 'Japanese traditional master.', latitude: 47.2285, longitude: -122.4398, location: 'McKinley, Tacoma, WA', age: 38, yearsExperience: 15, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  { id: '975', name: 'Lakewood Collins', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 106, bio: 'Modern neo-traditional work.', latitude: 47.1717, longitude: -122.5185, location: 'Lakewood, WA', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Tacoma' },
-  
-  // Denver
-  { id: '91', name: 'Parker Rodriguez', specialty: 'Minimalist', rating: 4.8, reviewCount: 75, bio: 'Clean lines and subtle, elegant designs.', latitude: 39.7392, longitude: -104.9903, location: 'Downtown Denver, CO', age: 27, yearsExperience: 5, avatar: '/api/placeholder/80/80', city: 'Denver' },
-  { id: '92', name: 'Quinn Garcia', specialty: 'Blackwork', rating: 4.6, reviewCount: 87, bio: 'Bold blackwork and geometric patterns.', latitude: 39.7420, longitude: -104.9850, location: 'RiNo, CO', age: 29, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Denver' },
-  { id: '93', name: 'Sage Wilson', specialty: 'Neo-Traditional', rating: 4.7, reviewCount: 89, bio: 'Modern twist on traditional tattooing.', latitude: 39.7500, longitude: -104.9975, location: 'LoDo, CO', age: 31, yearsExperience: 9, avatar: '/api/placeholder/80/80', city: 'Denver' },
-  { id: '94', name: 'River Brown', specialty: 'Realism', rating: 4.9, reviewCount: 121, bio: 'Photorealistic portraits and nature scenes.', latitude: 39.7650, longitude: -105.0100, location: 'Highlands, CO', age: 34, yearsExperience: 11, avatar: '/api/placeholder/80/80', city: 'Denver' },
-  { id: '95', name: 'Skyler Taylor', specialty: 'Watercolor', rating: 4.8, reviewCount: 83, bio: 'Vibrant watercolor and abstract art.', latitude: 39.7300, longitude: -104.9800, location: 'Capitol Hill, CO', age: 26, yearsExperience: 4, avatar: '/api/placeholder/80/80', city: 'Denver' },
-  { id: '96', name: 'Dakota Martinez', specialty: 'Japanese Traditional', rating: 4.7, reviewCount: 94, bio: 'Traditional Japanese irezumi and Oni masks.', latitude: 39.7200, longitude: -105.0050, location: 'Baker, CO', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Denver' },
-  { id: '97', name: 'Morgan Lee', specialty: 'Geometric', rating: 4.9, reviewCount: 102, bio: 'Sacred geometry and mandala designs.', latitude: 39.7580, longitude: -104.9680, location: 'City Park, CO', age: 30, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Denver' },
-  { id: '98', name: 'Casey Thompson', specialty: 'Traditional American', rating: 4.6, reviewCount: 77, bio: 'Classic American traditional with bold colors.', latitude: 39.7100, longitude: -104.9950, location: 'Washington Park, CO', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Denver' },
-  
-  // Memphis
-  { id: '96', name: 'Dakota Martinez', specialty: 'Traditional American', rating: 4.7, reviewCount: 98, bio: 'Classic American traditional tattoos.', latitude: 35.1495, longitude: -90.0490, location: 'Downtown Memphis, TN', age: 35, yearsExperience: 12, avatar: '/api/placeholder/80/80', city: 'Memphis' },
-  { id: '97', name: 'Phoenix Anderson', specialty: 'Japanese Traditional', rating: 4.6, reviewCount: 105, bio: 'Authentic Japanese Irezumi and traditional designs.', latitude: 35.1495, longitude: -90.0490, location: 'Midtown, TN', age: 32, yearsExperience: 8, avatar: '/api/placeholder/80/80', city: 'Memphis' },
-  { id: '98', name: 'Rowan Wilson', specialty: 'Geometric', rating: 4.8, reviewCount: 92, bio: 'Sacred geometry and mandala designs.', latitude: 35.1495, longitude: -90.0490, location: 'Cooper-Young, TN', age: 30, yearsExperience: 7, avatar: '/api/placeholder/80/80', city: 'Memphis' },
-  { id: '99', name: 'Indigo Davis', specialty: 'Realism', rating: 4.9, reviewCount: 116, bio: 'Photorealistic portraits and wildlife.', latitude: 35.1495, longitude: -90.0490, location: 'East Memphis, TN', age: 33, yearsExperience: 10, avatar: '/api/placeholder/80/80', city: 'Memphis' },
-  { id: '100', name: 'Ocean Garcia', specialty: 'Minimalist', rating: 4.7, reviewCount: 74, bio: 'Clean lines and subtle, elegant designs.', latitude: 35.1495, longitude: -90.0490, location: 'Germantown, TN', age: 28, yearsExperience: 6, avatar: '/api/placeholder/80/80', city: 'Memphis' }
-]
-
 const specialtyColors: { [key: string]: string } = {
   'Traditional American': '#FF8C00',
   'Neo-Traditional': '#FFD700',
   'Blackwork': '#20B2AA',
   'Realism': '#8A2BE2',
   'Watercolor': '#DC143C',
-  'Geometric': '#00BFFF',
-  'Minimalist': '#ADFF2F',
-  'Japanese Traditional': '#FF6347',
-  'Tribal': '#6A5ACD',
-  'Other': '#D3D3D3'
-}
+};
 
 interface LeafletMapProps {
   searchLocation?: string
@@ -399,16 +166,34 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
   const [initialLocationSet, setInitialLocationSet] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [hasShownInitialDefault, setHasShownInitialDefault] = useState(false)
+  const [artists, setArtists] = useState<any[]>([])
+  const [isLoadingArtists, setIsLoadingArtists] = useState(true)
+  const lastProcessedSearchLocationRef = useRef<string>('')
+  const userHasPannedRef = useRef<boolean>(false)
+
+  const specialtyColors: { [key: string]: string } = {
+    'Traditional American': '#FF8C00',
+    'Neo-Traditional': '#FFD700',
+    'Blackwork': '#20B2AA',
+    'Realism': '#8A2BE2',
+    'Watercolor': '#DC143C',
+    'Geometric': '#00BFFF',
+    'Minimalist': '#ADFF2F',
+    'Japanese Traditional': '#FF6347',
+    'Tribal': '#6A5ACD',
+    'Other': '#D3D3D3'
+  }
 
   // Show NYC as placeholder when first loading the page without a search
   useEffect(() => {
     if (hasShownInitialDefault) return
     
-    const timer = setTimeout(() => {
+    // Removed artificial delay - show map immediately
       if (!searchLocation || searchLocation.trim() === '') {
         const showDefaultNYC = () => {
           if (!mapInstanceRef.current) {
-            setTimeout(showDefaultNYC, 300)
+          // Use requestAnimationFrame for smoother initialization
+          requestAnimationFrame(showDefaultNYC)
             return
           }
           mapInstanceRef.current.setView([40.7128, -74.0060], 12)
@@ -419,13 +204,21 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
       } else {
         setHasShownInitialDefault(true)
       }
-    }, 1500)
-    
-    return () => clearTimeout(timer)
-  }, [searchLocation])
+  }, [searchLocation, hasShownInitialDefault])
 
   // Handle search location changes with geocoding
   useEffect(() => {
+    // Only process if searchLocation actually changed (not just a re-render)
+    if (searchLocation === lastProcessedSearchLocationRef.current) {
+      return
+    }
+    
+    // If user has manually panned the map, don't auto-pan to search location
+    if (userHasPannedRef.current && searchLocation && searchLocation.trim() !== '') {
+      lastProcessedSearchLocationRef.current = searchLocation
+      return
+    }
+    
     if (!searchLocation || searchLocation.trim() === '') {
       if (hasShownInitialDefault && initialLocationSet && !isTransitioning) {
         const showDefaultNYC = () => {
@@ -438,51 +231,16 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
         }
         showDefaultNYC()
       }
+      lastProcessedSearchLocationRef.current = searchLocation || ''
       return
     }
+    
+    // Mark this search location as processed
+    lastProcessedSearchLocationRef.current = searchLocation
     
     setIsTransitioning(true)
     const isInitialLoad = !initialLocationSet
     if (!initialLocationSet) setInitialLocationSet(true)
-    
-    const debounceDelay = isInitialLoad ? 0 : 800
-    const debounceTimer = setTimeout(() => {
-      const panToLocation = () => {
-        if (!mapInstanceRef.current) {
-          setTimeout(panToLocation, 300)
-          return
-        }
-        
-        const geocodeLocation = async () => {
-          try {
-            const response = await fetch(`/api/geocode?q=${encodeURIComponent(searchLocation)}`)
-            if (!response.ok) throw new Error(`API error ${response.status}`)
-            
-            const data = await response.json()
-            
-            if (data.success && data.lat && data.lon) {
-              mapInstanceRef.current.setView([data.lat, data.lon], 12)
-              setMapReady(true)
-              setIsTransitioning(false)
-            } else {
-              const fallbackCoords = getFallbackCoordinates(searchLocation)
-              if (fallbackCoords) {
-                mapInstanceRef.current.setView([fallbackCoords.lat, fallbackCoords.lng], 12)
-                setMapReady(true)
-              }
-              setIsTransitioning(false)
-            }
-          } catch (error) {
-            const fallbackCoords = getFallbackCoordinates(searchLocation)
-            if (fallbackCoords) {
-              mapInstanceRef.current.setView([fallbackCoords.lat, fallbackCoords.lng], 12)
-              setMapReady(true)
-            } else {
-              setMapReady(true)
-            }
-            setIsTransitioning(false)
-          }
-        }
         
         // Fallback coordinates for major cities
         const getFallbackCoordinates = (location: string) => {
@@ -521,24 +279,176 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
             'las vegas': { lat: 36.1699, lng: -115.1398 },
             'nashville': { lat: 36.1627, lng: -86.7816 },
             'milwaukee': { lat: 43.0389, lng: -87.9065 },
+            'oklahoma city': { lat: 35.4676, lng: -97.5164 },
+            'louisville': { lat: 38.2527, lng: -85.7585 },
+            'baltimore': { lat: 39.2904, lng: -76.6122 },
             'albuquerque': { lat: 35.0844, lng: -106.6504 },
-            'tucson': { lat: 32.2226, lng: -110.9747 }
+            'tucson': { lat: 32.2226, lng: -110.9747 },
+            'fresno': { lat: 36.7378, lng: -119.7871 },
+            'mesa': { lat: 33.4152, lng: -111.8315 },
+            'sacramento': { lat: 38.5816, lng: -121.4944 },
+            'kansas city': { lat: 39.0997, lng: -94.5786 },
+            'atlanta': { lat: 33.7490, lng: -84.3880 },
+            'long beach': { lat: 33.7701, lng: -118.1937 },
+            'colorado springs': { lat: 38.8339, lng: -104.8214 },
+            'raleigh': { lat: 35.7796, lng: -78.6382 },
+            'virginia beach': { lat: 36.8529, lng: -75.9780 },
+            'miami': { lat: 25.7617, lng: -80.1918 },
+            'omaha': { lat: 41.2565, lng: -95.9345 },
+            'oakland': { lat: 37.8044, lng: -122.2712 },
+            'minneapolis': { lat: 44.9778, lng: -93.2650 },
+            'tulsa': { lat: 36.1540, lng: -95.9928 },
+            'cleveland': { lat: 41.4993, lng: -81.6944 },
+            'wichita': { lat: 37.6872, lng: -97.3301 },
+            'arlington': { lat: 32.7357, lng: -97.1081 },
+            'new orleans': { lat: 29.9511, lng: -90.0715 },
+            'bakersfield': { lat: 35.3733, lng: -119.0187 },
+            'tampa': { lat: 27.9506, lng: -82.4572 },
+            'honolulu': { lat: 21.3099, lng: -157.8581 },
+            'anaheim': { lat: 33.8353, lng: -117.9145 },
+            'santa ana': { lat: 33.7455, lng: -117.8677 },
+            'st. louis': { lat: 38.6270, lng: -90.1994 },
+            'corpus christi': { lat: 27.8006, lng: -97.3964 },
+            'riverside': { lat: 33.9533, lng: -117.3962 },
+            'lexington': { lat: 38.0406, lng: -84.5037 },
+            'pittsburgh': { lat: 40.4406, lng: -79.9959 },
+            'anchorage': { lat: 61.2181, lng: -149.9003 },
+            'stockton': { lat: 37.9577, lng: -121.2908 },
+            'cincinnati': { lat: 39.1031, lng: -84.5120 },
+            'st. paul': { lat: 44.9537, lng: -93.0900 },
+            'toledo': { lat: 41.6528, lng: -83.5379 },
+            'greensboro': { lat: 36.0726, lng: -79.7920 },
+            'newark': { lat: 40.7357, lng: -74.1724 },
+            'plano': { lat: 33.0198, lng: -96.6989 },
+            'henderson': { lat: 36.0395, lng: -114.9817 },
+            'lincoln': { lat: 40.8136, lng: -96.7026 },
+            'buffalo': { lat: 42.8864, lng: -78.8784 },
+            'jersey city': { lat: 40.7178, lng: -74.0431 },
+            'chula vista': { lat: 32.6401, lng: -117.0842 },
+            'fort wayne': { lat: 41.0793, lng: -85.1394 },
+            'orlando': { lat: 28.5383, lng: -81.3792 },
+            'st. petersburg': { lat: 27.7676, lng: -82.6403 },
+            'chandler': { lat: 33.3062, lng: -111.8413 },
+            'laredo': { lat: 27.5306, lng: -99.4803 },
+            'norfolk': { lat: 36.8468, lng: -76.2852 },
+            'durham': { lat: 35.9940, lng: -78.8986 },
+            'madison': { lat: 43.0731, lng: -89.4012 },
+            'lubbock': { lat: 33.5779, lng: -101.8552 },
+            'irvine': { lat: 33.6846, lng: -117.8265 },
+            'winston-salem': { lat: 36.0999, lng: -80.2442 },
+            'glendale': { lat: 33.5387, lng: -112.1860 },
+            'garland': { lat: 32.9126, lng: -96.6389 },
+            'hialeah': { lat: 25.8576, lng: -80.2781 },
+            'reno': { lat: 39.5296, lng: -119.8138 },
+            'chesapeake': { lat: 36.7682, lng: -76.2875 },
+            'gilbert': { lat: 33.3528, lng: -111.7890 },
+            'baton rouge': { lat: 30.4515, lng: -91.1871 },
+            'irving': { lat: 32.8140, lng: -96.9489 },
+            'scottsdale': { lat: 33.4942, lng: -111.9261 },
+            'north las vegas': { lat: 36.1989, lng: -115.1175 },
+            'fremont': { lat: 37.5483, lng: -121.9886 },
+            'boise': { lat: 43.6150, lng: -116.2023 },
+            'richmond': { lat: 37.5407, lng: -77.4360 },
+            'san bernardino': { lat: 34.1083, lng: -117.2898 },
+            'birmingham': { lat: 33.5207, lng: -86.8025 },
+            'spokane': { lat: 47.6588, lng: -117.4260 },
+            'rochester': { lat: 43.1566, lng: -77.6088 },
+            'des moines': { lat: 41.5868, lng: -93.6250 },
+            'modesto': { lat: 37.6391, lng: -120.9969 },
+            'fayetteville': { lat: 35.0527, lng: -78.8784 },
+            'tacoma': { lat: 47.2529, lng: -122.4443 },
+            'oxnard': { lat: 34.1975, lng: -119.1771 },
+            'fontana': { lat: 34.0922, lng: -117.4350 },
+            'columbus': { lat: 32.4610, lng: -84.9877 },
+            'moreno valley': { lat: 33.9425, lng: -117.2297 },
+            'shreveport': { lat: 32.5252, lng: -93.7502 },
+            'aurora': { lat: 39.7294, lng: -104.8319 },
+            'yonkers': { lat: 40.9312, lng: -73.8988 },
+            'akron': { lat: 41.0814, lng: -81.5190 },
+            'huntington beach': { lat: 33.6595, lng: -117.9988 },
+            'little rock': { lat: 34.7465, lng: -92.2896 },
+            'augusta': { lat: 33.4735, lng: -82.0105 },
+            'amarillo': { lat: 35.2220, lng: -101.8313 },
+            'glendale': { lat: 34.1425, lng: -118.2551 },
+            'mobile': { lat: 30.6954, lng: -88.0399 },
+            'grand rapids': { lat: 42.9634, lng: -85.6681 },
+            'salt lake city': { lat: 40.7608, lng: -111.8910 },
+            'tallahassee': { lat: 30.4383, lng: -84.2807 },
+            'huntsville': { lat: 34.7304, lng: -86.5861 },
+            'grand prairie': { lat: 32.7459, lng: -96.9978 },
+            'knoxville': { lat: 35.9606, lng: -83.9207 },
+            'worcester': { lat: 42.2626, lng: -71.8023 },
+            'newport news': { lat: 37.0871, lng: -76.4730 },
+            'brownsville': { lat: 25.9017, lng: -97.4975 },
+            'overland park': { lat: 38.9822, lng: -94.6708 },
+            'santa clarita': { lat: 34.3917, lng: -118.5426 },
+            'providence': { lat: 41.8240, lng: -71.4128 },
+            'garden grove': { lat: 33.7739, lng: -117.9414 },
+            'vancouver': { lat: 45.6387, lng: -122.6615 },
+            'sioux falls': { lat: 43.5446, lng: -96.7311 },
+            'ontario': { lat: 34.0633, lng: -117.6509 },
+            'mckinney': { lat: 33.1972, lng: -96.6397 },
+            'elgin': { lat: 42.0373, lng: -88.2812 },
+            'hampton': { lat: 37.0299, lng: -76.3452 },
+            'warren': { lat: 42.5145, lng: -83.0147 },
+            'west valley city': { lat: 40.6916, lng: -112.0011 },
+            'burlington': { lat: 44.4759, lng: -73.2121 },
+            'er': { lat: 40.7608, lng: -111.8910 }
           }
           
           const normalizedLocation = location.toLowerCase().trim()
           return fallbackCities[normalizedLocation] || null
+    }
+    
+    // Reduced debounce delay for faster response
+    const debounceDelay = isInitialLoad ? 0 : 200
+    const debounceTimer = setTimeout(() => {
+      const panToLocation = () => {
+        if (!mapInstanceRef.current) {
+          // Use requestAnimationFrame for smoother updates
+          requestAnimationFrame(panToLocation)
+          return
+        }
+        
+        const geocodeLocation = async () => {
+          try {
+            const response = await fetch(`/api/geocode?q=${encodeURIComponent(searchLocation)}`)
+            if (!response.ok) throw new Error(`API error ${response.status}`)
+            
+            const data = await response.json()
+            
+            if (data.success && data.lat && data.lon) {
+              mapInstanceRef.current.setView([data.lat, data.lon], 12)
+              setMapReady(true)
+              setIsTransitioning(false)
+            } else {
+              const fallbackCoords = getFallbackCoordinates(searchLocation)
+              if (fallbackCoords) {
+                mapInstanceRef.current.setView([fallbackCoords.lat, fallbackCoords.lng], 12)
+                setMapReady(true)
+              }
+              setIsTransitioning(false)
+            }
+          } catch (error) {
+            const fallbackCoords = getFallbackCoordinates(searchLocation)
+            if (fallbackCoords) {
+              mapInstanceRef.current.setView([fallbackCoords.lat, fallbackCoords.lng], 12)
+              setMapReady(true)
+            } else {
+              setMapReady(true)
+            }
+            setIsTransitioning(false)
+          }
         }
 
         geocodeLocation()
       }
       
-      // Start the panning process
       panToLocation()
-    }, debounceDelay) // No delay on initial load, 800ms for subsequent searches
+    }, debounceDelay)
     
-    // Cleanup function to cancel pending geocode requests
     return () => clearTimeout(debounceTimer)
-  }, [searchLocation])
+    }, [searchLocation, initialLocationSet, hasShownInitialDefault, isTransitioning])
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return
@@ -564,9 +474,23 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
     }).addTo(map)
 
     mapInstanceRef.current = map
+    
+    // Track user panning/zooming to prevent auto-panning after manual interaction
+    const handleMoveStart = () => {
+      userHasPannedRef.current = true
+    }
+    
+    const handleZoom = () => {
+      userHasPannedRef.current = true
+    }
+    
+    map.on('movestart', handleMoveStart)
+    map.on('zoomstart', handleZoom)
 
     // Cleanup function
     return () => {
+      map.off('movestart', handleMoveStart)
+      map.off('zoomstart', handleZoom)
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
         mapInstanceRef.current = null
@@ -574,30 +498,97 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
     }
   }, []) // Empty deps - only run once on mount
 
-  // Separate effect to manage markers based on styleFilter and minReviews
+  // Fetch artists from API
   useEffect(() => {
-    if (!mapInstanceRef.current) return
+    const fetchArtists = async () => {
+      setIsLoadingArtists(true)
+      try {
+        const params = new URLSearchParams()
+        if (styleFilter) {
+          params.set('style', styleFilter)
+        }
+        params.set('limit', '1000') // Get all artists with location
+        
+        const response = await fetch(`/api/artists?${params.toString()}`)
+        if (!response.ok) {
+          throw new Error('Failed to fetch artists')
+        }
+        
+        const responseData = await response.json()
+        
+        // API returns ApiResponse.paginated format: { success: true, data: [...], meta: {...} }
+        // Handle both ApiResponse format and direct array format
+        let artistsArray = []
+        if (Array.isArray(responseData)) {
+          artistsArray = responseData
+        } else if (responseData.data && Array.isArray(responseData.data)) {
+          artistsArray = responseData.data
+        } else if (responseData.artists && Array.isArray(responseData.artists)) {
+          artistsArray = responseData.artists
+        } else if (responseData.success && responseData.data) {
+          artistsArray = Array.isArray(responseData.data) ? responseData.data : []
+        }
+        
+        console.log('Fetched artists from API:', artistsArray.length, 'total artists')
+        
+        // Transform API data to match component's Artist interface
+        const transformedArtists = artistsArray
+          .filter((artist: any) => {
+            const hasLocation = artist.latitude && artist.longitude
+            if (!hasLocation) {
+              console.log('Filtered out artist (no location):', artist.name, artist.id)
+            }
+            return hasLocation
+          })
+          .map((artist: any) => ({
+            id: artist.id,
+            name: artist.name || 'Unknown Artist',
+            specialty: artist.specialties?.[0] || artist.specialty || 'Other',
+            specialties: artist.specialties || [],
+            rating: artist.rating || 0,
+            reviewCount: artist.reviewCount || 0,
+            bio: artist.bio || '',
+            latitude: artist.latitude,
+            longitude: artist.longitude,
+            location: artist.location || '',
+            age: artist.age || 0,
+            yearsExperience: artist.yearsExperience || 0,
+            avatar: artist.avatar || '/api/placeholder/80/80',
+            city: artist.city || ''
+          }))
+        
+        console.log('Transformed artists with location:', transformedArtists.length)
+        
+        // Filter by minimum reviews
+        const filteredArtists = transformedArtists.filter((artist: any) => {
+          const meetsMinReviews = artist.reviewCount >= minReviews
+          if (!meetsMinReviews) {
+            console.log('Filtered out artist (min reviews):', artist.name, 'has', artist.reviewCount, 'reviews, need', minReviews)
+          }
+          return meetsMinReviews
+        })
+        
+        console.log('Final filtered artists:', filteredArtists.length)
+        setArtists(filteredArtists)
+      } catch (error) {
+        console.error('Error fetching artists:', error)
+        setArtists([])
+      } finally {
+        setIsLoadingArtists(false)
+      }
+    }
 
-    console.log('🗺️ Updating markers with styleFilter:', styleFilter, 'minReviews:', minReviews)
+    fetchArtists()
+  }, [styleFilter, minReviews])
 
-    // Remove all existing markers
-    markersRef.current.forEach(marker => {
-      marker.remove()
-    })
-    markersRef.current = []
-
-    // Create custom markers for each artist
-    mockArtists.forEach(artist => {
-      let color = specialtyColors[artist.specialty] || specialtyColors['Other']
-      
-      // Get artist initials (first letter of first and last name)
-      const nameParts = artist.name.trim().split(' ')
-      const initials = nameParts.length >= 2 
-        ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
-        : nameParts[0].substring(0, 2).toUpperCase()
-      
+  // Memoize filtered artists to avoid recalculating on every render
+  const filteredArtists = useMemo(() => {
+    return artists.filter(artist => {
       // Check if artist matches the style filter
-      const matchesStyle = !styleFilter || (artist.specialty && (
+      const matchesStyle = !styleFilter || (artist.specialties && artist.specialties.some((s: string) => 
+        s.toLowerCase().includes(styleFilter.toLowerCase()) ||
+        s.toLowerCase().replace(/\s+/g, '').includes(styleFilter.toLowerCase().replace(/\s+/g, ''))
+      )) || (artist.specialty && (
         artist.specialty.toLowerCase().includes(styleFilter.toLowerCase()) ||
         artist.specialty.toLowerCase().replace(/\s+/g, '').includes(styleFilter.toLowerCase().replace(/\s+/g, ''))
       ))
@@ -605,188 +596,71 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
       // Check if artist meets minimum review count
       const meetsMinReviews = artist.reviewCount >= minReviews
       
-      // Debug logging
-      if (styleFilter || minReviews > 0) {
-        console.log(`🎨 Artist ${artist.name} - Style: ${matchesStyle ? '✅' : '❌'}, Reviews (${artist.reviewCount}): ${meetsMinReviews ? '✅' : '❌'}`)
-      }
-      
-      // Gray out artists who don't match filters
-      const shouldGrayOut = (styleFilter && !matchesStyle) || (minReviews > 0 && !meetsMinReviews)
-      if (shouldGrayOut) {
-        color = '#6B7280' // Gray-500
-      }
-      
-      const iconSize = 24
-      const fontSize = 10
-      const opacity = shouldGrayOut ? 0.4 : 1.0
-      
-      // Create custom icon (grayed out for non-matching artists)
-      const customIcon = L.divIcon({
-        className: 'custom-marker',
-        html: `
-          <div style="
-            position: relative;
-            cursor: pointer;
-            opacity: ${opacity};
-          ">
-            <div style="
-              background-color: ${color};
-              width: ${iconSize}px;
-              height: ${iconSize}px;
-              border-radius: 50% 50% 50% 0;
-              border: 3px solid ${shouldGrayOut ? '#9CA3AF' : 'white'};
-              box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-              transform: rotate(-45deg);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            ">
-              <div style="
-                transform: rotate(45deg);
-                color: ${shouldGrayOut ? '#D1D5DB' : 'white'};
-                font-weight: bold;
-                font-size: ${fontSize}px;
-                line-height: 1;
-              ">${initials}</div>
-            </div>
-          </div>
-        `,
-        iconSize: [iconSize, iconSize],
-        iconAnchor: [iconSize / 2, iconSize]
-      })
-
-      // Create popup content with preview information
-      const popupContent = `
-        <div style="
-          min-width: 300px; 
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-          background: #000000; 
-          color: white; 
-          border-radius: 12px; 
-          padding: 20px;
-          border: 1px solid #374151;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-        ">
-          <div style="display: flex; align-items: center; margin-bottom: 16px;">
-            <img src="${artist.avatar}" alt="${artist.name}" style="
-              width: 60px; 
-              height: 60px; 
-              border-radius: 50%; 
-              margin-right: 16px; 
-              object-fit: cover;
-              border: 2px solid #374151;
-            " />
-            <div>
-              <h3 style="
-                margin: 0 0 6px 0; 
-                color: white; 
-                font-size: 20px; 
-                font-weight: 700;
-                letter-spacing: -0.02em;
-              ">
-                ${artist.name}
-              </h3>
-              <p style="margin: 0; color: #9ca3af; font-size: 14px; font-weight: 500;">
-                Age ${artist.age} • ${artist.yearsExperience} years experience
-              </p>
-            </div>
-          </div>
-          
-          <div style="margin-bottom: 16px;">
-            <div style="display: flex; align-items: center; margin-bottom: 8px;">
-              <svg width="18" height="18" fill="#fbbf24" style="margin-right: 8px;">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-              </svg>
-              <span style="color: white; font-weight: 700; font-size: 16px;">${artist.rating}/5</span>
-              <span style="color: #9ca3af; font-size: 13px; margin-left: 8px;">(${artist.reviewCount} reviews)</span>
-            </div>
-            <div style="
-              display: inline-block;
-              padding: 4px 12px; 
-              background-color: #1f2937; 
-              color: #60a5fa; 
-              border-radius: 20px; 
-              font-size: 13px; 
-              font-weight: 600;
-              margin-bottom: 8px;
-            ">
-              ${artist.specialty}
-            </div>
-            <p style="margin: 0; color: #9ca3af; font-size: 13px; display: flex; align-items: center;">
-              <svg width="14" height="14" fill="currentColor" style="margin-right: 6px;">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-              </svg>
-              ${artist.location}
-            </p>
-          </div>
-          
-          <div style="border-top: 1px solid #374151; padding-top: 16px;">
-            <a href="/artist/${artist.id}" 
-               style="
-                 display: block;
-                 width: 100%;
-                 padding: 12px 20px; 
-                 background-color: #ffffff; 
-                 color: #000000; 
-                 text-decoration: none; 
-                 border-radius: 8px; 
-                 font-size: 14px;
-                 font-weight: 600;
-                 text-align: center;
-                 transition: all 0.2s;
-                 border: 2px solid transparent;
-               "
-               onmouseover="this.style.backgroundColor='#f3f4f6'; this.style.borderColor='#d1d5db'"
-               onmouseout="this.style.backgroundColor='#ffffff'; this.style.borderColor='transparent'">
-              View Full Profile
-            </a>
-          </div>
-        </div>
-      `
-
-      // Add marker to map and store reference
-      const marker = L.marker([artist.latitude, artist.longitude], { icon: customIcon })
-        .addTo(mapInstanceRef.current)
-        .bindPopup(popupContent)
-      
-      markersRef.current.push(marker)
+      return matchesStyle && meetsMinReviews
     })
-  }, [styleFilter, minReviews]) // Re-run when styleFilter or minReviews changes
+  }, [artists, styleFilter, minReviews])
 
+  // Separate effect to manage markers based on styleFilter and minReviews
+  useEffect(() => {
+    if (!mapInstanceRef.current) return
+
+    // Remove all existing markers
+    markersRef.current.forEach(marker => {
+      marker.remove()
+    })
+    markersRef.current = []
+
+    // Add markers for filtered artists
+    filteredArtists.forEach(artist => {
+      if (artist.latitude && artist.longitude) {
+        const color = specialtyColors[artist.specialty] || specialtyColors['Other']
+        const marker = L.circleMarker([artist.latitude, artist.longitude], {
+          radius: 8,
+          fillColor: color,
+          color: '#fff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        })
+
+        // Create popup content with proper styling and clickable link
+        const popupContent = `
+          <div style="min-width: 220px; padding: 12px; background-color: #111827; color: #fff; border-radius: 8px;">
+            <h3 style="font-weight: 600; font-size: 16px; margin: 0 0 6px 0; color: #fff;">${artist.name}</h3>
+            <p style="font-size: 13px; color: #9ca3af; margin: 0 0 6px 0;">${artist.specialty}</p>
+            <p style="font-size: 13px; color: #fff; margin: 0 0 10px 0;">⭐ ${artist.rating.toFixed(1)} (${artist.reviewCount} ${artist.reviewCount === 1 ? 'review' : 'reviews'})</p>
+            <a href="/artist/${artist.id}" style="display: inline-block; padding: 8px 16px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 500; transition: background-color 0.2s; cursor: pointer;" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">View Profile</a>
+          </div>
+        `
+        
+        marker.bindPopup(popupContent, {
+          className: 'custom-popup',
+          maxWidth: 280,
+          closeButton: true
+        })
+        
+        // Add click handler to marker to open profile page when marker is clicked
+        marker.on('click', () => {
+          // Popup opens automatically, link in popup handles navigation
+        })
+
+        marker.addTo(mapInstanceRef.current!)
+      markersRef.current.push(marker)
+      }
+    })
+  }, [filteredArtists, specialtyColors])
 
   return (
-    <div className="w-full h-[calc(100vh-420px)] min-h-[400px] bg-black relative overflow-hidden">
-      {/* Loading overlay - covers map until ready */}
-      {!mapReady && (
-        <div className="absolute inset-0 bg-black z-50" />
+    <div className="relative w-full h-full min-h-[600px] bg-gray-900 overflow-visible z-0" style={{ borderRadius: '0.5rem' }}>
+      <div ref={mapRef} className="w-full h-full relative z-0" style={{ borderRadius: '0.5rem', overflow: 'hidden' }} />
+      {/* Bottom fade overlay - matches top fade style but inverted */}
+      {/* Higher z-index to ensure it appears above the filter section (z-10) */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-[500]" style={{ zIndex: 500 }} />
+      {isLoadingArtists && (
+        <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-2 rounded-lg text-sm z-[500]" style={{ zIndex: 500 }}>
+          Loading artists...
+        </div>
       )}
-      
-      {/* Map Container - Hidden until location is loaded */}
-      <div 
-        ref={mapRef} 
-        className="w-full h-full relative z-0 transition-opacity duration-500" 
-        style={{ 
-          opacity: mapReady ? 1 : 0
-        }}
-      />
-      
-      {/* Top Fade Overlay */}
-      <div 
-        className="absolute top-0 left-0 right-0 h-8 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to bottom, #000000, transparent)',
-          zIndex: 40
-        }}
-      ></div>
-      
-      {/* Bottom Fade Overlay */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to top, #000000 0%, rgba(0,0,0,0.95) 30%, rgba(0,0,0,0.7) 60%, transparent 100%)',
-          zIndex: 40
-        }}
-      ></div>
     </div>
   )
 }

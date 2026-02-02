@@ -378,7 +378,7 @@ function initializeWorkers() {
         where: { id: appointmentId },
         include: {
           artist: {
-            include: { profile: true }
+            include: { artistProfile: true }
           },
           client: true,
           service: true,
@@ -395,7 +395,7 @@ function initializeWorkers() {
         appointment.client.email,
         appointment.client.name || 'Valued Customer',
         {
-          artistName: appointment.artist.profile?.name || appointment.artist.name || 'Artist',
+          artistName: appointment.artist.name || 'Artist',
           date: appointment.startTime,
           time: appointment.startTime,
           service: appointment.service.name,
@@ -425,7 +425,7 @@ function initializeWorkers() {
         where: { id: appointmentId },
         include: {
           artist: {
-            include: { profile: true }
+            include: { artistProfile: true }
           },
           client: true,
           service: true,

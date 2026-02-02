@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { classifySearch } from '@/lib/smart-search'
 import TattooBackgroundCycler from './components/TattooBackgroundCycler'
+import { useI18n } from '@/lib/i18n/context'
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [showJoinModal, setShowJoinModal] = useState(false)
   const router = useRouter()
+  const { t } = useI18n()
 
   return (
     <div className="min-h-screen bg-transparent text-white">
@@ -40,7 +43,7 @@ export default function Home() {
           <div className="w-full lg:w-1/2 pt-8 lg:pt-16 text-left px-4 lg:px-0">
             {/* Main Headline */}
             <h1 className="display text-2xl md:text-3xl lg:text-5xl text-white mb-4 lg:mb-6 animate-fade-in delay-100 leading-tight" style={{textShadow: '0 2px 4px rgba(0,0,0,0.8)'}}>
-              At last, every tattoo artist in one place. Browse portfolios & reviews. Book appointments with confidence.
+              {t('home.headline')}
             </h1>
             
             {/* Search Bar */}
@@ -49,12 +52,12 @@ export default function Home() {
                 {!searchTerm && (
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{zIndex: 1}}>
                     <span className="text-gray-400 text-base" style={{textShadow: '0 1px 2px rgba(0,0,0,0.8)'}}>
-                      Search by{' '}
-                      <span style={{color: '#20B2AA'}}>artist</span>
+                      {t('home.searchBy')}{' '}
+                      <span style={{color: '#20B2AA'}}>{t('home.artist')}</span>
                       ,{' '}
-                      <span style={{color: '#FFD700'}}>style</span>
-                      , or{' '}
-                      <span style={{color: '#FF8C00'}}>location</span>
+                      <span style={{color: '#FFD700'}}>{t('home.style')}</span>
+                      , {t('home.or')}{' '}
+                      <span style={{color: '#FF8C00'}}>{t('home.location')}</span>
                       ...
                     </span>
                   </div>
@@ -121,15 +124,15 @@ export default function Home() {
                 }}
                 className="px-6 lg:px-8 py-2.5 lg:py-3 bg-white border-2 border-gray-400 text-black rounded-full font-semibold hover:bg-gray-100 transition-all duration-200 text-center min-w-[140px] lg:min-w-[160px] text-sm lg:text-base cursor-pointer"
               >
-                Browse Artists
+                {t('nav.explore')}
               </button>
-              <Link 
-                href="/register-artist" 
+              <button
+                onClick={() => setShowJoinModal(true)}
                 className="px-6 lg:px-8 py-2.5 lg:py-3 bg-transparent border-2 border-gray-400 text-white rounded-full font-semibold hover:bg-gray-400 hover:text-black transition-all duration-200 text-center min-w-[140px] lg:min-w-[160px] text-sm lg:text-base"
                 style={{textShadow: '0 1px 2px rgba(0,0,0,0.5)'}}
               >
-                Join as Artist
-              </Link>
+                {t('nav.signup')}
+              </button>
             </div>
 
           </div>
@@ -147,81 +150,33 @@ export default function Home() {
         </div>
       </section>
 
-
-      {/* Stats Section */}
-      <section className="py-16 bg-transparent">
+      {/* Artist Tools Section */}
+      <section className="py-20">
         <div className="container">
-          <div className="grid grid-cols-3 gap-8 text-center">
-            <div className="animate-fade-in">
-              <div className="display text-2xl md:text-3xl text-white mb-2">10K+</div>
-              <div className="body text-sm text-gray-400 uppercase tracking-wider">Artists</div>
-            </div>
-            <div className="animate-fade-in delay-100">
-              <div className="display text-2xl md:text-3xl text-white mb-2">50K+</div>
-              <div className="body text-sm text-gray-400 uppercase tracking-wider">Bookings</div>
-            </div>
-            <div className="animate-fade-in delay-200">
-              <div className="display text-2xl md:text-3xl text-white mb-2">200+</div>
-              <div className="body text-sm text-gray-400 uppercase tracking-wider">Cities</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* For Artists - New Features */}
-      <section className="py-20 bg-gradient-to-br from-black via-gray-900 to-black">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="display text-3xl md:text-4xl text-white mb-6">
-              Built for Modern Tattoo Artists
-            </h2>
-            <p className="body text-lg text-gray-400">
-              Powerful business tools to save time, prevent double bookings, and grow your business.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
-            <div className="card p-8 card-hover bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="card p-8 text-center card-hover">
               <div className="flex items-center justify-center mx-auto mb-6">
-                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#20B2AA'}}>
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#20B2AA'}}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
               </div>
-              <h3 className="headline text-2xl text-white mb-4">Unified Inbox</h3>
-              <p className="body text-gray-300 mb-4">
-                Manage all your client messages in one place. Connect Instagram, Email, Facebook, SMS, WhatsApp, and more.
+              <h3 className="headline text-xl text-white mb-4">{t('features.unifiedInbox.title')}</h3>
+              <p className="body text-gray-400">
+                {t('features.unifiedInbox.description')}
               </p>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li>✓ AI-powered message categorization</li>
-                <li>✓ Smart reply suggestions</li>
-                <li>✓ Never miss a booking request</li>
-                <li>✓ Save 2+ hours per day</li>
-              </ul>
             </div>
 
-            <div className="card p-8 card-hover bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700">
+            <div className="card p-8 text-center card-hover">
               <div className="flex items-center justify-center mx-auto mb-6">
-                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#FFD700'}}>
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#FFD700'}}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="headline text-2xl text-white mb-4">Unified Calendar</h3>
-              <p className="body text-gray-300 mb-4">
-                Sync all your bookings from Google, Apple, Square, Calendly, and more. Never double-book again.
+              <h3 className="headline text-xl text-white mb-4">{t('features.unifiedCalendar.title')}</h3>
+              <p className="body text-gray-400">
+                {t('features.unifiedCalendar.description')}
               </p>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li>✓ Automatic conflict detection</li>
-                <li>✓ AI email appointment parsing</li>
-                <li>✓ Multi-artist studio view</li>
-                <li>✓ Prevent $500+ in lost bookings</li>
-              </ul>
             </div>
-          </div>
-
-          <div className="text-center">
-            <Link href="/register-artist" className="inline-block px-8 py-3 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-all duration-200">
-              Start Free Trial → PRO Features for 30 Days
-            </Link>
           </div>
         </div>
       </section>
@@ -229,15 +184,6 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-20">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="display text-3xl md:text-4xl text-white mb-6">
-              Why Choose TATU
-            </h2>
-            <p className="body text-lg text-gray-400">
-              The professional platform connecting clients with verified tattoo artists worldwide.
-            </p>
-          </div>
-
           <div className="grid md:grid-cols-3 gap-8">
             <div className="card p-8 text-center card-hover">
               <div className="flex items-center justify-center mx-auto mb-6">
@@ -245,21 +191,21 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="headline text-xl text-white mb-4">Verified Artists</h3>
+              <h3 className="headline text-xl text-white mb-4">{t('features.verifiedArtists.title')}</h3>
               <p className="body text-gray-400">
-                All artists go through our rigorous verification process to ensure quality and professionalism.
+                {t('features.verifiedArtists.description')}
               </p>
             </div>
 
             <div className="card p-8 text-center card-hover">
               <div className="flex items-center justify-center mx-auto mb-6">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{color: '#FFD700'}}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h3 className="headline text-xl text-white mb-4">Video Consultations</h3>
+              <h3 className="headline text-xl text-white mb-4">{t('features.securePayments.title')}</h3>
               <p className="body text-gray-400">
-                Free HD video calls with unlimited duration. Discuss your design before committing.
+                {t('features.securePayments.description')}
               </p>
             </div>
 
@@ -269,36 +215,60 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
               </div>
-              <h3 className="headline text-xl text-white mb-4">Quality Guarantee</h3>
+              <h3 className="headline text-xl text-white mb-4">{t('features.qualityGuarantee.title')}</h3>
               <p className="body text-gray-400">
-                Satisfaction guaranteed with our comprehensive review system and quality standards.
+                {t('features.qualityGuarantee.description')}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-transparent">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="display text-3xl md:text-4xl text-white mb-6">
-              Ready to Get Started?
-            </h2>
-            <p className="body text-lg text-gray-400 mb-8">
-              Join thousands of satisfied clients and professional artists on TATU.
+      {/* Join Modal */}
+      {showJoinModal && (
+        <div 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowJoinModal(false)}
+        >
+          <div 
+            className="bg-black border-2 border-gray-400 rounded-xl p-8 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">{t('home.joinTATU')}</h2>
+              <button
+                onClick={() => setShowJoinModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <p className="text-gray-400 mb-6">
+              {t('home.joinDescription')}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/explore" className="btn btn-primary">
-                Find Your Artist
+
+            <div className="space-y-4">
+              <Link
+                href="/signup?role=client"
+                className="block w-full bg-white text-black px-6 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors text-center"
+                onClick={() => setShowJoinModal(false)}
+              >
+                {t('home.joinAsClient')}
               </Link>
-              <Link href="/register-artist" className="btn btn-secondary">
-                Apply as Artist
+              <Link
+                href="/register-artist"
+                className="block w-full bg-transparent border-2 border-gray-400 text-white px-6 py-4 rounded-xl font-semibold hover:bg-gray-400 hover:text-black transition-colors text-center"
+                onClick={() => setShowJoinModal(false)}
+              >
+                {t('home.joinAsArtist')}
               </Link>
             </div>
           </div>
         </div>
-      </section>
+      )}
     </div>
   )
 }

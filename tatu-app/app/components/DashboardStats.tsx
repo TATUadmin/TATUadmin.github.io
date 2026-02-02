@@ -61,31 +61,40 @@ export function useDashboardStats(range: '7d' | '30d' | '90d' = '30d') {
 }
 
 export default function DashboardStats({ stats, layout = 'grid' }: DashboardStatsProps) {
-  const getIconColor = (color?: string) => {
+  const getIconColor = (color?: string, index?: number) => {
+    // Use brand colors cyclically for visual interest
+    const brandColors = ['text-teal-400', 'text-yellow-400', 'text-orange-400']
+    const brandBgColors = ['bg-teal-400/10', 'bg-yellow-400/10', 'bg-orange-400/10']
+    
     switch (color) {
       case 'green':
-        return 'text-green-500'
+        return { text: 'text-teal-400', bg: 'bg-teal-400/10' }
       case 'red':
-        return 'text-red-500'
+        return { text: 'text-orange-400', bg: 'bg-orange-400/10' }
       case 'yellow':
-        return 'text-yellow-500'
+        return { text: 'text-yellow-400', bg: 'bg-yellow-400/10' }
       default:
-        return 'text-white'
+        // Cycle through brand colors if index provided
+        if (index !== undefined) {
+          const colorIndex = index % 3
+          return { text: brandColors[colorIndex], bg: brandBgColors[colorIndex] }
+        }
+        return { text: 'text-white', bg: 'bg-white/10' }
     }
   }
 
   const getTrendIcon = (trend?: 'up' | 'down' | 'neutral') => {
     if (trend === 'up') {
-      return <ArrowTrendingUpIcon className="w-4 h-4 text-green-500" />
+      return <ArrowTrendingUpIcon className="w-4 h-4 text-teal-400" />
     } else if (trend === 'down') {
-      return <ArrowTrendingDownIcon className="w-4 h-4 text-red-500" />
+      return <ArrowTrendingDownIcon className="w-4 h-4 text-orange-400" />
     }
     return null
   }
 
   const getTrendColor = (trend?: 'up' | 'down' | 'neutral') => {
-    if (trend === 'up') return 'text-green-500'
-    if (trend === 'down') return 'text-red-500'
+    if (trend === 'up') return 'text-teal-400'
+    if (trend === 'down') return 'text-orange-400'
     return 'text-gray-400'
   }
 
@@ -97,17 +106,18 @@ export default function DashboardStats({ stats, layout = 'grid' }: DashboardStat
           : 'flex flex-col md:flex-row gap-6'
       }
     >
-      {stats.map((stat) => {
+      {stats.map((stat, index) => {
         const IconComponent = stat.icon
+        const iconColors = getIconColor(stat.color, index)
 
         return (
           <div
             key={stat.id}
-            className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-all shadow-sm"
+            className="bg-gray-950 border border-gray-900 rounded-xl p-6 hover:border-gray-800 transition-all shadow-sm"
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 bg-gray-800 rounded-lg ${getIconColor(stat.color)}`}>
+              <div className={`p-3 rounded-xl border ${iconColors.bg} ${iconColors.text} border-gray-800`}>
                 <IconComponent className="w-6 h-6" />
               </div>
               {stat.trend && getTrendIcon(stat.trend)}

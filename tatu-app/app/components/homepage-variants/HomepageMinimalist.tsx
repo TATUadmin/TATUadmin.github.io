@@ -163,12 +163,6 @@ export default function HomepageMinimalist() {
 
       {/* Navigation Back */}
       <div className="py-12 text-center border-t border-gray-100">
-        <Link 
-          href="/styles" 
-          className="font-inter text-sm font-medium text-gray-600 hover:text-black tracking-wide transition-colors"
-        >
-          ← BACK TO STYLES
-        </Link>
       </div>
     </div>
   )

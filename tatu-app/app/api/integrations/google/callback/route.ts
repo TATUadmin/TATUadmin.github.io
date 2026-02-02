@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth'
 import { GoogleCalendarIntegration } from '@/lib/integrations/google-calendar'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/integrations/google/callback - Handle Google Calendar OAuth callback
 export async function GET(request: NextRequest) {
   try {

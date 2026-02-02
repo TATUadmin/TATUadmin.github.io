@@ -9,6 +9,8 @@ import { cacheService } from '@/lib/cache'
 import { CacheTags, CacheKeyGenerators } from '@/lib/cache'
 import { addReviewRequestJob } from '@/lib/background-jobs'
 
+export const dynamic = 'force-dynamic'
+
 const prisma = new PrismaClient()
 
 export const GET = withErrorHandling(async (request: NextRequest) => {

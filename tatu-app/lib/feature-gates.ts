@@ -337,7 +337,7 @@ export async function requireFeature(
   const prisma = new PrismaClient()
 
   try {
-    const profile = await prisma.profile.findUnique({
+    const profile = await prisma.artistProfile.findUnique({
       where: { userId },
       select: {
         subscriptionTier: true,

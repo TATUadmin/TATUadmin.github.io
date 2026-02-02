@@ -47,68 +47,140 @@ export async function POST(req: Request) {
     // Hash password using enterprise-grade security (configurable salt rounds)
     const hashedPassword = await hashPassword(validatedData.password)
 
+    // Generate user ID (using crypto.randomUUID for compatibility)
+    const userId = crypto.randomUUID()
+
     // Create user
     const user = await prisma.user.create({
       data: {
+        id: userId,
         email: validatedData.email,
         password: hashedPassword,
         name: validatedData.name,
         role: validatedData.role,
+        updatedAt: new Date(),
       },
     })
 
-    // Create profile with role-specific data
-    const profileData: Prisma.ProfileCreateInput = {
-      user: {
-        connect: {
-          id: user.id
-        }
-      }
-    }
+    // Create role-specific profile
+    if (validatedData.role === 'ARTIST' || validatedData.role === 'SHOP_OWNER') {
+      // Create ArtistProfile
+      const artistProfileId = crypto.randomUUID()
+      await prisma.artistProfile.create({
+        data: {
+          id: artistProfileId,
+          userId: user.id,
+          specialties: validatedData.artistSpecialties || [],
+          subscriptionTier: 'FREE',
+          subscriptionStatus: 'ACTIVE',
+        },
+      })
 
-    if (validatedData.role === 'ARTIST' && validatedData.artistSpecialties) {
-      profileData.specialties = validatedData.artistSpecialties
-    }
-
-    if (validatedData.role === 'SHOP_OWNER') {
-      if (validatedData.shopName) {
-        // Create shop for shop owner
+      // Create shop for shop owner
+      if (validatedData.role === 'SHOP_OWNER' && validatedData.shopName) {
+        const shopId = crypto.randomUUID()
         await prisma.shop.create({
           data: {
+            id: shopId,
             name: validatedData.shopName,
             address: validatedData.shopAddress || '',
             city: '', // These will be filled in during profile completion
             state: '',
             zipCode: '',
-            owner: {
-              connect: {
-                id: user.id
-              }
-            }
+            ownerId: user.id,
+            updatedAt: new Date(),
           }
         })
       }
+    } else if (validatedData.role === 'CUSTOMER') {
+      // Create CustomerProfile
+      const customerProfileId = crypto.randomUUID()
+      await prisma.customerProfile.create({
+        data: {
+          id: customerProfileId,
+          userId: user.id,
+          preferredStyles: [],
+        },
+      })
     }
-
-    await prisma.profile.create({
-      data: profileData,
-    })
 
     // Generate secure verification token
     const token = generateSecureToken(32)
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
+    // Generate verification token ID
+    const verificationTokenId = crypto.randomUUID()
+
     // Save verification token
     await prisma.verificationToken.create({
       data: {
+        id: verificationTokenId,
         token,
         email: user.email,
         expires,
       },
     })
 
-    // Send verification email
-    await sendWelcomeEmail(user.email, user.name || 'User', token)
+    // Send verification email (must succeed for signup to complete)
+    // Add timeout to prevent hanging
+    let emailResult
+    try {
+      const emailPromise = sendWelcomeEmail(user.email, user.name || 'User', token)
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Email sending timed out after 15 seconds')), 15000)
+      )
+      
+      emailResult = await Promise.race([emailPromise, timeoutPromise])
+    } catch (timeoutError) {
+      // If timeout, treat as email failure
+      emailResult = {
+        success: false,
+        error: timeoutError instanceof Error ? timeoutError.message : 'Email sending timed out',
+        id: 'timeout',
+        recipient: user.email,
+        subject: 'Welcome to TATU!',
+        sentAt: new Date().toISOString()
+      }
+    }
+    
+    if (!emailResult.success) {
+      console.error('=== EMAIL SENDING FAILED ===')
+      console.error('Error:', emailResult.error)
+      console.error('User email:', user.email)
+      console.error('User name:', user.name)
+      console.error('===========================')
+      
+      // If email fails, we should rollback the user creation
+      // Delete the user and profile that were just created
+      if (validatedData.role === 'ARTIST' || validatedData.role === 'SHOP_OWNER') {
+        await prisma.artistProfile.deleteMany({ where: { userId: user.id } })
+      } else if (validatedData.role === 'CUSTOMER') {
+        await prisma.customerProfile.deleteMany({ where: { userId: user.id } })
+      }
+      await prisma.verificationToken.deleteMany({ where: { email: user.email } })
+      await prisma.user.delete({ where: { id: user.id } })
+      
+      // Return specific error message
+      const errorMessage = emailResult.error || 'Failed to send verification email'
+      
+      if (errorMessage.includes('RESEND_API_KEY') || errorMessage.includes('not set')) {
+        return NextResponse.json(
+          { 
+            message: 'Email service not configured. Please contact support.',
+            error: 'RESEND_API_KEY is not set or invalid'
+          },
+          { status: 500 }
+        )
+      }
+      
+      return NextResponse.json(
+        { 
+          message: 'Failed to send verification email. Please try again or contact support.',
+          error: errorMessage
+        },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(
       { 
@@ -131,8 +203,64 @@ export async function POST(req: Request) {
       )
     }
 
+    // Check for Prisma errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as any
+      
+      // Unique constraint violation (e.g., email already exists)
+      if (prismaError.code === 'P2002') {
+        return NextResponse.json(
+          { 
+            message: 'A user with this email already exists',
+            error: 'Email already registered'
+          },
+          { status: 400 }
+        )
+      }
+      
+      // Foreign key constraint violation
+      if (prismaError.code === 'P2003') {
+        return NextResponse.json(
+          { 
+            message: 'Database constraint violation',
+            error: 'Invalid reference in database'
+          },
+          { status: 400 }
+        )
+      }
+      
+      // Record not found
+      if (prismaError.code === 'P2025') {
+        return NextResponse.json(
+          { 
+            message: 'Record not found',
+            error: 'Referenced record does not exist'
+          },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Log full error for debugging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorStack = error instanceof Error ? error.stack : undefined
+    
+    console.error('=== SIGNUP ERROR ===')
+    console.error('Message:', errorMessage)
+    console.error('Stack:', errorStack)
+    console.error('Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2))
+    console.error('===================')
+
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { 
+        message: 'Internal server error',
+        error: errorMessage,
+        // Include error details in development
+        ...(process.env.NODE_ENV === 'development' && { 
+          details: errorMessage,
+          stack: errorStack 
+        })
+      },
       { status: 500 }
     )
   }

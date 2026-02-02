@@ -3,6 +3,8 @@ import { auth } from '@/app/auth'
 import { paymentService } from '@/lib/payment'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createPaymentSchema = z.object({
   appointmentId: z.string(),
   amount: z.number().min(100), // Minimum $1.00

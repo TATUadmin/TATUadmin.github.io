@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/auth'
 import { prisma } from '@/lib/prisma'
 import { PortfolioItem } from '@prisma/client'
+
+export const dynamic = 'force-dynamic'
 
 interface ItemWithCounts extends PortfolioItem {
   _count: {
@@ -17,8 +20,8 @@ interface ItemResponse extends Omit<PortfolioItem, 'userId'> {
 
 export async function GET(request: Request) {
   try {
-    const session = await auth()
-    if (!session?.user) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -29,7 +32,7 @@ export async function GET(request: Request) {
     const tags = searchParams.get('tags')?.split(',').filter(Boolean)
 
     const where = {
-      userId: session.user.id,
+      userId: session.user.id!,
       ...(featured && { featured: true }),
       ...(collectionId && { collectionId }),
       ...(style && { style }),
@@ -41,8 +44,8 @@ export async function GET(request: Request) {
       include: {
         _count: {
           select: {
-            likes: true,
-            comments: true,
+            Like: true,
+            Comment: true,
           },
         },
       },
@@ -65,8 +68,8 @@ export async function GET(request: Request) {
       collectionId: item.collectionId,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-      likes: item._count.likes,
-      comments: item._count.comments,
+      likes: item._count.Like,
+      comments: item._count.Comment,
     }))
 
     return NextResponse.json(response)
@@ -81,8 +84,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = await auth()
-    if (!session?.user) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -105,13 +108,13 @@ export async function POST(request: Request) {
         style,
         featured: featured || false,
         collectionId,
-        userId: session.user.id,
+        userId: session.user.id!,
       },
       include: {
         _count: {
           select: {
-            likes: true,
-            comments: true,
+            Like: true,
+            Comment: true,
           },
         },
       },
@@ -129,8 +132,8 @@ export async function POST(request: Request) {
       collectionId: item.collectionId,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-      likes: item._count.likes,
-      comments: item._count.comments,
+      likes: item._count.Like,
+      comments: item._count.Comment,
     }
 
     return NextResponse.json(response)
@@ -145,8 +148,8 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const session = await auth()
-    if (!session?.user) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -164,7 +167,7 @@ export async function PATCH(request: Request) {
       where: { id },
     })
 
-    if (!existingItem || existingItem.userId !== session.user.id) {
+    if (!existingItem || existingItem.userId !== session.user.id!) {
       return NextResponse.json(
         { error: 'Item not found or unauthorized' },
         { status: 404 }
@@ -177,8 +180,8 @@ export async function PATCH(request: Request) {
       include: {
         _count: {
           select: {
-            likes: true,
-            comments: true,
+            Like: true,
+            Comment: true,
           },
         },
       },
@@ -196,8 +199,8 @@ export async function PATCH(request: Request) {
       collectionId: item.collectionId,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-      likes: item._count.likes,
-      comments: item._count.comments,
+      likes: item._count.Like,
+      comments: item._count.Comment,
     }
 
     return NextResponse.json(response)
@@ -212,8 +215,8 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const session = await auth()
-    if (!session?.user) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -232,7 +235,7 @@ export async function DELETE(request: Request) {
       where: { id },
     })
 
-    if (!existingItem || existingItem.userId !== session.user.id) {
+    if (!existingItem || existingItem.userId !== session.user.id!) {
       return NextResponse.json(
         { error: 'Item not found or unauthorized' },
         { status: 404 }

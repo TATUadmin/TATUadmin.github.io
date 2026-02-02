@@ -20,7 +20,7 @@ export default async function CalendarPage() {
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
-      profile: {
+      artistProfile: {
         select: {
           subscriptionTier: true,
         },
@@ -28,7 +28,7 @@ export default async function CalendarPage() {
     },
   })
 
-  const tier = user?.profile?.subscriptionTier || 'FREE'
+  const tier = user?.artistProfile?.subscriptionTier || 'FREE'
 
   return (
     <div className="min-h-screen">

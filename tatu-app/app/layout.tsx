@@ -3,9 +3,9 @@ import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import AuthProvider from './components/SessionProvider'
-import WebSocketProvider from './components/WebSocketProvider'
 import MobileNavigation from './components/MobileNavigation'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
+import { I18nProvider } from '@/lib/i18n/context'
 import './globals.css'
 import { Toaster as UiToaster } from "@/components/ui/toaster"
 import { Analytics } from '@vercel/analytics/next'
@@ -50,13 +50,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-black`}>
         {/* Simple black background */}
         <div 
           className="fixed inset-0 z-0 bg-black"
         />
-        <AuthProvider>
-          <WebSocketProvider>
+        <I18nProvider>
+          <AuthProvider>
             <div className="flex flex-col min-h-screen relative z-10">
               <Navbar />
               <MobileNavigation />
@@ -66,8 +66,8 @@ export default function RootLayout({
             <PWAInstallPrompt />
             <Toaster />
             <UiToaster />
-          </WebSocketProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </I18nProvider>
         <Analytics />
       </body>
     </html>

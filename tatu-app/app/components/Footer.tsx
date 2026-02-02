@@ -1,6 +1,18 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useI18n } from '@/lib/i18n/context'
 
 export default function Footer() {
+  const pathname = usePathname()
+  const { t } = useI18n()
+
+  // Hide footer on dashboard pages (they have their own layout)
+  if (pathname?.startsWith('/dashboard')) {
+    return null
+  }
+
   return (
     <footer className="bg-black border-t text-white" style={{borderColor: '#171717'}}>
       <div className="container py-16">
@@ -17,27 +29,27 @@ export default function Footer() {
               }}
             />
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-              The professional marketplace connecting verified tattoo artists with clients worldwide.
+              {t('footer.description')}
             </p>
           </div>
 
           {/* For Artists */}
           <div>
-            <h3 className="text-white font-medium mb-6">For Artists</h3>
+            <h3 className="text-white font-medium mb-6">{t('footer.forArtists')}</h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/register-artist" className="text-gray-400 hover:text-white transition-colors">
-                  Join as Artist
+                  {t('footer.joinAsArtist')}
                 </Link>
               </li>
               <li>
                 <Link href="/dashboard/portfolio" className="text-gray-400 hover:text-white transition-colors">
-                  Portfolio Management
+                  {t('footer.portfolioManagement')}
                 </Link>
               </li>
               <li>
                 <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
-                  Artist Dashboard
+                  {t('footer.artistDashboard')}
                 </Link>
               </li>
             </ul>
@@ -45,21 +57,16 @@ export default function Footer() {
 
           {/* For Clients */}
           <div>
-            <h3 className="text-white font-medium mb-6">For Clients</h3>
+            <h3 className="text-white font-medium mb-6">{t('footer.forClients')}</h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/explore" className="text-gray-400 hover:text-white transition-colors">
-                  Find Artists
+                  {t('footer.findArtists')}
                 </Link>
               </li>
               <li>
                 <Link href="/signup" className="text-gray-400 hover:text-white transition-colors">
-                  Create Account
-                </Link>
-              </li>
-              <li>
-                <Link href="/how-it-works" className="text-gray-400 hover:text-white transition-colors">
-                  How It Works
+                  {t('footer.createAccount')}
                 </Link>
               </li>
             </ul>
@@ -67,26 +74,21 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h3 className="text-white font-medium mb-6">Support</h3>
+            <h3 className="text-white font-medium mb-6">{t('footer.support')}</h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/about" className="text-gray-400 hover:text-white transition-colors">
-                  About TATU
-                </Link>
-              </li>
-              <li>
-                <Link href="/styles" className="text-gray-400 hover:text-white transition-colors">
-                  Tattoo Styles
+                  {t('footer.aboutTATU')}
                 </Link>
               </li>
               <li>
                 <Link href="/help" className="text-gray-400 hover:text-white transition-colors">
-                  Help Center
+                  {t('footer.helpCenter')}
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
-                  Contact Us
+                  {t('footer.contactUs')}
                 </Link>
               </li>
             </ul>
@@ -117,17 +119,17 @@ export default function Footer() {
         {/* Bottom Section */}
                   <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center text-sm" style={{borderColor: '#171717'}}>
           <p className="text-gray-400">
-            © 2024 TATU. All rights reserved.
+            {t('footer.copyright')}
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
-              Terms
+              {t('footer.terms')}
             </Link>
             <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
-              Privacy
+              {t('footer.privacy')}
             </Link>
             <Link href="/help" className="text-gray-400 hover:text-white transition-colors">
-              Help
+              {t('footer.help')}
             </Link>
           </div>
         </div>

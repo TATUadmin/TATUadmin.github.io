@@ -13,7 +13,7 @@ const mockNotifications: Notification[] = [
     message: 'John Doe wants to book a session for Traditional Rose tattoo on Dec 15, 2023',
     timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5 minutes ago
     read: false,
-    actionUrl: '/dashboard/appointments/123'
+    actionUrl: '/dashboard/calendar'
   },
   {
     id: '2',
