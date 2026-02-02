@@ -304,7 +304,7 @@ model Payment {
   createdAt             DateTime          @default(now())
   updatedAt              DateTime          @updatedAt
   // Relations
-  Appointment           Appointment?      @relation("AppointmentPaymentHold", fields: [appointmentId], references: [id])
+  Appointment           Appointment?      @relation("AppointmentPaymentHold")
   User_Payment_artistId User              @relation("Payment_artistId", fields: [artistId], references: [id])
   User_Payment_clientId User              @relation("Payment_clientId", fields: [clientId], references: [id])
 
