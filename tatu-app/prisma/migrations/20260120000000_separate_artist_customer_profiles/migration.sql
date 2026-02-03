@@ -10,8 +10,8 @@ CREATE TABLE "ArtistProfile" (
     "specialties" TEXT[],
     "userId" TEXT NOT NULL,
     "completedRegistration" BOOLEAN NOT NULL DEFAULT false,
-    "subscriptionTier" "SubscriptionTier",
-    "subscriptionStatus" "SubscriptionStatus",
+    "subscriptionTier" TEXT,
+    "subscriptionStatus" TEXT,
     "portfolioImageCount" INTEGER NOT NULL DEFAULT 0,
     "featuredListingActive" BOOLEAN NOT NULL DEFAULT false,
     "visibilityBoostActive" BOOLEAN NOT NULL DEFAULT false,
@@ -63,12 +63,12 @@ SELECT
     "specialties",
     "userId",
     "completedRegistration",
-    "subscriptionTier",
-    "subscriptionStatus",
-    "portfolioImageCount",
-    "featuredListingActive",
-    "visibilityBoostActive",
-    "visibilityBoostEndDate"
+    NULL,
+    NULL,
+    0,
+    false,
+    false,
+    NULL
 FROM "Profile"
 WHERE "userId" IN (
     SELECT "id" FROM "User" WHERE "role" IN ('ARTIST', 'SHOP_OWNER')
