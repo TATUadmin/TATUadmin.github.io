@@ -563,13 +563,14 @@
             <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8 text-center">
                 <h2 class="text-2xl font-bold mb-4">Stay Inked-In</h2>
                 <p class="text-gray-600 mb-6">Subscribe to get artist spotlights, style trends, and exclusive offers from top studios.</p>
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="email" placeholder="Your email address" 
+                <form id="newsletterForm" class="flex flex-col sm:flex-row gap-2">
+                    <input id="newsletterEmail" type="email" placeholder="Your email address" 
                            class="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition">
+                    <button id="newsletterSubmit" type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition">
                         Subscribe
                     </button>
-                </div>
+                </form>
+                <p id="newsletterMessage" class="text-sm mt-3 text-gray-500 hidden"></p>
                 <p class="text-gray-400 text-sm mt-3">We respect your privacy. Unsubscribe at any time.</p>
             </div>
         </div>
@@ -632,10 +633,10 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            <form>
+            <form id="reviewForm">
                 <div class="mb-6">
                     <label class="block text-gray-700 font-medium mb-2">Who are you reviewing?</label>
-                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <select id="reviewTarget" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">Select an artist or studio</option>
                         <option value="artist1">Sarah Inkwell</option>
                         <option value="artist2">Mike Steel</option>
@@ -658,13 +659,18 @@
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 font-medium mb-2">Review Title</label>
-                    <input type="text" placeholder="Summarize your experience" 
+                    <input id="reviewTitle" type="text" placeholder="Summarize your experience" 
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 font-medium mb-2">Your Review</label>
-                    <textarea rows="5" placeholder="Tell us about your experience..." 
+                    <textarea id="reviewComment" rows="5" placeholder="Tell us about your experience..." 
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Email (optional)</label>
+                    <input id="reviewEmail" type="email" placeholder="you@example.com"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 font-medium mb-2">Upload Photos (Optional)</label>
@@ -678,10 +684,11 @@
                     <button type="button" id="cancelReview" class="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-100">
                         Cancel
                     </button>
-                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition">
+                    <button id="reviewSubmit" type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition">
                         Submit Review
                     </button>
                 </div>
+                <p id="reviewMessage" class="text-sm mt-4 text-gray-500 hidden"></p>
             </form>
         </div>
     </div>
@@ -723,6 +730,9 @@
         const submitReviewBtn = document.querySelector('section#submit button');
         const closeModalBtn = document.getElementById('closeModal');
         const cancelReviewBtn = document.getElementById('cancelReview');
+        const reviewForm = document.getElementById('reviewForm');
+        const reviewMessage = document.getElementById('reviewMessage');
+        const reviewSubmit = document.getElementById('reviewSubmit');
 
         if (submitReviewBtn) {
             submitReviewBtn.addEventListener('click', () => {
@@ -748,6 +758,114 @@
                 reviewModal.classList.add('hidden');
             }
         });
+
+        // Newsletter form submission
+        const newsletterForm = document.getElementById('newsletterForm');
+        const newsletterEmail = document.getElementById('newsletterEmail');
+        const newsletterMessage = document.getElementById('newsletterMessage');
+        const newsletterSubmit = document.getElementById('newsletterSubmit');
+
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!newsletterEmail || !newsletterMessage || !newsletterSubmit) return;
+
+                const email = newsletterEmail.value.trim();
+                if (!email) {
+                    newsletterMessage.textContent = 'Please enter your email.';
+                    newsletterMessage.classList.remove('hidden');
+                    return;
+                }
+
+                newsletterSubmit.disabled = true;
+                newsletterSubmit.textContent = 'Subscribing...';
+
+                try {
+                    const response = await fetch('/api/newsletter', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, source: 'homepage' })
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json().catch(() => ({}));
+                        throw new Error(data.error || 'Failed to subscribe');
+                    }
+
+                    newsletterMessage.textContent = 'Thanks for subscribing!';
+                    newsletterMessage.classList.remove('hidden');
+                    newsletterEmail.value = '';
+                } catch (error) {
+                    newsletterMessage.textContent = error.message || 'Subscription failed. Try again.';
+                    newsletterMessage.classList.remove('hidden');
+                } finally {
+                    newsletterSubmit.disabled = false;
+                    newsletterSubmit.textContent = 'Subscribe';
+                }
+            });
+        }
+
+        // Review form submission
+        if (reviewForm) {
+            reviewForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!reviewMessage || !reviewSubmit) return;
+
+                const target = document.getElementById('reviewTarget');
+                const title = document.getElementById('reviewTitle');
+                const comment = document.getElementById('reviewComment');
+                const email = document.getElementById('reviewEmail');
+                const ratingValue = document.getElementById('selectedRating');
+
+                const rating = ratingValue ? parseInt(ratingValue.value, 10) : 0;
+                const targetName = target ? target.value : '';
+                const targetType = targetName.startsWith('studio') ? 'studio' : 'artist';
+
+                if (!targetName || rating < 1 || !title.value.trim() || !comment.value.trim()) {
+                    reviewMessage.textContent = 'Please complete all required fields and rating.';
+                    reviewMessage.classList.remove('hidden');
+                    return;
+                }
+
+                reviewSubmit.disabled = true;
+                reviewSubmit.textContent = 'Submitting...';
+
+                try {
+                    const response = await fetch('/api/public-reviews', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            targetType,
+                            targetName,
+                            rating,
+                            title: title.value.trim(),
+                            comment: comment.value.trim(),
+                            email: email ? email.value.trim() : ''
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json().catch(() => ({}));
+                        throw new Error(data.error || 'Failed to submit review');
+                    }
+
+                    reviewMessage.textContent = 'Review submitted! Thanks for sharing your experience.';
+                    reviewMessage.classList.remove('hidden');
+                    reviewForm.reset();
+                    document.getElementById('selectedRating').value = '0';
+                    document.querySelectorAll('.rating-star').forEach((s) => {
+                        s.classList.remove('text-yellow-400');
+                        s.classList.add('text-gray-300', 'hover:text-yellow-400');
+                    });
+                } catch (error) {
+                    reviewMessage.textContent = error.message || 'Failed to submit review.';
+                    reviewMessage.classList.remove('hidden');
+                } finally {
+                    reviewSubmit.disabled = false;
+                    reviewSubmit.textContent = 'Submit Review';
+                }
+            });
+        }
 
         // Search functionality
         const searchInput = document.querySelector('nav input[type="text"]');
@@ -803,7 +921,8 @@
         document.querySelectorAll('.tattoo-type-tag').forEach(tag => {
             tag.addEventListener('click', () => {
                 // In a real app, this would filter results
-                alert(`Showing results for: ${tag.textContent.trim()}`);
+                tag.classList.toggle('ring-2');
+                tag.classList.toggle('ring-purple-500');
             });
         });
 

@@ -192,7 +192,7 @@ function UserLocationMarker() {
           map.setView([latitude, longitude], 12)
         },
         (error) => {
-          console.log('Location access denied:', error)
+          console.error('Location access denied:', error)
         }
       )
     }
@@ -214,6 +214,7 @@ function UserLocationMarker() {
 
 export default function RealMap() {
   const [isClient, setIsClient] = useState(false)
+  const [locationError, setLocationError] = useState<string | null>(null)
 
   useEffect(() => {
     setIsClient(true)
@@ -231,7 +232,12 @@ export default function RealMap() {
   }
 
   return (
-    <div className="w-full h-96 rounded-lg overflow-hidden">
+    <div className="w-full h-96 rounded-lg overflow-hidden relative">
+      {locationError && (
+        <div className="absolute top-4 left-1/2 z-20 w-[90%] max-w-md -translate-x-1/2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-xs text-red-200">
+          {locationError}
+        </div>
+      )}
       <MapContainer
         center={[40.7128, -74.0060]} // NYC coordinates
         zoom={11}
@@ -268,11 +274,14 @@ export default function RealMap() {
               navigator.geolocation.getCurrentPosition(
                 (position) => {
                   // This will be handled by UserLocationMarker component
+                  setLocationError(null)
                 },
                 (error) => {
-                  alert('Location access denied. Please enable location services.')
+                  setLocationError('Location access denied. Please enable location services.')
                 }
               )
+            } else {
+              setLocationError('Geolocation is not supported by your browser.')
             }
           }}
           className="bg-white/90 text-black px-3 py-2 rounded-lg shadow-lg hover:bg-white transition-colors text-sm font-medium"

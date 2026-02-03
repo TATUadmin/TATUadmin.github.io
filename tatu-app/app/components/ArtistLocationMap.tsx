@@ -39,13 +39,11 @@ export default function ArtistLocationMap({
 
     // Check if map is already initialized on this container
     if (mapInstanceRef.current) {
-      console.log('Map already initialized, skipping...')
       return
     }
 
     // Check if Leaflet has already initialized this container
     if ((mapRef.current as any)._leaflet_id) {
-      console.log('Container already has Leaflet instance, cleaning up first...')
       // Container was already initialized, clean it up
       const existingMap = (mapRef.current as any)._leaflet
       if (existingMap) {
@@ -71,7 +69,6 @@ export default function ArtistLocationMap({
 
       // Double-check container is still available and not initialized
       if ((mapRef.current as any)._leaflet_id) {
-        console.log('Container initialized during async import, skipping...')
         return
       }
 
@@ -253,8 +250,6 @@ export default function ArtistLocationMap({
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude: lat, longitude: lng } = position.coords
-          console.log('Location obtained:', lat, lng)
-
           // Wait for map to be available if needed (with timeout)
           const updateMapWithLocation = (retries = 10) => {
             if (!map) {
@@ -363,7 +358,6 @@ export default function ArtistLocationMap({
             case err.PERMISSION_DENIED:
               // If first attempt failed and we used high accuracy, try without it
               if (attempt === 1 && options.enableHighAccuracy) {
-                console.log('Retrying with lower accuracy...')
                 tryGetLocation({
                   enableHighAccuracy: false,
                   timeout: 15000,
@@ -392,7 +386,6 @@ export default function ArtistLocationMap({
             case err.TIMEOUT:
               // Retry with longer timeout if first attempt
               if (attempt === 1) {
-                console.log('Retrying with longer timeout...')
                 tryGetLocation({
                   enableHighAccuracy: false,
                   timeout: 20000,

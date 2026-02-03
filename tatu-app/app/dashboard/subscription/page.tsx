@@ -23,6 +23,7 @@ export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
   const [showPricing, setShowPricing] = useState(false)
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     fetchSubscription()
@@ -62,14 +63,14 @@ export default function SubscriptionPage() {
       const data = await response.json()
 
       if (data.success) {
-        alert(data.message)
+        setStatusMessage({ type: 'success', text: data.message })
         await fetchSubscription()
       } else {
-        alert('Failed to cancel subscription: ' + data.error)
+        setStatusMessage({ type: 'error', text: `Failed to cancel subscription: ${data.error}` })
       }
     } catch (error) {
       console.error('Failed to cancel subscription:', error)
-      alert('Failed to cancel subscription. Please try again.')
+      setStatusMessage({ type: 'error', text: 'Failed to cancel subscription. Please try again.' })
     } finally {
       setCancelling(false)
     }
@@ -135,6 +136,15 @@ export default function SubscriptionPage() {
             Manage your TATU subscription and billing
           </p>
         </div>
+        {statusMessage && (
+          <div className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
+            statusMessage.type === 'success'
+              ? 'border-green-200 bg-green-50 text-green-800'
+              : 'border-red-200 bg-red-50 text-red-800'
+          }`}>
+            {statusMessage.text}
+          </div>
+        )}
 
         {/* Current Subscription Card */}
         {subscription && (

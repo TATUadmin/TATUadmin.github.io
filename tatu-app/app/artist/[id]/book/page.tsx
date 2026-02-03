@@ -40,6 +40,7 @@ export default function BookAppointmentPage() {
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,8 +50,10 @@ export default function BookAppointmentPage() {
     await new Promise(resolve => setTimeout(resolve, 1000))
     
     // Show success message and redirect
-    alert('Booking request submitted successfully! The artist will contact you soon.')
-    router.push(`/artist/${artistId}`)
+    setStatusMessage('Booking request submitted successfully! The artist will contact you soon.')
+    setTimeout(() => {
+      router.push(`/artist/${artistId}`)
+    }, 1200)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -85,6 +88,11 @@ export default function BookAppointmentPage() {
         <div className="container mx-auto px-4 max-w-2xl">
           <div className="bg-transparent border-2 border-gray-400 rounded-lg p-8">
             <h2 className="headline text-xl text-white mb-6">Appointment Details</h2>
+            {statusMessage && (
+              <div className="mb-6 rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-200">
+                {statusMessage}
+              </div>
+            )}
             
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Personal Information */}

@@ -120,6 +120,7 @@ export default function InteractiveArtistMap() {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 })
+  const [locationError, setLocationError] = useState<string | null>(null)
 
   const defaultLatitude = 40.7128 // NYC latitude
   const defaultLongitude = -74.0060 // NYC longitude
@@ -136,14 +137,15 @@ export default function InteractiveArtistMap() {
             center: { lat: position.coords.latitude, lng: position.coords.longitude },
             zoom: 14
           })
+          setLocationError(null)
         },
         (error) => {
           console.error('Error getting user location:', error)
-          alert('Could not retrieve your location. Please ensure location services are enabled.')
+          setLocationError('Could not retrieve your location. Please ensure location services are enabled.')
         }
       )
     } else {
-      alert('Geolocation is not supported by your browser.')
+      setLocationError('Geolocation is not supported by your browser.')
     }
   }
 
@@ -201,6 +203,11 @@ export default function InteractiveArtistMap() {
 
   return (
     <div className="w-full h-96 bg-gray-900 rounded-lg relative overflow-hidden">
+      {locationError && (
+        <div className="absolute top-4 left-4 right-4 z-20 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-xs text-red-200">
+          {locationError}
+        </div>
+      )}
       {/* Map Background - NYC-style map */}
       <div 
         className="absolute inset-0"

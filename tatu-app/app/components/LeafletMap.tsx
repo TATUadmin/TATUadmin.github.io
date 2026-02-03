@@ -529,41 +529,9 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
           artistsArray = Array.isArray(responseData.data) ? responseData.data : []
         }
         
-        console.log('Fetched artists from API:', artistsArray.length, 'total artists')
-        
-        // Debug: Check for specific user
-        const ppcrzart = artistsArray.find((a: any) => a.email === 'ppcrzart@gmail.com' || a.id?.includes('ppcrzart'))
-        if (ppcrzart) {
-          console.log('✅ Found ppcrzart in API response:', {
-            id: ppcrzart.id,
-            name: ppcrzart.name,
-            email: ppcrzart.email,
-            latitude: ppcrzart.latitude,
-            longitude: ppcrzart.longitude,
-            location: ppcrzart.location
-          })
-        }
-        
         // Transform API data to match component's Artist interface
         const transformedArtists = artistsArray
-          .filter((artist: any) => {
-            const hasLocation = artist.latitude && artist.longitude
-            if (!hasLocation) {
-              console.log('Filtered out artist (no location):', artist.name, artist.id, {
-                latitude: artist.latitude,
-                longitude: artist.longitude
-              })
-            }
-            // Debug specific user
-            if ((artist.email === 'ppcrzart@gmail.com' || artist.id?.includes('ppcrzart')) && !hasLocation) {
-              console.log('❌ ppcrzart filtered out - missing location data:', {
-                latitude: artist.latitude,
-                longitude: artist.longitude,
-                location: artist.location
-              })
-            }
-            return hasLocation
-          })
+          .filter((artist: any) => artist.latitude && artist.longitude)
           .map((artist: any) => ({
             id: artist.id,
             name: artist.name || 'Unknown Artist',
@@ -580,19 +548,11 @@ export default function LeafletMap({ searchLocation, onLocationChange, styleFilt
             avatar: artist.avatar || '/api/placeholder/80/80',
             city: artist.city || ''
           }))
-        
-        console.log('Transformed artists with location:', transformedArtists.length)
-        
+
         // Filter by minimum reviews
         const filteredArtists = transformedArtists.filter((artist: any) => {
-          const meetsMinReviews = artist.reviewCount >= minReviews
-          if (!meetsMinReviews) {
-            console.log('Filtered out artist (min reviews):', artist.name, 'has', artist.reviewCount, 'reviews, need', minReviews)
-          }
-          return meetsMinReviews
+          return artist.reviewCount >= minReviews
         })
-        
-        console.log('Final filtered artists:', filteredArtists.length)
         setArtists(filteredArtists)
       } catch (error) {
         console.error('Error fetching artists:', error)

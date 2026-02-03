@@ -32,7 +32,6 @@ function VerifyEmailContent() {
           return
         }
 
-        console.log('Verifying email with token:', token.substring(0, 10) + '...')
 
         const response = await fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`)
         const data = await response.json()

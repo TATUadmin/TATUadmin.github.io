@@ -89,25 +89,21 @@ export default function NotificationsPage() {
       prev.map(n => n.id === id ? { ...n, read: true } : n)
     )
     // In real app: API call to mark as read
-    console.log(`Marking notification ${id} as read`)
   }
 
   const handleMarkAllAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     // In real app: API call to mark all as read
-    console.log('Marking all notifications as read')
   }
 
   const handleDelete = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id))
     // In real app: API call to delete notification
-    console.log(`Deleting notification ${id}`)
   }
 
   const handleClearAll = () => {
     setNotifications([])
     // In real app: API call to clear all notifications
-    console.log('Clearing all notifications')
   }
 
   const handleNotificationClick = (notification: Notification) => {

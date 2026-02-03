@@ -579,8 +579,9 @@ export default function SignUpPage() {
 
           <button
             type="button"
-            onClick={() => alert('Google sign up coming soon!')}
-            className="btn btn-secondary w-full flex items-center justify-center gap-2"
+            disabled
+            aria-disabled="true"
+            className="btn btn-secondary w-full flex items-center justify-center gap-2 opacity-60 cursor-not-allowed"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -590,6 +591,9 @@ export default function SignUpPage() {
             </svg>
             {t('auth.continueWithGoogle')}
           </button>
+          <p className="text-xs text-gray-500 text-center">
+            Google sign up is not available yet.
+          </p>
 
           <div className="text-center">
             <span className="text-sm text-gray-400">

@@ -22,6 +22,7 @@ export default function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false)
 
   useEffect(() => {
     // Check if already installed
@@ -65,11 +66,8 @@ export default function PWAInstallPrompt() {
       const { outcome } = await deferredPrompt.userChoice
       
       if (outcome === 'accepted') {
-        console.log('User accepted the install prompt')
-      } else {
-        console.log('User dismissed the install prompt')
+        // No-op: handled by system prompt
       }
-      
       setDeferredPrompt(null)
       setShowPrompt(false)
     } catch (error) {
@@ -85,9 +83,7 @@ export default function PWAInstallPrompt() {
 
   const handleIOSInstall = () => {
     // Show iOS-specific installation instructions
-    setShowPrompt(false)
-    // You could show a modal with iOS installation steps
-    alert('To install TATU on your iPhone:\n\n1. Tap the Share button\n2. Tap "Add to Home Screen"\n3. Tap "Add"')
+    setShowIOSInstructions(true)
   }
 
   // Don't show if already installed or recently dismissed
@@ -145,6 +141,11 @@ export default function PWAInstallPrompt() {
               <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
+          {isIOS && showIOSInstructions && (
+            <div className="mt-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600">
+              Open the Share menu in Safari, then choose “Add to Home Screen.”
+            </div>
+          )}
         </div>
       </div>
     </div>
