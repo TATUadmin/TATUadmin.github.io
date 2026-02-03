@@ -138,9 +138,13 @@ async function main() {
       await prisma.review.create({
         data: {
           rating: Math.floor(Math.random() * 2) + 4, // 4-5 stars
-          content: `Amazing work by ${artistData.name}! Highly recommend.`,
-          userId: customer.id,
-          shopId: shop.id
+          title: `Great experience with ${artistData.name}`,
+          comment: `Amazing work by ${artistData.name}! Highly recommend.`,
+          wouldRecommend: true,
+          images: [],
+          artistId: user.id,
+          clientId: customer.id,
+          status: 'PUBLISHED'
         }
       })
     }
