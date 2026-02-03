@@ -16,11 +16,40 @@ export async function GET(
 
     const { conversationId } = params
 
-    // TODO: Implement actual message fetching from database
-    // For now, return empty array - the frontend will use mock data
-    const messages: any[] = []
+    const thread = await prisma.messageThread.findFirst({
+      where: {
+        id: conversationId,
+        userId: session.user.id,
+      },
+    })
 
-    return NextResponse.json({ messages })
+    if (!thread) {
+      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
+    }
+
+    const messages = await prisma.unifiedMessage.findMany({
+      where: {
+        userId: session.user.id,
+        threadId: conversationId,
+      },
+      orderBy: { receivedAt: 'asc' },
+    })
+
+    const mappedMessages = messages.map((message) => {
+      const isSent =
+        message.sender === session.user.id || message.sender === session.user.email
+      return {
+        id: message.id,
+        senderId: message.sender,
+        senderName: message.senderName || message.sender || 'Unknown',
+        content: message.content,
+        timestamp: message.receivedAt.toISOString(),
+        isRead: message.status === 'READ',
+        isSent,
+      }
+    })
+
+    return NextResponse.json({ messages: mappedMessages })
   } catch (error) {
     console.error('Error fetching messages:', error)
     return NextResponse.json(

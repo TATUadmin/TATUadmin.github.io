@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/auth'
 import { prisma } from '@/lib/prisma'
+import { GoogleCalendarIntegration } from '@/lib/integrations/google-calendar'
 
 export const dynamic = 'force-dynamic'
 
@@ -217,7 +218,35 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // TODO: If calendar has 2-way sync, create event in external calendar
+    if (calendar.provider === 'GOOGLE' && calendar.syncEnabled) {
+      try {
+        if (calendar.accessToken && calendar.refreshToken) {
+          const integration = new GoogleCalendarIntegration(
+            calendar.accessToken,
+            calendar.refreshToken
+          )
+          const externalEvent = await integration.createEvent({
+            title,
+            description,
+            location,
+            startTime: new Date(startTime),
+            endTime: new Date(endTime),
+            timezone,
+          })
+
+          await prisma.calendarEvent.update({
+            where: { id: event.id },
+            data: {
+              externalId: externalEvent.id || null,
+              externalUrl: externalEvent.htmlLink || null,
+              lastSyncedAt: new Date(),
+            },
+          })
+        }
+      } catch (error) {
+        console.error('Error syncing event to Google Calendar:', error)
+      }
+    }
 
     return NextResponse.json({ event }, { status: 201 })
   } catch (error) {
@@ -343,7 +372,47 @@ export async function PATCH(request: NextRequest) {
       },
     })
 
-    // TODO: If calendar has 2-way sync, update event in external calendar
+    if (updatedEvent.calendar.provider === 'GOOGLE' && updatedEvent.calendar.syncEnabled) {
+      try {
+        if (event.calendar.accessToken && event.calendar.refreshToken) {
+          const integration = new GoogleCalendarIntegration(
+            event.calendar.accessToken,
+            event.calendar.refreshToken
+          )
+
+          if (updatedEvent.externalId) {
+            await integration.updateEvent(updatedEvent.externalId, {
+              title: updatedEvent.title,
+              description: updatedEvent.description || undefined,
+              location: updatedEvent.location || undefined,
+              startTime: updatedEvent.startTime,
+              endTime: updatedEvent.endTime,
+              timezone: updatedEvent.timezone,
+            })
+          } else {
+            const externalEvent = await integration.createEvent({
+              title: updatedEvent.title,
+              description: updatedEvent.description || undefined,
+              location: updatedEvent.location || undefined,
+              startTime: updatedEvent.startTime,
+              endTime: updatedEvent.endTime,
+              timezone: updatedEvent.timezone,
+            })
+
+            await prisma.calendarEvent.update({
+              where: { id: updatedEvent.id },
+              data: {
+                externalId: externalEvent.id || null,
+                externalUrl: externalEvent.htmlLink || null,
+                lastSyncedAt: new Date(),
+              },
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error syncing event update to Google Calendar:', error)
+      }
+    }
 
     return NextResponse.json({ event: updatedEvent })
   } catch (error) {
@@ -393,7 +462,25 @@ export async function DELETE(request: NextRequest) {
       },
     })
 
-    // TODO: If calendar has 2-way sync, delete event in external calendar
+    if (event.externalId) {
+      const calendar = await prisma.calendar.findUnique({
+        where: { id: event.calendarId },
+      })
+
+      if (calendar?.provider === 'GOOGLE' && calendar.syncEnabled) {
+        try {
+          if (calendar.accessToken && calendar.refreshToken) {
+            const integration = new GoogleCalendarIntegration(
+              calendar.accessToken,
+              calendar.refreshToken
+            )
+            await integration.deleteEvent(event.externalId)
+          }
+        } catch (error) {
+          console.error('Error deleting event from Google Calendar:', error)
+        }
+      }
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

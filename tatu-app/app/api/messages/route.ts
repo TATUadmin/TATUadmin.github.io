@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,22 +95,59 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: Send message via appropriate platform integration
-    // For now, just save as INTERNAL message
-    
+    let resolvedThreadId = threadId as string | undefined
+    const now = new Date()
+
+    if (resolvedThreadId) {
+      const existingThread = await prisma.messageThread.findFirst({
+        where: {
+          id: resolvedThreadId,
+          userId: session.user.id,
+        },
+      })
+
+      if (!existingThread) {
+        return NextResponse.json(
+          { error: 'Conversation not found' },
+          { status: 404 }
+        )
+      }
+    } else {
+      const newThread = await prisma.messageThread.create({
+        data: {
+          id: crypto.randomUUID(),
+          userId: session.user.id,
+          subject: null,
+          participants: [session.user.id, recipient],
+          lastMessageAt: now,
+          createdAt: now,
+          updatedAt: now,
+        },
+      })
+      resolvedThreadId = newThread.id
+    }
+
     const message = await prisma.unifiedMessage.create({
       data: {
         userId: session.user.id,
         platform,
-        sender: session.user.email || 'you',
-        senderName: session.user.name || 'You',
+        sender: session.user.id,
+        senderName: session.user.name || session.user.email || 'You',
         content,
         status: 'READ', // Sent messages are automatically read
-        receivedAt: new Date(),
-        threadId,
+        receivedAt: now,
+        threadId: resolvedThreadId,
       },
       include: {
         attachments: true,
+      },
+    })
+
+    await prisma.messageThread.update({
+      where: { id: resolvedThreadId },
+      data: {
+        lastMessageAt: now,
+        updatedAt: now,
       },
     })
 

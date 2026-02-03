@@ -21,19 +21,51 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: Implement actual message sending to database
-    // For now, return a mock message
-    const message = {
-      id: crypto.randomUUID(),
-      senderId: session.user.id,
-      senderName: session.user.name || 'You',
-      content: content,
-      timestamp: new Date().toISOString(),
-      isRead: false,
-      isSent: true,
+    const thread = await prisma.messageThread.findFirst({
+      where: {
+        id: conversationId,
+        userId: session.user.id,
+      },
+    })
+
+    if (!thread) {
+      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
     }
 
-    return NextResponse.json(message, { status: 201 })
+    const now = new Date()
+    const createdMessage = await prisma.unifiedMessage.create({
+      data: {
+        userId: session.user.id,
+        platform: 'INTERNAL',
+        sender: session.user.id,
+        senderName: session.user.name || session.user.email || 'You',
+        content: content.trim(),
+        status: 'READ',
+        receivedAt: now,
+        threadId: thread.id,
+      },
+    })
+
+    await prisma.messageThread.update({
+      where: { id: thread.id },
+      data: {
+        lastMessageAt: now,
+        updatedAt: now,
+      },
+    })
+
+    return NextResponse.json(
+      {
+        id: createdMessage.id,
+        senderId: createdMessage.sender,
+        senderName: createdMessage.senderName || 'You',
+        content: createdMessage.content,
+        timestamp: createdMessage.receivedAt.toISOString(),
+        isRead: true,
+        isSent: true,
+      },
+      { status: 201 }
+    )
   } catch (error) {
     console.error('Error sending message:', error)
     return NextResponse.json(
