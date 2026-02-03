@@ -59,6 +59,7 @@ model Appointment {
   User_Appointment_clientIdToUser User              @relation("Appointment_clientIdToUser", fields: [clientId], references: [id])
   Service                         Service           @relation(fields: [serviceId], references: [id])
   Shop                            Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  reviews                         Review[]
 
   @@index([artistId])
   @@index([clientId])
@@ -273,16 +274,76 @@ model Subscription {
 }
 
 model Review {
-  id        String   @id
-  rating    Int      @db.SmallInt
-  content   String
-  images    String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime
+  id              String       @id @default(cuid())
+  rating          Int          @db.SmallInt
+  title           String
+  comment         String
+  wouldRecommend  Boolean      @default(true)
+  categories      Json?
+  images          String[]
+  helpfulCount    Int          @default(0)
+  notHelpfulCount Int          @default(0)
+  status          ReviewStatus @default(PUBLISHED)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  artistId      String
+  clientId      String
+  appointmentId String?
+
+  artist     User         @relation("ArtistReviews", fields: [artistId], references: [id], onDelete: Cascade)
+  client     User         @relation("ClientReviews", fields: [clientId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  responseText      String?
+  responseCreatedAt DateTime?
+
+  @@index([artistId])
+  @@index([clientId])
+  @@index([appointmentId])
+  @@index([status])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
   userId    String
-  shopId    String
-  Shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actionUrl String?
+  metadata  Json?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([read])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  source    String?
+  status    String   @default("ACTIVE")
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PublicReview {
+  id         String   @id @default(cuid())
+  targetType String
+  targetName String
+  rating     Int      @db.SmallInt
+  title      String
+  comment    String
+  email      String?
+  createdAt  DateTime @default(now())
+  status     String   @default("PENDING")
 }
 
 model Payment {
@@ -397,7 +458,6 @@ model Shop {
   updatedAt      DateTime
   ownerId        String
   Appointment    Appointment[]
-  Review         Review[]
   Service        Service[]
   User           User             @relation(fields: [ownerId], references: [id])
   ShopsOnArtists ShopsOnArtists[]
@@ -459,7 +519,9 @@ model User {
   artistProfile                          ArtistProfile?        @relation("ArtistProfile")
   customerProfile                        CustomerProfile?      @relation("CustomerProfile")
   subscription                           Subscription?
-  Review                                 Review[]
+  Review                                 Review[]        @relation("ArtistReviews")
+  reviewsWritten                         Review[]        @relation("ClientReviews")
+  notifications                          Notification[]
   Service                                Service[]
   Session                                Session[]
   Share                                  Share[]
@@ -557,6 +619,22 @@ enum ShopStatus {
   PENDING
   ACTIVE
   INACTIVE
+}
+
+enum ReviewStatus {
+  PUBLISHED
+  PENDING
+  HIDDEN
+}
+
+enum NotificationType {
+  booking
+  message
+  review
+  payment
+  like
+  follow
+  system
 }
 
 enum CalendarProvider {
