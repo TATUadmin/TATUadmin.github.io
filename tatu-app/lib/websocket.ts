@@ -1,6 +1,12 @@
 import { Server as SocketIOServer } from 'socket.io'
 import { Server as HTTPServer } from 'http'
-import { NextRequest } from 'next/server'
+import jwt from 'jsonwebtoken'
+import { prisma } from '@/lib/prisma'
+
+// Track active socket ownership across helper APIs.
+const userSockets = new Map<string, string>() // userId -> socketId
+const socketUsers = new Map<string, string>() // socketId -> userId
+const userNames = new Map<string, string>() // userId -> displayName
 
 // WebSocket event types
 export interface ServerToClientEvents {
@@ -39,6 +45,7 @@ export interface ClientToServerEvents {
   joinConversation: (conversationId: string) => void
   leaveConversation: (conversationId: string) => void
   sendMessage: (data: SendMessageData) => void
+  markMessageRead: (messageId: string) => void
   startTyping: (conversationId: string) => void
   stopTyping: (conversationId: string) => void
   
@@ -136,22 +143,28 @@ export function createWebSocketServer(httpServer: HTTPServer) {
     transports: ['websocket', 'polling']
   })
 
-  // Store user connections
-  const userSockets = new Map<string, string>() // userId -> socketId
-  const socketUsers = new Map<string, string>() // socketId -> userId
-
   io.on('connection', (socket) => {
     console.log('Client connected:', socket.id)
 
     // Handle authentication
     socket.on('authenticate', async (token) => {
       try {
-        // TODO: Verify JWT token and get user info
-        // For now, we'll use a simple approach
-        const userId = token // In production, decode JWT to get userId
+        const secret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || ''
+        const decoded = jwt.verify(token, secret) as { userId?: string }
+        const userId = decoded.userId
+        if (!userId) {
+          throw new Error('Invalid token')
+        }
         
         userSockets.set(userId, socket.id)
         socketUsers.set(socket.id, userId)
+        if (!userNames.has(userId)) {
+          const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { name: true, email: true },
+          })
+          userNames.set(userId, user?.name || user?.email || 'User')
+        }
         
         socket.emit('connection', 'connected')
         console.log(`User ${userId} authenticated`)
@@ -168,7 +181,15 @@ export function createWebSocketServer(httpServer: HTTPServer) {
       if (!userId) return
 
       try {
-        // TODO: Update notification in database
+        await prisma.notification.updateMany({
+          where: {
+            id: notificationId,
+            userId,
+          },
+          data: {
+            read: true,
+          },
+        })
         socket.emit('notificationRead', notificationId)
       } catch (error) {
         console.error('Error marking notification as read:', error)
@@ -180,8 +201,15 @@ export function createWebSocketServer(httpServer: HTTPServer) {
       if (!userId) return
 
       try {
-        // TODO: Update all notifications in database
-        console.log(`Marking all notifications as read for user ${userId}`)
+        await prisma.notification.updateMany({
+          where: {
+            userId,
+            read: false,
+          },
+          data: {
+            read: true,
+          },
+        })
       } catch (error) {
         console.error('Error marking all notifications as read:', error)
       }
@@ -203,17 +231,53 @@ export function createWebSocketServer(httpServer: HTTPServer) {
       if (!userId) return
 
       try {
-        // TODO: Save message to database
+        const thread = await prisma.messageThread.findFirst({
+          where: {
+            id: data.conversationId,
+            userId,
+          },
+        })
+
+        if (!thread) {
+          socket.emit('error', 'Conversation not found')
+          return
+        }
+
+        const receiverId = thread.participants.find((p) => p !== userId) || ''
+        const sender = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { name: true },
+        })
+        const now = new Date()
+
+        const savedMessage = await prisma.unifiedMessage.create({
+          data: {
+            userId,
+            platform: 'INTERNAL',
+            sender: userId,
+            senderName: sender?.name || 'User',
+            content: data.content,
+            status: 'UNREAD',
+            receivedAt: now,
+            threadId: thread.id,
+          },
+        })
+
+        await prisma.messageThread.update({
+          where: { id: thread.id },
+          data: { lastMessageAt: now },
+        })
+
         const messageData: MessageData = {
-          id: `msg_${Date.now()}`,
+          id: savedMessage.id,
           conversationId: data.conversationId,
           senderId: userId,
-          receiverId: '', // TODO: Get from conversation data
+          receiverId,
           content: data.content,
-          timestamp: new Date().toISOString(),
+          timestamp: now.toISOString(),
           read: false,
           type: data.type || 'text',
-          attachments: data.attachments
+          attachments: data.attachments,
         }
 
         // Broadcast to conversation participants
@@ -224,6 +288,28 @@ export function createWebSocketServer(httpServer: HTTPServer) {
       }
     })
 
+    socket.on('markMessageRead', async (messageId) => {
+      const userId = socketUsers.get(socket.id)
+      if (!userId) return
+
+      try {
+        const message = await prisma.unifiedMessage.findFirst({
+          where: { id: messageId, userId },
+        })
+        if (!message) return
+
+        await prisma.unifiedMessage.update({
+          where: { id: messageId },
+          data: { status: 'READ' },
+        })
+        if (message.threadId) {
+          io.to(`conversation:${message.threadId}`).emit('messageRead', messageId, userId)
+        }
+      } catch (error) {
+        console.error('Error marking message read:', error)
+      }
+    })
+
     socket.on('startTyping', (conversationId) => {
       const userId = socketUsers.get(socket.id)
       if (!userId) return
@@ -231,7 +317,7 @@ export function createWebSocketServer(httpServer: HTTPServer) {
       const typingData: TypingData = {
         conversationId,
         userId,
-        userName: 'User' // TODO: Get from user data
+        userName: userNames.get(userId) || 'User'
       }
 
       socket.to(`conversation:${conversationId}`).emit('typing', typingData)
@@ -244,7 +330,7 @@ export function createWebSocketServer(httpServer: HTTPServer) {
       const typingData: TypingData = {
         conversationId,
         userId,
-        userName: 'User' // TODO: Get from user data
+        userName: userNames.get(userId) || 'User'
       }
 
       socket.to(`conversation:${conversationId}`).emit('typingStop', typingData)
@@ -274,6 +360,7 @@ export function createWebSocketServer(httpServer: HTTPServer) {
       if (userId) {
         userSockets.delete(userId)
         socketUsers.delete(socket.id)
+        userNames.delete(userId)
         console.log(`User ${userId} disconnected`)
       }
     })

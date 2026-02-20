@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { MessageList } from './MessageList';
 import { MessageSidebar } from './MessageSidebar';
@@ -15,22 +17,36 @@ export function InboxClient({ initialMessages, initialConnectedAccounts }: Inbox
   const [selectedMessageId, setSelectedMessageId] = useState<string>();
   const [selectedAccountId, setSelectedAccountId] = useState<string>();
   const [messages, setMessages] = useState(initialMessages);
-  const [connectedAccounts, setConnectedAccounts] = useState(initialConnectedAccounts);
+  const [connectedAccounts] = useState(initialConnectedAccounts);
 
   const handleConnectAccount = async (platform: MessagePlatform) => {
-    // TODO: Implement platform-specific OAuth flows
     switch (platform) {
       case MessagePlatform.EMAIL:
-        // Redirect to Gmail OAuth
         window.location.href = '/api/auth/gmail';
         break;
-      case MessagePlatform.INSTAGRAM:
-        // Redirect to Instagram auth
-        window.location.href = '/api/auth/instagram';
+      case MessagePlatform.OUTLOOK:
+        window.location.href = '/api/integrations/outlook/auth';
         break;
-      // Add other platform handlers
+      case MessagePlatform.INSTAGRAM:
+        window.location.href = '/api/instagram/auth';
+        break;
+      case MessagePlatform.FACEBOOK:
+        window.location.href = '/api/integrations/facebook/auth';
+        break;
+      case MessagePlatform.X_TWITTER:
+        window.location.href = '/api/integrations/twitter/auth';
+        break;
+      case MessagePlatform.SMS:
+        await fetch('/api/integrations/sms/provision', { method: 'POST' });
+        window.location.href = '/dashboard/inbox';
+        break;
     }
   };
+
+  const handleConnectAlias = (provider: 'hotmail' | 'msn') => {
+    const providerQuery = encodeURIComponent(provider)
+    window.location.href = `/api/integrations/outlook/auth?provider=${providerQuery}`
+  }
 
   const handleMessageSelect = async (messageId: string) => {
     setSelectedMessageId(messageId);
@@ -43,16 +59,34 @@ export function InboxClient({ initialMessages, initialConnectedAccounts }: Inbox
       
       // Update local state
       setMessages(messages.map(msg => 
-        msg.id === messageId ? { ...msg, unread: false } : msg
+        msg.id === messageId ? { ...msg, status: 'READ' } : msg
       ));
     } catch (error) {
       console.error('Failed to mark message as read:', error);
     }
   };
 
-  const handleAccountSelect = (accountId: string) => {
+  const handleAccountSelect = async (accountId: string) => {
     setSelectedAccountId(accountId);
-    // TODO: Filter messages by selected account
+    const account = connectedAccounts.find((item) => item.id === accountId);
+    if (!account) return;
+
+    try {
+      const response = await fetch(
+        `/api/inbox/messages?platform=${encodeURIComponent(account.platform)}&limit=50`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch account messages');
+      }
+
+      const data = await response.json();
+      if (Array.isArray(data.messages)) {
+        setMessages(data.messages);
+      }
+    } catch (error) {
+      console.error('Failed to filter messages by account:', error);
+    }
   };
 
   return (
@@ -60,6 +94,7 @@ export function InboxClient({ initialMessages, initialConnectedAccounts }: Inbox
       <MessageSidebar
         connectedAccounts={connectedAccounts}
         onConnectAccount={handleConnectAccount}
+        onConnectAlias={handleConnectAlias}
         selectedAccountId={selectedAccountId}
         onAccountSelect={handleAccountSelect}
       />
