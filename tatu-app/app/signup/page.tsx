@@ -180,6 +180,11 @@ export default function SignUpPage() {
       }
 
       if (response.ok) {
+        if (data.verificationEmailSent === false) {
+          toast.error(
+            'Account created, but verification email failed. Please use "Resend verification" on login.'
+          )
+        }
         
         // If artist signup, update profile with additional information
         if (isArtistSignup && data.userId) {

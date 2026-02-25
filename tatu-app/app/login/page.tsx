@@ -39,7 +39,11 @@ function LoginContent() {
       })
 
       if (result?.error) {
-        toast.error(t('auth.invalidCredentials'))
+        if (result.error.toLowerCase().includes('verify')) {
+          toast.error('Please verify your email before logging in.')
+        } else {
+          toast.error(t('auth.invalidCredentials'))
+        }
       } else if (result?.ok) {
         toast.success(t('auth.signedInSuccess'))
         router.push(callbackUrl)
@@ -47,6 +51,33 @@ function LoginContent() {
     } catch (error) {
       console.error('Sign in error:', error)
       toast.error('An error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    if (!formData.email) {
+      toast.error('Enter your email first to resend verification.')
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email }),
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        toast.error(data.message || 'Failed to resend verification email.')
+        return
+      }
+      toast.success(data.message || 'Verification email sent.')
+    } catch (error) {
+      console.error('Resend verification error:', error)
+      toast.error('Failed to resend verification email.')
     } finally {
       setIsLoading(false)
     }
@@ -127,6 +158,13 @@ function LoginContent() {
                 {t('auth.forgotPassword')}
               </Link>
             </div>
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Resend verification
+            </button>
           </div>
 
           <div className="space-y-3">

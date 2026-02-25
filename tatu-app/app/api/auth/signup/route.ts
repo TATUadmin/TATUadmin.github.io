@@ -4,6 +4,7 @@ import { hashPassword, generateSecureToken } from '@/lib/security'
 import { sendWelcomeEmail } from '@/lib/email-service'
 import { z } from 'zod'
 import { Prisma } from '@prisma/client'
+import { randomUUID } from 'crypto'
 
 const signUpSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -47,78 +48,66 @@ export async function POST(req: Request) {
     // Hash password using enterprise-grade security (configurable salt rounds)
     const hashedPassword = await hashPassword(validatedData.password)
 
-    // Generate user ID (using crypto.randomUUID for compatibility)
-    const userId = crypto.randomUUID()
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        id: userId,
-        email: validatedData.email,
-        password: hashedPassword,
-        name: validatedData.name,
-        role: validatedData.role,
-        updatedAt: new Date(),
-      },
-    })
-
-    // Create role-specific profile
-    if (validatedData.role === 'ARTIST' || validatedData.role === 'SHOP_OWNER') {
-      // Create ArtistProfile
-      const artistProfileId = crypto.randomUUID()
-      await prisma.artistProfile.create({
+    // Persist user + profile + verification token atomically.
+    const { user, token } = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
         data: {
-          id: artistProfileId,
-          userId: user.id,
-          specialties: validatedData.artistSpecialties || [],
-          subscriptionTier: 'FREE',
-          subscriptionStatus: 'ACTIVE',
+          id: randomUUID(),
+          email: validatedData.email,
+          password: hashedPassword,
+          name: validatedData.name,
+          role: validatedData.role,
+          updatedAt: new Date(),
         },
       })
 
-      // Create shop for shop owner
-      if (validatedData.role === 'SHOP_OWNER' && validatedData.shopName) {
-        const shopId = crypto.randomUUID()
-        await prisma.shop.create({
+      if (validatedData.role === 'ARTIST' || validatedData.role === 'SHOP_OWNER') {
+        await tx.artistProfile.create({
           data: {
-            id: shopId,
-            name: validatedData.shopName,
-            address: validatedData.shopAddress || '',
-            city: '', // These will be filled in during profile completion
-            state: '',
-            zipCode: '',
-            ownerId: user.id,
-            updatedAt: new Date(),
-          }
+            id: randomUUID(),
+            userId: user.id,
+            specialties: validatedData.artistSpecialties || [],
+            subscriptionTier: 'FREE',
+            subscriptionStatus: 'ACTIVE',
+          },
+        })
+
+        if (validatedData.role === 'SHOP_OWNER' && validatedData.shopName) {
+          await tx.shop.create({
+            data: {
+              id: randomUUID(),
+              name: validatedData.shopName,
+              address: validatedData.shopAddress || '',
+              city: '',
+              state: '',
+              zipCode: '',
+              ownerId: user.id,
+              updatedAt: new Date(),
+            },
+          })
+        }
+      } else if (validatedData.role === 'CUSTOMER') {
+        await tx.customerProfile.create({
+          data: {
+            id: randomUUID(),
+            userId: user.id,
+            preferredStyles: [],
+          },
         })
       }
-    } else if (validatedData.role === 'CUSTOMER') {
-      // Create CustomerProfile
-      const customerProfileId = crypto.randomUUID()
-      await prisma.customerProfile.create({
+
+      const token = generateSecureToken(32)
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000)
+      await tx.verificationToken.create({
         data: {
-          id: customerProfileId,
-          userId: user.id,
-          preferredStyles: [],
+          id: randomUUID(),
+          token,
+          email: user.email,
+          expires,
         },
       })
-    }
 
-    // Generate secure verification token
-    const token = generateSecureToken(32)
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-
-    // Generate verification token ID
-    const verificationTokenId = crypto.randomUUID()
-
-    // Save verification token
-    await prisma.verificationToken.create({
-      data: {
-        id: verificationTokenId,
-        token,
-        email: user.email,
-        expires,
-      },
+      return { user, token }
     })
 
     // Send verification email (must succeed for signup to complete)
@@ -149,36 +138,19 @@ export async function POST(req: Request) {
       console.error('User email:', user.email)
       console.error('User name:', user.name)
       console.error('===========================')
-      
-      // If email fails, we should rollback the user creation
-      // Delete the user and profile that were just created
-      if (validatedData.role === 'ARTIST' || validatedData.role === 'SHOP_OWNER') {
-        await prisma.artistProfile.deleteMany({ where: { userId: user.id } })
-      } else if (validatedData.role === 'CUSTOMER') {
-        await prisma.customerProfile.deleteMany({ where: { userId: user.id } })
-      }
-      await prisma.verificationToken.deleteMany({ where: { email: user.email } })
-      await prisma.user.delete({ where: { id: user.id } })
-      
-      // Return specific error message
-      const errorMessage = emailResult.error || 'Failed to send verification email'
-      
-      if (errorMessage.includes('RESEND_API_KEY') || errorMessage.includes('not set')) {
-        return NextResponse.json(
-          { 
-            message: 'Email service not configured. Please contact support.',
-            error: 'RESEND_API_KEY is not set or invalid'
-          },
-          { status: 500 }
-        )
-      }
-      
+
+      // Do not fail signup if email provider is temporarily unavailable.
+      // Account exists and token is persisted; email can be resent later.
       return NextResponse.json(
-        { 
-          message: 'Failed to send verification email. Please try again or contact support.',
-          error: errorMessage
+        {
+          message:
+            'Account created, but verification email could not be sent right now. Please request a resend from support or retry shortly.',
+          userId: user.id,
+          role: user.role,
+          verificationEmailSent: false,
+          emailError: emailResult.error || 'Email send failed',
         },
-        { status: 500 }
+        { status: 201 }
       )
     }
 
@@ -186,7 +158,8 @@ export async function POST(req: Request) {
       { 
         message: 'User created successfully. Please check your email to verify your account.',
         userId: user.id,
-        role: user.role
+        role: user.role,
+        verificationEmailSent: true,
       },
       { status: 201 }
     )
